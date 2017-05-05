@@ -2,7 +2,7 @@ import tkinter as tk
 import PIL.ImageTk
 from PIL import Image, ImageTk
 
-
+whitetomove=True
 # Set number of rows and columns
 ROWS = 10
 COLS = 10
@@ -12,6 +12,7 @@ tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 pieces=["wl", "wm", "we", "bl", "bm", "be"]
 whitepieces=[[3,8], [6,8], [4,8], [5,8], [4,9], [5,9]]
 blackpieces=[[3,1], [6,1], [4,1], [5,1], [4,0], [5,0]]
+
 tiles[3][8] = tiles[6][8] = "wl"
 tiles[4][8] = tiles[5][8] = "wm"
 tiles[4][9] = tiles[5][9] = "we"
@@ -22,6 +23,9 @@ tiles[4][0] = tiles[5][0] = "be"
 
 def callback(event):
     global SelectedSquare
+    global whitepieces
+    global blackpieces
+    global whitetomove
     # Get rectangle diameters
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
@@ -34,21 +38,39 @@ def callback(event):
     if not SelectedSquare:
         if not tiles[col][row]:
             print("Invalid Selection. Please select a piece.\n")
+        elif whitetomove and not [col, row] in whitepieces:
+            print("Invalid Selection. Please select a white piece.\n")
+        elif not whitetomove and not [col, row] in blackpieces:
+            print("Invalid Selection. Please select a black piece.\n")
         else:
             SelectedSquare=col, row
             print(validmoves(col, row))
+            #print("White can make "+ str(totalmoves(whitepieces)) + " moves")
+            #print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
     else:
          if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
-         #if not tiles[col][row]:
+
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
             tiles[SelectedSquare[0]][SelectedSquare[1]]=None
-            #print("Coloring Coloumn, row" +str(col)+str(row)+tiles[col][row])
+            if whitetomove:
+                whitepieces[whitepieces.index([SelectedSquare[0],SelectedSquare[1]])]=[col, row]
+                whitetomove=False
+            else:
+                blackpieces[blackpieces.index([SelectedSquare[0],SelectedSquare[1]])]=[col, row]
+                whitetomove=True
             colorsquare(col, row)
             colorsquare(SelectedSquare[0], SelectedSquare[1])
             SelectedSquare=None
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
+
+def totalmoves(pieces):
+    counter=0
+    for [col, row] in pieces:
+        counter+=len(validmoves(col, row))
+    return counter
+
 def adjacentsquares(col, row):
     squares=[]
     for cols in range(col-1,col+2):
