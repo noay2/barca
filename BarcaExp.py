@@ -32,8 +32,10 @@ def callback(event):
             print("Invalid Selection. Please select a piece.\n")
         else:
             SelectedSquare=col, row
+            print(validmoves(col, row))
     else:
-         if not tiles[col][row]:
+         if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
+         #if not tiles[col][row]:
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
             tiles[SelectedSquare[0]][SelectedSquare[1]]=None
             #print("Coloring Coloumn, row" +str(col)+str(row)+tiles[col][row])
@@ -41,8 +43,63 @@ def callback(event):
             colorsquare(SelectedSquare[0], SelectedSquare[1])
             SelectedSquare=None
          else:
-             print("Invalid Selection. Must move to empty square.\n")
+             print("Invalid Move.\n")
              SelectedSquare=None
+
+def validmoves(col, row):
+    moves=[]
+    piece=tiles[col][row]
+    colt=col
+    rowt=row
+    #Lion's valid moves:::::::::::::::::
+    if piece=="wl" or piece=="bl" or piece=="be" or piece=="we":
+        colt+=1
+        rowt+=1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt+=1
+            rowt+=1
+        colt=col-1
+        rowt=row+1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt-=1
+            rowt+=1
+
+        colt=col+1
+        rowt=row-1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt+=1
+            rowt-=1
+        colt=col-1
+        rowt=row-1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt-=1
+            rowt-=1
+        colt=col+1
+        rowt=row
+    #Mouse's Valid Moves::::::::::::;
+    if piece=="wm" or piece=="bm" or piece=="be" or piece=="we":
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt+=1
+        colt=col-1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            colt-=1
+        colt=col
+        rowt=row-1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            rowt-=1
+        rowt=row+1
+        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+            moves.append([colt, rowt])
+            rowt+=1
+
+    return moves
 
 def colorsquare(col, row):
     col_width = c.winfo_width()//COLS
