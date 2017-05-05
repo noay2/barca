@@ -78,65 +78,25 @@ def infear(piece, col, row):
 def validmoves(col, row):
     moves=[]
     piece=tiles[col][row]
+    unafraid=True
     colt=col
     rowt=row
-    unafraid=True
     #Lion's valid moves:::::::::::::::::
-    if piece=="wl" or piece=="bl" or piece=="be" or piece=="we":
-        colt+=1
-        rowt+=1
-
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt+=1
-            rowt+=1
-        colt=col-1
-        rowt=row+1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt-=1
-            rowt+=1
-
-        colt=col+1
-        rowt=row-1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt+=1
-            rowt-=1
-        colt=col-1
-        rowt=row-1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt-=1
-            rowt-=1
-        colt=col+1
-        rowt=row
-    #Mouse's Valid Moves::::::::::::;
-    if piece=="wm" or piece=="bm" or piece=="be" or piece=="we":
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt+=1
-        colt=col-1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            colt-=1
-        colt=col
-        rowt=row-1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            rowt-=1
-        rowt=row+1
-        while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            if not infear(piece, colt, rowt):
-                moves.append([colt, rowt])
-            rowt+=1
+    for rowd in (-1,0,1):
+        for cold in (-1,0,1):
+            if (rowd ==0 == cold):
+                pass
+            elif (abs(cold) == abs(rowd) and piece=="wl" or piece=="bl" or piece=="be" or piece=="we") or\
+                 ((cold ==0 or rowd ==0 ) and piece=="wm" or piece=="bm" or piece=="be" or piece=="we"):
+                colt +=cold
+                rowt += rowd
+                while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
+                    moves.append([colt, rowt])
+                    colt+=cold
+                    rowt+=rowd
+            unafraid=True
+            colt = col
+            rowt = row
 
     return moves
 def loadgraphics():
