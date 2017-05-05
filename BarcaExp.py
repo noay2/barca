@@ -115,8 +115,8 @@ def validmoves(col, row):
                 while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
                     if not infear(piece, colt, rowt):
                         moves.append([colt, rowt])
-                        colt+=cold
-                        rowt+=rowd
+                    colt+=cold
+                    rowt+=rowd
             unafraid=True
             colt = col
             rowt = row
