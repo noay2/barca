@@ -49,37 +49,68 @@ def callback(event):
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
+def adjacentsquares(col, row):
+    squares=[]
+    for cols in range(col-1,col+2):
+        for rows in range(row-1, row+2):
+            if cols in range(COLS) and rows in range(ROWS):
+                squares.append([cols, rows])
+    return squares
 
+def fears(piece):
+    if piece == "wl":
+        return "be"
+    if piece == "bl":
+        return "we"
+    if piece == "we":
+        return "bm"
+    if piece == "be":
+        return "wm"
+    if piece == "wm":
+        return "bl"
+    if piece == "bm":
+        return "wl"
+def infear(piece, col, row):
+    for [c, r] in adjacentsquares(col, row):
+        if tiles[c][r]==fears(piece):
+            return True
+    return False
 def validmoves(col, row):
     moves=[]
     piece=tiles[col][row]
     colt=col
     rowt=row
+    unafraid=True
     #Lion's valid moves:::::::::::::::::
     if piece=="wl" or piece=="bl" or piece=="be" or piece=="we":
         colt+=1
         rowt+=1
+
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt+=1
             rowt+=1
         colt=col-1
         rowt=row+1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt-=1
             rowt+=1
 
         colt=col+1
         rowt=row-1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt+=1
             rowt-=1
         colt=col-1
         rowt=row-1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt-=1
             rowt-=1
         colt=col+1
@@ -87,20 +118,24 @@ def validmoves(col, row):
     #Mouse's Valid Moves::::::::::::;
     if piece=="wm" or piece=="bm" or piece=="be" or piece=="we":
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt+=1
         colt=col-1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             colt-=1
         colt=col
         rowt=row-1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             rowt-=1
         rowt=row+1
         while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]:
-            moves.append([colt, rowt])
+            if not infear(piece, colt, rowt):
+                moves.append([colt, rowt])
             rowt+=1
 
     return moves
@@ -131,7 +166,7 @@ def colorsquare(col, row):
             c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="darkblue")  
         else:
             c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="lightblue")
-        return 
+       # return 
     if(tiles[col][row]=="wl"):
         c.create_image(col*col_width, row*row_height, image=c.whitelion, anchor='nw')
     elif(tiles[col][row]=="wm"):
