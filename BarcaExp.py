@@ -137,6 +137,18 @@ def loadgraphics():
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.whiteelephant=whiteelephant = ImageTk.PhotoImage(img)
 
+    img = Image.open("blackelephant.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.blackelephant=blackelephant = ImageTk.PhotoImage(img)
+
+    img = Image.open("blacklion.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.blacklion=blacklion = ImageTk.PhotoImage(img)
+
+    img = Image.open("blackmouse.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.blackmouse=blackmouse = ImageTk.PhotoImage(img)
+
 def colorsquare(col, row):
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
@@ -157,11 +169,12 @@ def colorsquare(col, row):
     elif(tiles[col][row]=="we"):
         c.create_image(col*col_width, row*row_height, image=c.whiteelephant, anchor='nw')
     elif(tiles[col][row]=="bl"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="yellow")
+        c.create_image(col*col_width, row*row_height, image=c.blacklion, anchor='nw')
     elif(tiles[col][row]=="bm"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="brown")
+        c.create_image(col*col_width, row*row_height, image=c.blackmouse, anchor='nw')
     elif(tiles[col][row]=="be"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="purple")
+        c.create_image(col*col_width, row*row_height, image=c.blackelephant, anchor='nw')
+
 # Create the window, a canvas and the mouse click event binding
 def checkerboard(can):
     col_width = c.winfo_width()//COLS
