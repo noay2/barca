@@ -1,4 +1,6 @@
 import tkinter as tk
+import PIL.ImageTk
+from PIL import Image, ImageTk
 
 
 # Set number of rows and columns
@@ -8,6 +10,8 @@ SelectedSquare= None
 # Create a grid of None to store the references to the tiles
 tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 pieces=["wl", "wm", "we", "bl", "bm", "be"]
+whitepieces=[[3,8], [6,8], [4,8], [5,8], [4,9], [5,9]]
+blackpieces=[[3,1], [6,1], [4,1], [5,1], [4,0], [5,0]]
 tiles[3][8] = tiles[6][8] = "wl"
 tiles[4][8] = tiles[5][8] = "wm"
 tiles[4][9] = tiles[5][9] = "we"
@@ -100,22 +104,40 @@ def validmoves(col, row):
             rowt+=1
 
     return moves
+def loadgraphics():
+    col_width = c.winfo_width()//COLS
+    row_height = c.winfo_height()//ROWS
+    img = Image.open("whitelionwhitesquare.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.whitelion=whitelion = ImageTk.PhotoImage(img)
+
+    img = Image.open("whitemousewhitesquare.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.whitemouse=whitemouse = ImageTk.PhotoImage(img)
+
+    img = Image.open("whiteelephantwhitesquare.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.whiteelephant=whiteelephant = ImageTk.PhotoImage(img)
 
 def colorsquare(col, row):
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
+    #whitelion = tk.PhotoImage(file = './b185f0114f241d9bd5471f0c94c9d5a7.gif')
+    #scale_w = col_width//whitelion.width()
+    #scale_h = row_height//whitelion.height()
+
     if not tiles[col][row]:
         if (row+col)%2==0:
-            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="black")
+            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="darkblue")  
         else:
-            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="white")
+            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="lightblue")
         return 
     if(tiles[col][row]=="wl"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="green")
+        c.create_image(col*col_width, row*row_height, image=c.whitelion, anchor='nw')
     elif(tiles[col][row]=="wm"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="red")
+        c.create_image(col*col_width, row*row_height, image=c.whitemouse, anchor='nw')
     elif(tiles[col][row]=="we"):
-        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="blue")
+        c.create_image(col*col_width, row*row_height, image=c.whiteelephant, anchor='nw')
     elif(tiles[col][row]=="bl"):
         c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="yellow")
     elif(tiles[col][row]=="bm"):
@@ -134,8 +156,13 @@ root = tk.Tk()
 c = tk.Canvas(root, width=500, height=500, borderwidth=5, background='white')
 c.grid(row=0,column=0)
 root.update_idletasks()
+loadgraphics()
 c.pack()
+
 checkerboard(c)
+
+c.pack()
 c.bind("<Button-1>", callback)
+label=tk.Label()
 
 root.mainloop()
