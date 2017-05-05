@@ -90,7 +90,8 @@ def validmoves(col, row):
                  ((cold ==0 or rowd ==0 ) and piece=="wm" or piece=="bm" or piece=="be" or piece=="we"):
                 colt +=cold
                 rowt += rowd
-                while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt] and not infear(piece, colt, rowt):
+                while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
+                    if not infear(piece, colt, rowt):
                     moves.append([colt, rowt])
                     colt+=cold
                     rowt+=rowd
