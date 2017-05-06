@@ -10,8 +10,9 @@ SelectedSquare= None
 # Create a grid of None to store the references to the tiles
 tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 pieces=["wl", "wm", "we", "bl", "bm", "be"]
-whitepieces=[[3,8], [6,8], [4,8], [5,8], [4,9], [5,9]]
-blackpieces=[[3,1], [6,1], [4,1], [5,1], [4,0], [5,0]]
+whitepieces=[(3,8), (6,8), (4,8), (5,8), (4,9), (5,9)]
+blackpieces=[(3,1), (6,1), (4,1), (5,1), (4,0), (5,0)]
+wateringholes=[(3,3), (3,6), (6,3), (6,6)]
 
 tiles[3][8] = tiles[6][8] = "wl"
 tiles[4][8] = tiles[5][8] = "wm"
@@ -26,6 +27,7 @@ def callback(event):
     global whitepieces
     global blackpieces
     global whitetomove
+    global wateringholes
     # Get rectangle diameters
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
@@ -38,9 +40,9 @@ def callback(event):
     if not SelectedSquare:
         if not tiles[col][row]:
             print("Invalid Selection. Please select a piece.\n")
-        elif whitetomove and not [col, row] in whitepieces:
+        elif whitetomove and not (col, row) in whitepieces:
             print("Invalid Selection. Please select a white piece.\n")
-        elif not whitetomove and not [col, row] in blackpieces:
+        elif not whitetomove and not (col, row) in blackpieces:
             print("Invalid Selection. Please select a black piece.\n")
         else:
             SelectedSquare=col, row
@@ -49,18 +51,22 @@ def callback(event):
             #print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
     else:
          if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
-
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
             tiles[SelectedSquare[0]][SelectedSquare[1]]=None
             if whitetomove:
-                whitepieces[whitepieces.index([SelectedSquare[0],SelectedSquare[1]])]=[col, row]
+                whitepieces[whitepieces.index((SelectedSquare[0],SelectedSquare[1]))]=(col, row)
                 whitetomove=False
             else:
-                blackpieces[blackpieces.index([SelectedSquare[0],SelectedSquare[1]])]=[col, row]
+                blackpieces[blackpieces.index((SelectedSquare[0],SelectedSquare[1]))]=(col, row)
                 whitetomove=True
             colorsquare(col, row)
             colorsquare(SelectedSquare[0], SelectedSquare[1])
             SelectedSquare=None
+            if len(set(wateringholes) & set(whitepieces))==3:
+                   print("WHITE WINS!!")
+            if len(set(wateringholes) & set(blackpieces))==3:
+                   print("WHITE WINS!!")
+            
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
