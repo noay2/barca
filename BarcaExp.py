@@ -65,7 +65,7 @@ def callback(event):
             if len(set(wateringholes) & set(whitepieces))==3:
                    print("WHITE WINS!!")
             if len(set(wateringholes) & set(blackpieces))==3:
-                   print("WHITE WINS!!")
+                   print("BLACK WINS!!")
             
          else:
              print("Invalid Move.\n")
@@ -131,15 +131,19 @@ def validmoves(col, row):
 def loadgraphics():
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
-    img = Image.open("whitelionwhitesquare.gif")
+    img = Image.open("well.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.well=well = ImageTk.PhotoImage(img)
+
+    img = Image.open("whitelion2.gif")
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.whitelion=whitelion = ImageTk.PhotoImage(img)
 
-    img = Image.open("whitemousewhitesquare.gif")
+    img = Image.open("whitemouse2.gif")
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.whitemouse=whitemouse = ImageTk.PhotoImage(img)
 
-    img = Image.open("whiteelephantwhitesquare.gif")
+    img = Image.open("whiteelephant2.gif")
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.whiteelephant=whiteelephant = ImageTk.PhotoImage(img)
 
@@ -161,13 +165,14 @@ def colorsquare(col, row):
     #whitelion = tk.PhotoImage(file = './b185f0114f241d9bd5471f0c94c9d5a7.gif')
     #scale_w = col_width//whitelion.width()
     #scale_h = row_height//whitelion.height()
-
-    if not tiles[col][row]:
-        if (row+col)%2==0:
-            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="darkblue")  
-        else:
-            c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="lightblue")
-       # return 
+    global wateringholes
+    if (row+col)%2==0:
+        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="darkblue")  
+    else:
+        c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="lightblue")
+    if (col, row) in wateringholes:
+        c.create_image(col*col_width, row*row_height, image=c.well, anchor='nw')
+ 
     if(tiles[col][row]=="wl"):
         c.create_image(col*col_width, row*row_height, image=c.whitelion, anchor='nw')
     elif(tiles[col][row]=="wm"):
@@ -190,7 +195,7 @@ def checkerboard(can):
             colorsquare(col, row)
 # Create the window, a canvas and the mouse click event binding
 root = tk.Tk()
-c = tk.Canvas(root, width=500, height=500, borderwidth=5, background='white')
+c = tk.Canvas(root, width=600, height=600, borderwidth=5, background='white')
 c.grid(row=0,column=0)
 root.update_idletasks()
 loadgraphics()
