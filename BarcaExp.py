@@ -62,9 +62,9 @@ def callback(event):
             colorsquare(SelectedSquare[0], SelectedSquare[1])
             
             if len(set(wateringholes) & set(whitepieces))==3:
-                   print("WHITE WINS!!")
+                   victory("white")
             elif len(set(wateringholes) & set(blackpieces))==3:
-                   print("BLACK WINS!!")
+                   victory("black")
             #See if move casts fear::
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
@@ -116,6 +116,20 @@ def infear(piece, col, row):
         if tiles[c][r]==fears(piece):
             return True
     return False
+
+def victory(color):
+    col_width = c.winfo_width()//COLS
+    row_height = c.winfo_height()//ROWS
+    if color=="white":
+        print("WHITE WINS!")
+        for (col,row) in whitepieces:
+            c.create_image(col*col_width, row*row_height, image=c.coronet, anchor='nw')
+    if color=="black":
+        print("BLACK WINS!")
+        for (col, row) in blackpieces:
+            c.create_image(col*col_width, row*row_height, image=c.coronet, anchor='nw')
+
+
 def validmoves(col, row):
     moves=[]
     piece=tiles[col][row]
@@ -171,6 +185,10 @@ def loadgraphics():
     img = Image.open("blackmouse.gif")
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.blackmouse=blackmouse = ImageTk.PhotoImage(img)
+
+    img = Image.open("coronet.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.coronet=coronet = ImageTk.PhotoImage(img)
 
     img = Image.open("fear.gif")
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
