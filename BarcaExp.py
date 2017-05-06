@@ -24,10 +24,9 @@ tiles[4][0] = tiles[5][0] = "be"
 
 def callback(event):
     global SelectedSquare
-    global whitepieces
-    global blackpieces
-    global whitetomove
-    global wateringholes
+    global whitepieces, blackpieces, wateringholes
+    global whitetomove, c
+
     # Get rectangle diameters
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
@@ -61,11 +60,23 @@ def callback(event):
                 whitetomove=True
             colorsquare(col, row)
             colorsquare(SelectedSquare[0], SelectedSquare[1])
-            SelectedSquare=None
+            
             if len(set(wateringholes) & set(whitepieces))==3:
                    print("WHITE WINS!!")
-            if len(set(wateringholes) & set(blackpieces))==3:
+            elif len(set(wateringholes) & set(blackpieces))==3:
                    print("BLACK WINS!!")
+            #See if move casts fear::
+            for (cc, rr) in adjacentsquares(col, row):
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                else:
+                    colorsquare(cc, rr)
+            for (cc, rr) in adjacentsquares(SelectedSquare[0], SelectedSquare[1]):
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                else:
+                    colorsquare(cc, rr)
+            SelectedSquare=None
             
          else:
              print("Invalid Move.\n")
@@ -73,7 +84,7 @@ def callback(event):
 
 def totalmoves(pieces):
     counter=0
-    for [col, row] in pieces:
+    for (col, row) in pieces:
         counter+=len(validmoves(col, row))
     return counter
 
@@ -98,6 +109,8 @@ def fears(piece):
         return "bl"
     if piece == "bm":
         return "wl"
+    if piece==None:
+        return "999"
 def infear(piece, col, row):
     for [c, r] in adjacentsquares(col, row):
         if tiles[c][r]==fears(piece):
@@ -159,13 +172,18 @@ def loadgraphics():
     img = img.resize((col_width,row_height), Image.ANTIALIAS)
     c.blackmouse=blackmouse = ImageTk.PhotoImage(img)
 
+    img = Image.open("fear.gif")
+    img = img.resize((col_width,row_height), Image.ANTIALIAS)
+    c.fear=fear= ImageTk.PhotoImage(img)
+
 def colorsquare(col, row):
+    global wateringholes, c
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
     #whitelion = tk.PhotoImage(file = './b185f0114f241d9bd5471f0c94c9d5a7.gif')
     #scale_w = col_width//whitelion.width()
     #scale_h = row_height//whitelion.height()
-    global wateringholes
+
     if (row+col)%2==0:
         c.create_rectangle(col*col_width, row*row_height, (col+1)*col_width, (row+1)*row_height, fill="darkblue")  
     else:
