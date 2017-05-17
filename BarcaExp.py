@@ -1,6 +1,7 @@
 import tkinter as tk
 import PIL.ImageTk
 from PIL import Image, ImageTk
+import time
 
 whitetomove=True
 # Set number of rows and columns
@@ -14,6 +15,8 @@ whitepieces=[(3,8), (6,8), (4,8), (5,8), (4,9), (5,9)]
 blackpieces=[(3,1), (6,1), (4,1), (5,1), (4,0), (5,0)]
 wateringholes=[(3,3), (3,6), (6,3), (6,6)]
 
+moves=[]
+
 tiles[3][8] = tiles[6][8] = "wl"
 tiles[4][8] = tiles[5][8] = "wm"
 tiles[4][9] = tiles[5][9] = "we"
@@ -26,6 +29,7 @@ def callback(event):
     global SelectedSquare
     global whitepieces, blackpieces, wateringholes
     global whitetomove, c
+    global moves
 
     # Get rectangle diameters
     col_width = c.winfo_width()//COLS
@@ -45,9 +49,9 @@ def callback(event):
             print("Invalid Selection. Please select a black piece.\n")
         else:
             SelectedSquare=col, row
-            print(validmoves(col, row))
-            #print("White can make "+ str(totalmoves(whitepieces)) + " moves")
-            #print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
+            #print(validmoves(col, row))
+            print("White can make "+ str(totalmoves(whitepieces)) + " moves")
+            print("Black can make "+ str(totalmovesblack()) + " moves")
     else:
          if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
@@ -55,16 +59,15 @@ def callback(event):
             if whitetomove:
                 whitepieces[whitepieces.index((SelectedSquare[0],SelectedSquare[1]))]=(col, row)
                 whitetomove=False
+                moves.append(totalmoves(whitepieces))
             else:
                 blackpieces[blackpieces.index((SelectedSquare[0],SelectedSquare[1]))]=(col, row)
                 whitetomove=True
+                moves.append(totalmoves(whitepieces))
             colorsquare(col, row)
             colorsquare(SelectedSquare[0], SelectedSquare[1])
-            
-            if len(set(wateringholes) & set(whitepieces))==3:
-                   victory("white")
-            elif len(set(wateringholes) & set(blackpieces))==3:
-                   victory("black")
+            print("Average number of valid moves: " + str(sum(moves)/float(len(moves))))
+
             #See if move casts fear::
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
@@ -76,15 +79,25 @@ def callback(event):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
                 else:
                     colorsquare(cc, rr)
+            if len(set(wateringholes) & set(whitepieces))==3:
+                   victory("white")
+            elif len(set(wateringholes) & set(blackpieces))==3:
+                   victory("black")
             SelectedSquare=None
             
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
 
-def totalmoves(pieces):
+def totalmoves(piecess):
     counter=0
-    for (col, row) in pieces:
+    for (col, row) in piecess:
+        counter+=len(validmoves(col, row))
+    return counter
+
+def totalmovesblack():
+    counter=0
+    for (col, row) in blackpieces:
         counter+=len(validmoves(col, row))
     return counter
 
@@ -129,7 +142,6 @@ def victory(color):
         for (col, row) in blackpieces:
             c.create_image(col*col_width, row*row_height, image=c.coronet, anchor='nw')
 
-
 def validmoves(col, row):
     moves=[]
     piece=tiles[col][row]
@@ -141,8 +153,8 @@ def validmoves(col, row):
         for cold in (-1,0,1):
             if (rowd ==0 == cold):
                 pass
-            elif (abs(cold) == abs(rowd) and piece=="wl" or piece=="bl" or piece=="be" or piece=="we") or\
-                 ((cold ==0 or rowd ==0 ) and piece=="wm" or piece=="bm" or piece=="be" or piece=="we"):
+            elif (abs(cold) == abs(rowd) and (piece=="wl" or piece=="bl" or piece=="be" or piece=="we")) or\
+                 ((cold ==0 or rowd ==0 ) and (piece=="wm" or piece=="bm" or piece=="be" or piece=="we")):
                 colt +=cold
                 rowt += rowd
                 while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
@@ -155,6 +167,7 @@ def validmoves(col, row):
             rowt = row
 
     return moves
+
 def loadgraphics():
     col_width = c.winfo_width()//COLS
     row_height = c.winfo_height()//ROWS
@@ -229,9 +242,16 @@ def checkerboard(can):
     for row in range(10):
         for col in range(10):
             colorsquare(col, row)
+def reset2():
+    global whitepieces, blackpieces
+    whitepieces=[(3,8), (6,8), (4,8), (5,8), (4,9), (5,9)]
+    blackpieces=[(3,1), (6,1), (4,1), (5,1), (4,0), (5,0)]
+    time.sleep(5)
+    checkerboard(c)
+
 # Create the window, a canvas and the mouse click event binding
 root = tk.Tk()
-c = tk.Canvas(root, width=600, height=600, borderwidth=5, background='white')
+c = tk.Canvas(root, width=600, height=600, borderwidth=1, background='white')
 c.grid(row=0,column=0)
 root.update_idletasks()
 loadgraphics()
