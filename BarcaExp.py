@@ -11,6 +11,8 @@ SelectedSquare= None
 # Create a grid of None to store the references to the tiles
 tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 pieces=["wl", "wm", "we", "bl", "bm", "be"]
+afraid_pieces = set()
+afraid_and_stuck = set()
 whitepieces=[(3,8), (6,8), (4,8), (5,8), (4,9), (5,9)]
 blackpieces=[(3,1), (6,1), (4,1), (5,1), (4,0), (5,0)]
 wateringholes=[(3,3), (3,6), (6,3), (6,6)]
@@ -37,21 +39,34 @@ def callback(event):
     # Calculate column and row number
     col = event.x//col_width
     row = event.y//row_height
- 
+
+
+
+
+                
     # If the tile is not filled, create a rectangle
     print("Row:: " + str(row) + "\nCol:: " + str(col) +'\n')
     if not SelectedSquare:
         if not tiles[col][row]:
             print("Invalid Selection. Please select a piece.\n")
-        elif whitetomove and not (col, row) in whitepieces:
+        elif (whitetomove and not (col, row) in whitepieces) :
             print("Invalid Selection. Please select a white piece.\n")
-        elif not whitetomove and not (col, row) in blackpieces:
+        elif (not whitetomove and not (col, row) in blackpieces) :
             print("Invalid Selection. Please select a black piece.\n")
         else:
             SelectedSquare=col, row
             #print(validmoves(col, row))
             print("White can make "+ str(totalmoves(whitepieces)) + " moves")
-            print("Black can make "+ str(totalmovesblack()) + " moves")
+            print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
+        #noah
+        if ((col,row) not in afraid_pieces) and tiles[col][row]:
+            for i in afraid_pieces:
+                row1 = tiles[i[0]]
+                if row1[i[1]][0]== ('w' if whitetomove else 'b'):
+                    print('You must move a scared piece first')
+                    SelectedSquare = None
+        #noah
+        
     else:
          if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
@@ -72,6 +87,7 @@ def callback(event):
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    afraid_pieces.add( (cc,rr) ) #noah
                 else:
                     colorsquare(cc, rr)
             for (cc, rr) in adjacentsquares(SelectedSquare[0], SelectedSquare[1]):
@@ -79,6 +95,7 @@ def callback(event):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
                 else:
                     colorsquare(cc, rr)
+                    afraid_pieces.discard( (cc, rr) ) #noah
             if len(set(wateringholes) & set(whitepieces))==3:
                    victory("white")
             elif len(set(wateringholes) & set(blackpieces))==3:
