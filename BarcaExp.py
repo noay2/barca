@@ -12,7 +12,8 @@ SelectedSquare= None
 tiles = [[None for _ in range(COLS)] for _ in range(ROWS)]
 pieces=["wl", "wm", "we", "bl", "bm", "be"]
 afraid_pieces = set()
-afraid_and_stuck = set()
+afraid_and_trapped = set()
+stuck = set()
 whitepieces=[(3,8), (6,8), (4,8), (5,8), (4,9), (5,9)]
 blackpieces=[(3,1), (6,1), (4,1), (5,1), (4,0), (5,0)]
 wateringholes=[(3,3), (3,6), (6,3), (6,6)]
@@ -63,11 +64,12 @@ def callback(event):
             for i in afraid_pieces:
                 row1 = tiles[i[0]]
                 if row1[i[1]][0]== ('w' if whitetomove else 'b'):
-                    print('You must move a scared piece first')
+                    print('You must move a newly scared piece first')
                     SelectedSquare = None
         #noah
         
     else:
+
          if [col, row] in validmoves(SelectedSquare[0], SelectedSquare[1]):
             tiles[col][row]=tiles[SelectedSquare[0]][SelectedSquare[1]]
             tiles[SelectedSquare[0]][SelectedSquare[1]]=None
@@ -86,16 +88,31 @@ def callback(event):
             #See if move casts fear::
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
+     
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    afraid_pieces.add( (cc,rr) ) #noah
+                    if validmoves(cc, rr) != [1]:
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) #noah
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) #noah
+                        afraid_and_trapped.add( (cc, rr) )
                 else:
-                    colorsquare(cc, rr)
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) #noah
+                    colorsquare(cc, rr)                                               
             for (cc, rr) in adjacentsquares(SelectedSquare[0], SelectedSquare[1]):
                 if infear(tiles[cc][rr], cc, rr):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmoves(cc, rr) != [1]:
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) #noah
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) #noah
+                        afraid_and_trapped.add( (cc, rr) )
                 else:
-                    colorsquare(cc, rr)
-                    afraid_pieces.discard( (cc, rr) ) #noah
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) #noah
+                    colorsquare(cc, rr)  
             if len(set(wateringholes) & set(whitepieces))==3:
                    victory("white")
             elif len(set(wateringholes) & set(blackpieces))==3:
@@ -161,6 +178,7 @@ def victory(color):
 
 def validmoves(col, row):
     moves=[]
+    temp_afraid_moves = [] #noah
     piece=tiles[col][row]
     unafraid=True
     colt=col
@@ -175,14 +193,18 @@ def validmoves(col, row):
                 colt +=cold
                 rowt += rowd
                 while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
-                    if not infear(piece, colt, rowt):
+                    if (not infear(piece, colt, rowt)) or (col, row) in afraid_and_trapped:
                         moves.append([colt, rowt])
+                    else:
+                        temp_afraid_moves.append( [colt, rowt]) #noah
                     colt+=cold
                     rowt+=rowd
             unafraid=True
             colt = col
             rowt = row
-
+    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): #noah
+        return [1]
+ #       temp_afraid_moves.append([col, row])
     return moves
 
 def loadgraphics():
