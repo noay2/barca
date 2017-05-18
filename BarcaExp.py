@@ -59,14 +59,14 @@ def callback(event):
             #print(validmoves(col, row))
             print("White can make "+ str(totalmoves(whitepieces)) + " moves")
             print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
-        #noah
+        
         if ((col,row) not in afraid_pieces) and tiles[col][row]:
             for i in afraid_pieces:
                 row1 = tiles[i[0]]
                 if row1[i[1]][0]== ('w' if whitetomove else 'b'):
                     print('You must move a newly scared piece first')
                     SelectedSquare = None
-        #noah
+        
         
     else:
 
@@ -88,30 +88,29 @@ def callback(event):
             #See if move casts fear::
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
-     
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmoves(cc, rr) != [1]:
+                    if validmoves(cc, rr) != [1]: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
-                        afraid_pieces.add( (cc,rr) ) #noah
+                        afraid_pieces.add( (cc,rr) ) 
                     else:
-                        afraid_pieces.discard( (cc,rr) ) #noah
+                        afraid_pieces.discard( (cc,rr) ) 
                         afraid_and_trapped.add( (cc, rr) )
                 else:
                     afraid_and_trapped.discard( (cc, rr) )
-                    afraid_pieces.discard( (cc,rr) ) #noah
+                    afraid_pieces.discard( (cc,rr) ) 
                     colorsquare(cc, rr)                                               
             for (cc, rr) in adjacentsquares(SelectedSquare[0], SelectedSquare[1]):
                 if infear(tiles[cc][rr], cc, rr):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmoves(cc, rr) != [1]:
+                    if validmoves(cc, rr) != [1]: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
-                        afraid_pieces.add( (cc,rr) ) #noah
+                        afraid_pieces.add( (cc,rr) ) 
                     else:
-                        afraid_pieces.discard( (cc,rr) ) #noah
+                        afraid_pieces.discard( (cc,rr) ) 
                         afraid_and_trapped.add( (cc, rr) )
                 else:
                     afraid_and_trapped.discard( (cc, rr) )
-                    afraid_pieces.discard( (cc,rr) ) #noah
+                    afraid_pieces.discard( (cc,rr) ) 
                     colorsquare(cc, rr)  
             if len(set(wateringholes) & set(whitepieces))==3:
                    victory("white")
@@ -178,7 +177,7 @@ def victory(color):
 
 def validmoves(col, row):
     moves=[]
-    temp_afraid_moves = [] #noah
+    #temp_afraid_moves = [] 
     piece=tiles[col][row]
     unafraid=True
     colt=col
@@ -196,14 +195,15 @@ def validmoves(col, row):
                     if (not infear(piece, colt, rowt)) or (col, row) in afraid_and_trapped:
                         moves.append([colt, rowt])
                     else:
-                        temp_afraid_moves.append( [colt, rowt]) #noah
+                       # temp_afraid_moves.append( [colt, rowt]) 
                     colt+=cold
                     rowt+=rowd
             unafraid=True
             colt = col
             rowt = row
-    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): #noah
-        return [1]
+     ##this is to check trapped pieces, thats why it returns [1]
+    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
+        return [1] 
  #       temp_afraid_moves.append([col, row])
     return moves
 
