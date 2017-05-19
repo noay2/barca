@@ -63,7 +63,7 @@ def callback(event):
         if ((col,row) not in afraid_pieces) and tiles[col][row]:
             for i in afraid_pieces:
                 row1 = tiles[i[0]]
-                if row1[i[1]][0]== ('w' if whitetomove else 'b'):
+                if (row1[i[1]][0]== ('w' if whitetomove else 'b')):
                     print('You must move a newly scared piece first')
                     SelectedSquare = None
         
@@ -177,7 +177,7 @@ def victory(color):
 
 def validmoves(col, row):
     moves=[]
-    #temp_afraid_moves = [] 
+    temp_afraid_moves = [] 
     piece=tiles[col][row]
     unafraid=True
     colt=col
@@ -195,16 +195,15 @@ def validmoves(col, row):
                     if (not infear(piece, colt, rowt)) or (col, row) in afraid_and_trapped:
                         moves.append([colt, rowt])
                     else:
-                        pass
-                       # temp_afraid_moves.append( [colt, rowt]) 
+                        temp_afraid_moves.append( [colt, rowt]) 
                     colt+=cold
                     rowt+=rowd
             unafraid=True
             colt = col
             rowt = row
      ##this is to check trapped pieces, thats why it returns [1]
-    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
-        return [1] 
+    if (len(moves) == 0) and (len(temp_afraid_moves) ==0 ): 
+         return [1] 
  #       temp_afraid_moves.append([col, row])
     return moves
 
