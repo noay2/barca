@@ -195,6 +195,7 @@ def validmoves(col, row):
                     if (not infear(piece, colt, rowt)) or (col, row) in afraid_and_trapped:
                         moves.append([colt, rowt])
                     else:
+                        pass
                        # temp_afraid_moves.append( [colt, rowt]) 
                     colt+=cold
                     rowt+=rowd
