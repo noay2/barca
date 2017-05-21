@@ -2,6 +2,7 @@ import tkinter as tk
 import PIL.ImageTk
 from PIL import Image, ImageTk
 import time
+import math
 
 whitetomove=True
 # Set number of rows and columns
@@ -46,7 +47,7 @@ def callback(event):
 
                 
     # If the tile is not filled, create a rectangle
-    print("Row:: " + str(row) + "\nCol:: " + str(col) +'\n')
+    #print("Row:: " + str(row) + "\nCol:: " + str(col) +'\n')
     if not SelectedSquare:
         if not tiles[col][row]:
             print("Invalid Selection. Please select a piece.\n")
@@ -84,7 +85,8 @@ def callback(event):
             colorsquare(col, row)
             colorsquare(SelectedSquare[0], SelectedSquare[1])
             print("Average number of valid moves: " + str(sum(moves)/float(len(moves))))
-
+            print("White Board Eval " + str(boardeval(whitepieces)))
+            print("Black Board Eval " + str(boardeval(blackpieces)))
             #See if move casts fear::
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
@@ -102,7 +104,7 @@ def callback(event):
             for (cc, rr) in adjacentsquares(SelectedSquare[0], SelectedSquare[1]):
                 if infear(tiles[cc][rr], cc, rr):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmoves(cc, rr) != [1]: #Checks trapped pieces or not
+                    if validmoves(cc, rr) != []: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
                         afraid_pieces.add( (cc,rr) ) 
                     else:
@@ -121,6 +123,28 @@ def callback(event):
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
+def boardeval(piecess):
+    score=30
+    #How many watering holes you have:
+    global waterinholes
+    holes=len(set(piecess).intersection(set(wateringholes)))
+    if holes==1:
+        score=score+100
+    elif holes==2:
+        score=score+300
+    #Can you get a hole next turn?:
+    for (col, row) in piecess:
+        for [coll,roww] in validmoves(col,row):
+            if (coll, roww) in wateringholes:
+                score=score+10
+    #Distance of your pieces from centre:
+    for (col,row) in piecess:
+        score=score-distancefromcenter(col,row)
+    return score
+
+def distancefromcenter(col, row):
+    return math.sqrt((col-4.5)**2+(row-4.5)**2)
+
 
 def totalmoves(piecess):
     counter=0
@@ -182,7 +206,6 @@ def validmoves(col, row):
     unafraid=True
     colt=col
     rowt=row
-    #Lion's valid moves:::::::::::::::::
     for rowd in (-1,0,1):
         for cold in (-1,0,1):
             if (rowd ==0 == cold):
@@ -203,7 +226,7 @@ def validmoves(col, row):
             rowt = row
      ##this is to check trapped pieces, thats why it returns [1]
     if (len(moves) == 0) and (len(temp_afraid_moves) ==0 ): 
-         return [1] 
+         return [] 
  #       temp_afraid_moves.append([col, row])
     return moves
 
