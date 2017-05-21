@@ -225,8 +225,13 @@ def validmoves(col, row):
             colt = col
             rowt = row
      ##this is to check trapped pieces, thats why it returns [1]
+<<<<<<< HEAD
     if (len(moves) == 0) and (len(temp_afraid_moves) ==0 ): 
          return [] 
+=======
+    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
+         return [1] 
+>>>>>>> f9e38fa41693611e3147772414c511d0e45a1c06
  #       temp_afraid_moves.append([col, row])
     return moves
 
