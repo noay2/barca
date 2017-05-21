@@ -91,7 +91,7 @@ def callback(event):
             for (cc, rr) in adjacentsquares(col, row):
                 if infear(tiles[cc][rr], cc, rr):
                     c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmoves(cc, rr) != [1]: #Checks trapped pieces or not
+                    if validmoves(cc, rr) != []: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
                         afraid_pieces.add( (cc,rr) ) 
                     else:
@@ -225,13 +225,10 @@ def validmoves(col, row):
             colt = col
             rowt = row
      ##this is to check trapped pieces, thats why it returns [1]
-<<<<<<< HEAD
-    if (len(moves) == 0) and (len(temp_afraid_moves) ==0 ): 
-         return [] 
-=======
+
     if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
-         return [1] 
->>>>>>> f9e38fa41693611e3147772414c511d0e45a1c06
+         return [] 
+
  #       temp_afraid_moves.append([col, row])
     return moves
 
