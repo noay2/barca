@@ -42,10 +42,49 @@ def callback(event):
     col = event.x//col_width
     row = event.y//row_height
 
-
-
-
-                
+    ############################################################
+    #AI Moves for black::
+    if not whitetomove:
+        move1=AImakemove()
+        colorsquare(move1[0][0], move1[0][1])
+        colorsquare(move1[1][0], move1[1][1])
+        for (cc, rr) in adjacentsquares(move1[0][0], move1[0][1]):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                    colorsquare(cc, rr)                                               
+        for (cc, rr) in adjacentsquares(move1[1][0], move1[1][1]):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                    colorsquare(cc, rr)  
+            if len(set(wateringholes) & set(whitepieces))==3:
+                   victory("white")
+            elif len(set(wateringholes) & set(blackpieces))==3:
+                   victory("black")
+            SelectedSquare=None
+            whitetomove=True
+        return
+    #########################################################
+     
     # If the tile is not filled, create a rectangle
     #print("Row:: " + str(row) + "\nCol:: " + str(col) +'\n')
     if not SelectedSquare:
@@ -123,27 +162,53 @@ def callback(event):
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
+
 def boardeval(piecess):
-    score=30
     #How many watering holes you have:
     global waterinholes
+    score=0
     holes=len(set(piecess).intersection(set(wateringholes)))
     if holes==1:
-        score=score+100
+        score=score+20
     elif holes==2:
-        score=score+300
+        score=score+50
+    elif holes==3:
+        score=score+10000
     #Can you get a hole next turn?:
     for (col, row) in piecess:
         for [coll,roww] in validmoves(col,row):
             if (coll, roww) in wateringholes:
-                score=score+10
-    #Distance of your pieces from centre:
+                score=score+5**holes
+    #Are your pieces adjacent to the watering holes?
     for (col,row) in piecess:
-        score=score-distancefromcenter(col,row)
+        for (coll, roww) in wateringholes:
+            if [col, row] in adjacentsquares(coll, roww):
+                score=score+5
+    #Can you intimitade an opponent's piece?
+    for (col,row) in piecess:
+        maxfearcount=0
+        for [coll, roww] in validmoves(col,row):
+            fearcount=0
+            for (co, ro) in adjacentsquares(coll, roww):
+                if tiles[co][ro]==intimidates(tiles[col][row]):
+                    fearcount+=1
+                    if (co, ro) in wateringholes: 
+                        score+=10 #If you can scare a watering hole occupent, +10
+                    if fearcount>maxfearcount:
+                        maxfearcount=fearcount
+        if maxfearcount==1:
+            score+=5 #can scare one piece 
+        if maxfearcount==2:
+            score+=15 #can scare two pieces
+    #Are your pieces Afraid?
+    score-=5*len(set(afraid_pieces).intersection(set(piecess)))
     return score
 
-def distancefromcenter(col, row):
-    return math.sqrt((col-4.5)**2+(row-4.5)**2)
+def otherpieces(piecess):
+    if piecess==whitepieces:
+        return blackpieces
+    else:
+        return whitepieces
 
 
 def totalmoves(piecess):
@@ -181,6 +246,23 @@ def fears(piece):
         return "wl"
     if piece==None:
         return "999"
+
+def intimidates(piece):
+    if piece == "we":
+        return "bl"
+    if piece == "be":
+        return "wl"
+    if piece == "wm":
+        return "be"
+    if piece == "bm":
+        return "we"
+    if piece == "wl":
+        return "bm"
+    if piece == "bl":
+        return "wm"
+    if piece==None:
+        return "999"
+
 def infear(piece, col, row):
     for [c, r] in adjacentsquares(col, row):
         if tiles[c][r]==fears(piece):
@@ -200,6 +282,11 @@ def victory(color):
             c.create_image(col*col_width, row*row_height, image=c.coronet, anchor='nw')
 
 def validmoves(col, row):
+    global afraid_pieces
+    if len(afraid_pieces.intersection(set(getcolor(col,row)))) != 0: 
+        if ((col,row) not in afraid_pieces) and tiles[col][row]:
+            return []
+
     moves=[]
     temp_afraid_moves = [] 
     piece=tiles[col][row]
@@ -224,13 +311,102 @@ def validmoves(col, row):
             unafraid=True
             colt = col
             rowt = row
-     ##this is to check trapped pieces, thats why it returns [1]
-
     if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
          return [] 
 
  #       temp_afraid_moves.append([col, row])
     return moves
+
+def validmovesA(col, row): #Doesn't account for if other pieces are afraid
+    moves=[]
+    temp_afraid_moves = [] 
+    piece=tiles[col][row]
+    unafraid=True
+    colt=col
+    rowt=row
+    for rowd in (-1,0,1):
+        for cold in (-1,0,1):
+            if (rowd ==0 == cold):
+                pass
+            elif (abs(cold) == abs(rowd) and (piece=="wl" or piece=="bl" or piece=="be" or piece=="we")) or\
+                 ((cold ==0 or rowd ==0 ) and (piece=="wm" or piece=="bm" or piece=="be" or piece=="we")):
+                colt +=cold
+                rowt += rowd
+                while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
+                    if (not infear(piece, colt, rowt)) or (col, row) in afraid_and_trapped:
+                        moves.append([colt, rowt])
+                    else:
+                        temp_afraid_moves.append( [colt, rowt]) 
+                    colt+=cold
+                    rowt+=rowd
+            unafraid=True
+            colt = col
+            rowt = row
+
+    if (len(moves) == 0) and (len(temp_afraid_moves) !=0 ): 
+         return [] 
+    return moves
+
+def getcolor(col, row): #returns the color of a piece at a certain square:
+    global whitepieces, blackpieces
+    if tiles[col][row]:
+        if tiles[col][row][0]=='w':
+            return whitepieces
+        elif tiles[col][row][0]=='b':
+            return blackpieces
+    else:
+        return None
+
+def AImakemove():
+    global blackpieces, whitepieces,tiles
+    bestmove=((0,0), (0,0), -1000)
+    for (col,row) in blackpieces:
+        for (coll, roww) in validmoves(col, row):
+            makemoveblack(col, row, coll, roww)
+            value=boardeval(blackpieces)-boardeval(whitepieces)
+            if value>bestmove[2]:
+                bestmove=((col,row), (coll,roww), value)
+            makemoveblack(coll, roww, col, row)
+    (coll, roww)=bestmove[1]
+    (col,row)=bestmove[0]
+    tiles[coll][roww]=tiles[col][row]
+    tiles[col][row]=None
+    return ((col,row), (coll, roww))
+ 
+def makemoveblack(col,row, col1, row1):
+    global blackpieces, tiles
+    tiles[col1][row1]=tiles[col][row]
+    tiles[col][row]=None
+    blackpieces[blackpieces.index((col,row))]=(col1, row1)
+    if True:
+        for (cc, rr) in adjacentsquares(col, row):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                                                                  
+        for (cc, rr) in adjacentsquares(col1, row1):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                    
 
 def loadgraphics():
     col_width = c.winfo_width()//COLS
