@@ -371,6 +371,7 @@ def AImakemove():
     (col,row)=bestmove[0]
     tiles[coll][roww]=tiles[col][row]
     tiles[col][row]=None
+    blackpieces[blackpieces.index((col,row))]=(coll, roww)
     return ((col,row), (coll, roww))
  
 def makemoveblack(col,row, col1, row1):
@@ -382,7 +383,6 @@ def makemoveblack(col,row, col1, row1):
         for (cc, rr) in adjacentsquares(col, row):
             if True:
                 if infear(tiles[cc][rr], cc, rr):
-                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
                     if validmovesA(cc, rr) != []: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
                         afraid_pieces.add( (cc,rr) ) 
@@ -396,7 +396,6 @@ def makemoveblack(col,row, col1, row1):
         for (cc, rr) in adjacentsquares(col1, row1):
             if True:
                 if infear(tiles[cc][rr], cc, rr):
-                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
                     if validmovesA(cc, rr) != []: #Checks trapped pieces or not
                         afraid_and_trapped.discard( (cc, rr) )
                         afraid_pieces.add( (cc,rr) ) 
