@@ -42,48 +42,7 @@ def callback(event):
     col = event.x//col_width
     row = event.y//row_height
 
-    ############################################################
-    #AI Moves for black::
-    if not whitetomove:
-        move1=AImakemove()
-        colorsquare(move1[0][0], move1[0][1])
-        colorsquare(move1[1][0], move1[1][1])
-        for (cc, rr) in adjacentsquares(move1[0][0], move1[0][1]):
-            if True:
-                if infear(tiles[cc][rr], cc, rr):
-                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
-                        afraid_and_trapped.discard( (cc, rr) )
-                        afraid_pieces.add( (cc,rr) ) 
-                    else:
-                        afraid_pieces.discard( (cc,rr) ) 
-                        afraid_and_trapped.add( (cc, rr) )
-                else:
-                    afraid_and_trapped.discard( (cc, rr) )
-                    afraid_pieces.discard( (cc,rr) ) 
-                    colorsquare(cc, rr)                                               
-        for (cc, rr) in adjacentsquares(move1[1][0], move1[1][1]):
-            if True:
-                if infear(tiles[cc][rr], cc, rr):
-                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
-                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
-                        afraid_and_trapped.discard( (cc, rr) )
-                        afraid_pieces.add( (cc,rr) ) 
-                    else:
-                        afraid_pieces.discard( (cc,rr) ) 
-                        afraid_and_trapped.add( (cc, rr) )
-                else:
-                    afraid_and_trapped.discard( (cc, rr) )
-                    afraid_pieces.discard( (cc,rr) ) 
-                    colorsquare(cc, rr)  
-            if len(set(wateringholes) & set(whitepieces))==3:
-                   victory("white")
-            elif len(set(wateringholes) & set(blackpieces))==3:
-                   victory("black")
-            SelectedSquare=None
-            whitetomove=True
-        return
-    #########################################################
+
      
     # If the tile is not filled, create a rectangle
     #print("Row:: " + str(row) + "\nCol:: " + str(col) +'\n')
@@ -97,8 +56,6 @@ def callback(event):
         else:
             SelectedSquare=col, row
             #print(validmoves(col, row))
-            print("White can make "+ str(totalmoves(whitepieces)) + " moves")
-            print("Black can make "+ str(totalmoves(blackpieces)) + " moves")
         
         if ((col,row) not in afraid_pieces) and tiles[col][row]:
             for i in afraid_pieces:
@@ -162,6 +119,48 @@ def callback(event):
          else:
              print("Invalid Move.\n")
              SelectedSquare=None
+            ############################################################
+    #AI Moves for black::
+    if not whitetomove:
+        move1=AImakemove()
+        colorsquare(move1[0][0], move1[0][1])
+        colorsquare(move1[1][0], move1[1][1])
+        for (cc, rr) in adjacentsquares(move1[0][0], move1[0][1]):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                    colorsquare(cc, rr)                                               
+        for (cc, rr) in adjacentsquares(move1[1][0], move1[1][1]):
+            if True:
+                if infear(tiles[cc][rr], cc, rr):
+                    c.create_image(cc*col_width, rr*row_height, image=c.fear, anchor='nw')
+                    if validmovesA(cc, rr) != []: #Checks trapped pieces or not
+                        afraid_and_trapped.discard( (cc, rr) )
+                        afraid_pieces.add( (cc,rr) ) 
+                    else:
+                        afraid_pieces.discard( (cc,rr) ) 
+                        afraid_and_trapped.add( (cc, rr) )
+                else:
+                    afraid_and_trapped.discard( (cc, rr) )
+                    afraid_pieces.discard( (cc,rr) ) 
+                    colorsquare(cc, rr)  
+            if len(set(wateringholes) & set(whitepieces))==3:
+                   victory("white")
+            elif len(set(wateringholes) & set(blackpieces))==3:
+                   victory("black")
+            SelectedSquare=None
+            whitetomove=True
+        return
+    #########################################################
 
 def boardeval(piecess):
     #How many watering holes you have:
@@ -178,7 +177,12 @@ def boardeval(piecess):
     for (col, row) in piecess:
         for [coll,roww] in validmoves(col,row):
             if (coll, roww) in wateringholes:
-                score=score+5**holes
+                if holes==0:
+                    score+=5
+                if holes==1:
+                    score+=20
+                if holes==2: 
+                    score+=50
     #Are your pieces adjacent to the watering holes?
     for (col,row) in piecess:
         for (coll, roww) in wateringholes:
