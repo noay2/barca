@@ -173,25 +173,15 @@ def boardeval(piecess):
         score=score+50
     elif holes==3:
         score=score+10000
-    #Can you get a hole next turn?:
+    maxfearcount=0
+
     for (col, row) in piecess:
-        for [coll,roww] in validmoves(col,row):
-            if (coll, roww) in wateringholes:
-                if holes==0:
-                    score+=5
-                if holes==1:
-                    score+=20
-                if holes==2: 
-                    score+=50
-    #Are your pieces adjacent to the watering holes?
-    for (col,row) in piecess:
         for (coll, roww) in wateringholes:
             if [col, row] in adjacentsquares(coll, roww):
                 score=score+5
-    #Can you intimitade an opponent's piece?
-    for (col,row) in piecess:
-        maxfearcount=0
-        for [coll, roww] in validmoves(col,row):
+        #Can you intimitade an opponent's piece?
+        for [coll,roww] in validmoves(col,row):
+            score+=0.2
             fearcount=0
             for (co, ro) in adjacentsquares(coll, roww):
                 if tiles[co][ro]==intimidates(tiles[col][row]):
@@ -200,12 +190,22 @@ def boardeval(piecess):
                         score+=10 #If you can scare a watering hole occupent, +10
                     if fearcount>maxfearcount:
                         maxfearcount=fearcount
+           #Can you get a hole next turn?:
+            if (coll, roww) in wateringholes:
+                if holes==0:
+                    score+=5
+                elif holes==1:
+                    score+=20
+                elif holes==2: 
+                    score+=50
         if maxfearcount==1:
             score+=5 #can scare one piece 
         if maxfearcount==2:
             score+=15 #can scare two pieces
+
     #Are your pieces Afraid?
     score-=5*len(set(afraid_pieces).intersection(set(piecess)))
+
     return score
 
 def otherpieces(piecess):
@@ -362,6 +362,7 @@ def getcolor(col, row): #returns the color of a piece at a certain square:
         return None
 
 def AImakemove():
+    starttime=time.time()
     global blackpieces, whitepieces,tiles
     bestmove=((0,0), (0,0), -1000)
     for (col,row) in blackpieces:
@@ -376,6 +377,7 @@ def AImakemove():
     tiles[coll][roww]=tiles[col][row]
     tiles[col][row]=None
     blackpieces[blackpieces.index((col,row))]=(coll, roww)
+    print(time.time()-starttime)
     return ((col,row), (coll, roww))
  
 def makemoveblack(col,row, col1, row1):
@@ -409,7 +411,7 @@ def makemoveblack(col,row, col1, row1):
                 else:
                     afraid_and_trapped.discard( (cc, rr) )
                     afraid_pieces.discard( (cc,rr) ) 
-                    
+              
 
 def loadgraphics():
     col_width = c.winfo_width()//COLS
