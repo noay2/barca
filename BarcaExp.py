@@ -153,8 +153,13 @@ def validmoves(col, row):
         for cold in (-1,0,1):
             if (rowd ==0 == cold):
                 pass
+<<<<<<< HEAD
             elif (abs(cold) == abs(rowd) and (piece=="wl" or piece=="bl" or piece=="be" or piece=="we")) or\
                  ((cold ==0 or rowd ==0 ) and (piece=="wm" or piece=="bm" or piece=="be" or piece=="we")):
+=======
+            elif (abs(cold) == abs(rowd) and (piece=="wl" or piece=="bl" or piece=="be" or piece=="we") ) or\
+                 ((cold ==0 or rowd ==0 ) and (piece=="wm" or piece=="bm" or piece=="be" or piece=="we") ):
+>>>>>>> 6dddbef96614efacac0d69302e052865af1709b2
                 colt +=cold
                 rowt += rowd
                 while colt in range(COLS) and rowt in range(ROWS) and not tiles[colt][rowt]: 
