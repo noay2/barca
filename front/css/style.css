@@ -1,0 +1,50 @@
+body {
+    background-color: #99ccff;
+}
+h1 {
+    color: Black;
+}
+
+.mainBox{
+	background-color: #92f359;
+	width: 90%;
+	height: 90%;
+	border-style: solid;
+	z-index: 1;
+	
+}
+
+.smallBox11{
+	width: 70px;
+    height: 70px;
+    outline: 1px solid;
+    float: left;
+	background-color: #66ff99;
+	
+}
+
+.smallBox21{
+	width: 70px;
+    height: 70px;
+    outline: 1px solid;
+    float: left;
+	background-color: #ccccff;
+	
+}
+.smallBox1{
+	background-color: #ccff66;
+	width: 10%;
+	height: 10%;
+	outline: 1px solid;
+	float: left;
+
+}
+
+.smallBox2{
+	background-color: #80ffd4;
+	width: 10%;
+	height: 10%;
+    outline: 1px solid;
+    float: left;
+
+}
