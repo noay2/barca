@@ -172,7 +172,7 @@ public:
         {
             for (int cold = -1; cold != 2; cold++)
             {
-                if ( !(rowd == cold == 0))
+                if ( !( rowd == 0 && cold == 0))
                 {
                     if ( (abs(cold) == abs(rowd) && (piece->type == "LION" || piece->type=="ELEPHANT")) ||\
                         ((cold ==0 || rowd ==0 ) && (piece->type == "MOUSE"|| piece->type=="ELEPHANT"))
