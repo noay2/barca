@@ -9,7 +9,6 @@ int main(int argc, const char * argv[]) {
 
     while(!bob->exists_victory)
     {
-        ui.print_board();
         ui.turn();
     }
     ui.print_board();
