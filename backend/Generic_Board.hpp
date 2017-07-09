@@ -65,7 +65,7 @@ public:
         std::vector<std::pair<int,int>> adjacent_squares = std::vector<std::pair<int,int>> ();
         for (int rowt = row-1; rowt != row +2; ++rowt)
         {
-            for (int colt = cols-1; colt!= cols+2; ++colt)
+            for (int colt = col-1; colt!= col+2; ++colt)
             {
                 if (rowt == row && colt == col)
                 {
@@ -90,6 +90,8 @@ public:
         for(auto i = adjacent_squares.begin(); i!= adjacent_squares.end(); ++i)
         {
             Piece * adjacent_piece = this->board[i->first][i->second];
+     
+            
             if( adjacent_piece != nullptr && piece->scared_of(adjacent_piece) )
             {return true;}
         }
@@ -112,6 +114,7 @@ public:
         {
             for (auto i = this->Pieces.begin(); i!= this->Pieces.end(); ++i)
             {
+         
                 if ( i->just_infear && (i->color == piece->color) )
                 {return;}
             }
