@@ -12,7 +12,8 @@ int main(int argc, const char * argv[]) {
         ui.print_board();
         ui.turn();
     }
-    
+    ui.print_board();
+
     std::cout<<"Victory"<<std::endl;
     delete bob;
     return 0;
