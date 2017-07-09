@@ -20,6 +20,7 @@ public:
     
     void turn()
     {
+        this->print_board();
         this->ask_user();
         this->make_move();
     }
