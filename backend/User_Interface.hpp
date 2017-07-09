@@ -28,6 +28,7 @@ public:
     {
         this->valid_piece = false;
         this->valid_destination = false;
+        this->validmoves.clear();
 
         while(!this->valid_destination)
         {
