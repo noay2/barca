@@ -78,76 +78,7 @@ public:
     }
     
     
-    void modify_fear_piece(Piece * piece)
-    {
-        if (!piece->infear(piece->col, piece->row))
-        {
-            piece->just_infear = false;
-            piece->infear_and_trapped = false;
-            return;
-        }
-        
-        int rowt = piece->row;
-        int colt = piece->col;
-        
-        for (int rowd = -1; rowd != 2; rowd++)                               //All 8 directions
-        {
-            for (int cold = -1; cold != 2; cold++)
-            {
-                if ( !( rowd == 0 && cold == 0))
-                {
-                    if ( (abs(cold) == abs(rowd) && (piece->type == "LION" || piece->type=="ELEPHANT")) ||\
-                        ((cold ==0 || rowd ==0 ) && (piece->type == "MOUSE"|| piece->type=="ELEPHANT"))
-                        )                                                     //Piece can go direction
-                    {
-                        colt +=cold;
-                        rowt += rowd;
-                        
-                        while( (rowt >=0) && (rowt < this->rows) &&           //Piece in bounds
-                              (colt >=0) && (colt < this->cols) &&
-                              this->board[rowt][colt] == nullptr            //Piece not colliding with other piece
-                              )
-                        {
 
-                            
-                            if( (!piece->infear(piece->col, piece->row))) //Checks if afraid or bypasses if infear/trapped
-                            {
-                                piece->just_infear = true;
-                                piece->infear_and_trapped = false;
-                                return;
-                            }
-                            colt+=cold;
-                            rowt+=rowd;
-                            
-                        }
-                    }
-                }
-                colt = piece->col;
-                rowt = piece->row;
-            }
-        }
-        
-        piece->just_infear = false;
-        piece->infear_and_trapped = true;
-        
-        
-    }
-    
-    void fear_update(Piece * moving_piece)
-    {
-        for (auto piece = this->Pieces.begin(); piece != this->Pieces.end(); piece++)
-        {
-            
-            if( piece->just_infear || piece->infear_and_trapped || (piece->scared_of(moving_piece)
-                                                                && abs(piece->row -moving_piece->row) <=1
-                                                                && abs(piece->col -moving_piece->col) <=1
-                                                                ))
-               {
-                   modify_fear_piece( & *piece);
-               }
-        }
-        
-    }
     
     
     void check_victory()
@@ -193,7 +124,7 @@ public:
         piece->row = row;
         piece->col = col;
         
-        fear_update(piece);
+        piece->fear_update();
         
         this->check_victory();
         this->switch_turn();
