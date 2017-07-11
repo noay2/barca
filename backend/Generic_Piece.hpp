@@ -164,7 +164,76 @@ class Piece
     }
     
     
+    void modify_fear_piece()
+    {
+        if (!this->infear(this->col, this->row))
+        {
+            this->just_infear = false;
+            this->infear_and_trapped = false;
+            return;
+        }
+        
+        int rowt = this->row;
+        int colt = this->col;
+        
+        for (int rowd = -1; rowd != 2; rowd++)                               //All 8 directions
+        {
+            for (int cold = -1; cold != 2; cold++)
+            {
+                if ( !( rowd == 0 && cold == 0))
+                {
+                    if ( (abs(cold) == abs(rowd) && (this->type == "LION" || this->type=="ELEPHANT")) ||\
+                        ((cold ==0 || rowd ==0 ) && (this->type == "MOUSE"|| this->type=="ELEPHANT"))
+                        )                                                     //Piece can go direction
+                    {
+                        colt +=cold;
+                        rowt += rowd;
+                        
+                        while( (rowt >=0) && (rowt < this->rows) &&           //Piece in bounds
+                              (colt >=0) && (colt < this->cols) &&
+                              this->board->at(rowt)[colt] == nullptr            //Piece not colliding with other piece
+                              )
+                        {
+                            
+                            
+                            if( (!this->infear(this->col, this->row))) //Checks if afraid or bypasses if infear/trapped
+                            {
+                                this->just_infear = true;
+                                this->infear_and_trapped = false;
+                                return;
+                            }
+                            colt+=cold;
+                            rowt+=rowd;
+                            
+                        }
+                    }
+                }
+                colt = this->col;
+                rowt = this->row;
+            }
+        }
+        
+        this->just_infear = false;
+        this->infear_and_trapped = true;
+        
+        
+    }
     
+    void fear_update()
+    {
+        for (auto piece = this->Pieces->begin(); piece != this->Pieces->end(); piece++)
+        {
+            
+            if( piece->just_infear || piece->infear_and_trapped || (piece->scared_of(this)
+                                                                    && abs(piece->row -this->row) <=1
+                                                                    && abs(piece->col -this->col) <=1
+                                                                    ))
+            {
+                piece-> modify_fear_piece();
+            }
+        }
+        
+    }
     
     
     std::string                                     color                      ;
