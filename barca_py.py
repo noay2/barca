@@ -70,7 +70,6 @@ class Piece:
                 rowt = len(board)
                 colt = len(board[0])
 ##########################################              
-
 class Board:
      def __init__(self,whitetomove,humantomove, Pieces,source,dest):
         self.colors = ["BLACK", "WHITE"]
@@ -91,9 +90,6 @@ class Board:
                                   [self.rows/2 +1, self.cols/2 -2],[self.rows/2 +1, self.cols/2 +1]
                                 
                 ]
-
-
-
         
         self.whitetomove = whitetomove
         self.humantomove = humantomove
@@ -101,17 +97,42 @@ class Board:
         self.board = [[None for j in range(10)] for i in range(10) ]
         for piece in self.Pieces:
             self.board[piece[2]][piece[3]]  = Piece(piece)
-        self.source      = source
-        self.dest        = dest
-        Pieces = []
+        self.piece = self.board[source][dest]
+        
+    def all_valid_moves(self):
+        for piece in in self.Pieces:
+            for validmoves in piece.validmoves():
+                yield [piece.row, piece.col, validmoves[0], validmoves[1]]
 
-    def pack_data(self)
-        for row in self.board:
-            for piece in row:
-                if piece != None:
-                    Pieces.append([piece.color, piece.type, piece.row, piece.col, piece.scared, piece.trapped])
-        return [self.whitetomove, self.humantomove, Pieces, self.source, self.dest]
+    def update(self, source, dest):
+        
+        
+        
 
+    def check_score(self):
+        pass
+                
+    def check_victory(self):
+        white_counter = 0
+        black_counter = 0
+        for watering_hole in self.watering_holes:
+            if (self.board[watering_hole[0]][watering_hole[1]]!= None):
+                if (self.board[watering_hole[0]][watering_hole[1]]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
+        if white_counter >= 3:
+            return "WHITE"
+        elif black_counter >=3:
+            return "BLACK"
+        else:
+            return None
+##########################################      
+class Game(self):
+    def __init__(self,whitetomove,humantomove, Pieces,source,dest):
+        self.board = Board(whitetomove,humantomove, Pieces,source,dest)
+        self.human_source      = source
+        self.human_dest        = dest
 ##########################################
 class Backend:
     def __init__(self):
@@ -135,7 +156,7 @@ class Backend:
                 ]
 
 
-    def create_new_data(self, whitetomove = True, humantomove = True, source = None, dest = None):
+    def send_new_data(self, whitetomove = True, humantomove = True, source = None, dest = None):
         Pieces = []
         counter = 0
         for color in self.colors:
@@ -149,10 +170,20 @@ class Backend:
     
 
     def receive_data(self, whitetomove,humantomove, Pieces,source,dest):
-        self.board = Board(whitetomove,humantomove, Pieces,source,dest)
+        self.game = Game(whitetomove,humantomove, Pieces,source,dest)
 
 
 
-    def create_updated_data(self):
-        return self.board.pack_data()
+    def send_updated_data(self):
+        Pieces = []
+        for row in self.game.board.board:
+            for piece in row:
+                if piece != None:
+                    Pieces.append([piece.color, piece.type, piece.row, piece.col, piece.scared, piece.trapped])
+        return [self.whitetomove, self.humantomove, Pieces, self.source, self.dest]
+
+
 ##########################################
+class rest:
+    def __init__(self):
+        pass
