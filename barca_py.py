@@ -180,7 +180,7 @@ class Board:
     def check_victory(self):
         white_counter = 0
         black_counter = 0
-        for watering_hole in self.watering_holes:
+        for watering_hole in Board.watering_holes:
             if (self.board[watering_hole[0]][watering_hole[1]]!= None):
                 if (self.board[watering_hole[0]][watering_hole[1]]).color == "BLACK":
                     black_counter +=1
