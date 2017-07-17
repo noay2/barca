@@ -157,17 +157,72 @@ class Board:
                     pieces.append([piece.color, piece.type, piece.row, piece.col, piece.scared, piece.trapped])
         return [self.whitetomove, self.humantomove,self.victory, pieces]
 
-         
-        
     def all_valid_moves(self):
         for piece in self.pieces:
             for validmoves in piece.validmoves():
                 yield [piece.row, piece.col, validmoves[0], validmoves[1]]
 
+    def watering_hole_counter(self):
+        white_counter = 0
+        black_counter = 0
+        for watering_hole in Board.watering_holes:
+            if (self.board[watering_hole[0]][watering_hole[1]]!= None):
+                if (self.board[watering_hole[0]][watering_hole[1]]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
+        return [white_counter, black_counter]
 
-    def check_score(self):
-        pass
+    def board_evaluation(self):
+        score=0
+        maxfearcount=0
 
+        #How many watering holes you have:
+        acquired_holes= watering_hole_counter()
+        holes = acquired_holes[0] if self.whitetomove else acquired_holes[1]
+        if holes==1:
+            score=score+20
+        elif holes==2:
+            score=score+50
+        elif holes==3:
+            score=score+1000000
+
+        #Are you next to a watering hole:
+        for piece in self.pieces:
+            for watering_hole in Board.wateringholes:
+                if watering_hole in piece.adjacent_squares():
+                    score=score+5
+
+        #Going Through All Validmoves
+        for validmove in self.all_valid_moves():
+            row = validmove[2]
+            col = validmove[3]
+            score+=0.2
+            fearcount=0
+            for  in adjacentsquares(row, col):
+                    if tiles[co][ro]==intimidates(tiles[col][row]):
+                        fearcount+=1
+                        if (co, ro) in wateringholes: 
+                            score+=10 #If you can scare a watering hole occupent, +10
+                        if fearcount>maxfearcount:
+                            maxfearcount=fearcount
+               #Can you get a hole next turn?:
+                if (coll, roww) in wateringholes:
+                    if holes==0:
+                        score+=5
+                    elif holes==1:
+                        score+=20
+                    elif holes==2: 
+                        score+=50
+            if maxfearcount==1:
+                score+=5 #can scare one piece 
+            if maxfearcount==2:
+                score+=15 #can scare two pieces
+
+        #Are your pieces Afraid?
+        score-=5*len(set(afraid_pieces).intersection(set(piecess)))
+
+        return score
 
     
     def fear_update(self,moving_piece):
@@ -178,17 +233,10 @@ class Board:
                 
                 
     def check_victory(self):
-        white_counter = 0
-        black_counter = 0
-        for watering_hole in Board.watering_holes:
-            if (self.board[watering_hole[0]][watering_hole[1]]!= None):
-                if (self.board[watering_hole[0]][watering_hole[1]]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
-        if white_counter >= 3:
+        counter = watering_hole_counter()
+        if counter[0] >= 3:
             return "WHITE"
-        elif black_counter >=3:
+        elif counter[1] >=3:
             return "BLACK"
         else:
             return None
@@ -215,7 +263,21 @@ class Board:
         self.switch_turn()
         
 
-##########################################      
+##########################################
+class AI:
+    def __init__(self, board):
+        self.board = board
+        self.piece_move_stack = []
+        self.piece_fear_stack = []
+
+    def execute(self):
+        
+        
+        
+
+    
+        
+##########################################       
 class Game:
     @staticmethod
     def send_new_data(whitetomove, humantomove, victory, pieces, cpu_source, cpu_dest):
@@ -225,13 +287,14 @@ class Game:
         self.board = Board(whitetomove,humantomove, victory, pieces)
         self.human_source      = source
         self.human_dest        = dest
+        self.ai =               AI(board)
         
     def send_updated_data(self):
         return self.board.send_updated_data() + [self.human_source, self.human_dest]
 
     def execute(self):
         self.board.update(self.human_source, self.human_dest)
-        ##FINISH OTHER STUFF, AI STUFF
+        self.ai.execute()
         
 
 ##########################################
