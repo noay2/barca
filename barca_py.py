@@ -170,10 +170,10 @@ class Board:
 
 
     
-    def fear_update(self):
+    def fear_update(self,moving_piece):
         for piece in self.pieces:
             if (piece.infear) or \
-               (piece.scared_of(self) and abs(piece.row -self.row)<=1 and abs(piece.col -self.col)<=1) :
+               (piece.scared_of(moving_piece) and abs(piece.row -moving_piece.row)<=1 and abs(piece.col -moving_piece.col)<=1) :
                 piece.modify_fear()
                 
                 
@@ -210,7 +210,7 @@ class Board:
         self.board[dest[0]][dest[1]] = piece
 
         
-        self.fear_update()
+        self.fear_update(piece)
         self.check_victory()
         self.switch_turn()
         
