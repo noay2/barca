@@ -1,0 +1,124 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+body {
+    background-color: #99ccff;
+}
+h1 {
+    color: Black;
+}
+.smallBox1{
+	background-color: #ccff66;
+	width: 10%;
+	height: 10%;
+	outline: 1px solid;
+	float: left;
+}
+.smallBox2{
+	background-color: #80ffd4;
+	width: 10%;
+	height: 10%;
+    outline: 1px solid;
+    float: left;
+}
+.mainBox{
+	background-color: #92f359;
+	width: 90%;
+	height: 90%;
+	margin: 3%;
+	border-style: solid;
+	z-index: 1;	
+}
+
+</style>
+<script>
+var barca_array = 
+[
+	['.','.','.','.','BE1','BE2','.','.','.','.'],
+	['.','.','.','BL1','BR1','BR2','BL2','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','.','.','.','.','.','.','.'],
+	['.','.','.','WL1','WR1','WR2','WL2','.','.','.'],
+	['.','.','.','.','WE1','WE2','.','.','.','.']
+];
+
+var clicks_made = [];
+var player_TURN = "WHITE";
+var checkForValue = function(i,j){
+	if((i+j)%2 != 0)
+	{
+		return (player_TURN === "WHITE") ? "smallBox1" : "smallBox2"; 
+	}
+	else
+	{
+		return (player_TURN === "WHITE") ? "smallBox2" : "smallBox1";
+	}
+}
+function newBoard(){
+	var output = "";
+	for(var i = 0; i < 10; i++){
+		for(var j = 0; j < 10; j++){
+			output += "<div id= title_"+ i + "," + j +" class=" + checkForValue(i,j) + "></div>";
+		}
+	}
+	document.getElementById('barca_board').innerHTML = output;
+}
+/*function clickMade(tile,){
+} "onclick=clickMade(this,"+barca_array[i][j]+
+*/
+
+function placeImage(){
+	for(var i=0;i<10;++i)
+	{
+		for(var j=0; j<10; ++j)
+		{
+			if(barca_array[i][j] != '.')
+			{
+				var name_of_div = 'title_'+i+','+j;
+				var div = document.getElementById(name_of_div);
+				div.innerHTML = div.innerHTML + 'Data';
+			}
+		}
+	}
+}
+
+</script>
+</head>
+<body>
+<div class = "row">
+	<div class = "col-xs-1"></div>
+	<div class = "col-xs-11">
+		<h1>Welcome To Barca!</h1>
+	</div>
+</div>
+<br>
+<div class = "row">
+	<div class = "col-xs-4 text-center">
+		Choose side... &nbsp; &nbsp; &nbsp;
+		<select class = "selectpicker show-tick" id = "player">		
+		  <option value="white">White</option>
+		  <option value="black">Black</option>
+		</select>
+	</div>
+	<div class = "col-xs-8"></div>
+</div>
+<br>
+<div class = "row">
+	<div class = "col-xs-4 text-center">
+		<button type = "button" class = "btn btn-primary" id = "player-selection">Start Game!</button>				
+	</div>
+	<div class = "col-xs-8"></div>
+</div>
+<br>
+<div id="barca_board" class = "mainBox"></div>
+<script>newBoard();</script>
+</body>
+</html>
