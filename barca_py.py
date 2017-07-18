@@ -1,8 +1,3 @@
-import time
-import math
-
-
-
 ##########################################
 class Piece:
     def __init__(self, piece_arr, board, pieces):
@@ -66,7 +61,7 @@ class Piece:
                     while (rowt >=0) and (rowt < len(self.board)) and\
                           (colt >=0) and    (colt<len(self.board[0])) and self.board[rowt][colt] == None:
                         if (not self.potential_infear(rowt,colt)) or self.trapped:
-                            yield [rowt,colt]
+                            yield [self.row, self.col, rowt , colt]
                         rowt+=rowd
                         colt+=cold
                 rowt = self.row
@@ -91,7 +86,7 @@ class Piece:
                           (colt >=0) and    (colt<len(self.board[0])) and self.board[rowt][colt] == None:
                         if (not self.potential_infear(rowt,colt)):
                             self.infear = True
-                            self.infear_and_trapped = False
+                            self.trapped = False
                             return
                         rowt+=rowd
                         colt+=cold
@@ -154,20 +149,21 @@ class Board:
         for row in self.board:
             for piece in row:
                 if piece != None:
-                    pieces.append([piece.color, piece.type, piece.row, piece.col, piece.scared, piece.trapped])
+                    pieces.append([piece.color, piece.type, piece.row, piece.col, piece.infear, piece.trapped])
         return [self.whitetomove, self.humantomove,self.victory, pieces]
 
     def all_valid_moves(self):
         for piece in self.pieces:
-            for validmoves in piece.validmoves():
-                yield [piece.row, piece.col, validmoves[0], validmoves[1]]
+            if (piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove):
+                for validmoves in piece.validmoves():
+                    yield [piece.row, piece.col, validmoves[0], validmoves[1]]
 
     def watering_hole_counter(self):
         white_counter = 0
         black_counter = 0
         for watering_hole in Board.watering_holes:
-            if (self.board[watering_hole[0]][watering_hole[1]]!= None):
-                if (self.board[watering_hole[0]][watering_hole[1]]).color == "BLACK":
+            if (self.board[int(watering_hole[0])][int(watering_hole[1])]!= None):
+                if (self.board[int(watering_hole[0])][int(watering_hole[1])]).color == "BLACK":
                     black_counter +=1
                 else:
                     white_counter +=1
@@ -178,7 +174,7 @@ class Board:
         maxfearcount=0
 
         #How many watering holes you have:
-        acquired_holes= watering_hole_counter()
+        acquired_holes= self.watering_hole_counter()
         holes = acquired_holes[0] if self.whitetomove else acquired_holes[1]
         if holes==1:
             score=score+20
@@ -189,38 +185,49 @@ class Board:
 
         #Are you next to a watering hole:
         for piece in self.pieces:
-            for watering_hole in Board.wateringholes:
-                if watering_hole in piece.adjacent_squares():
-                    score=score+5
+            if (piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove):
+                for watering_hole in Board.watering_holes:
+                    if watering_hole in piece.adjacent_squares(piece.row, piece.col):
+                        score=score+5
+
+        #How many pieces do you fear the current turn
+        for piece in self.pieces:
+            if (not ((piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove)) )and piece.infear:
+                score +=4
 
         #Going Through All Validmoves
-        for validmove in self.all_valid_moves():
-            row = validmove[2]
-            col = validmove[3]
-            score+=0.2
-            fearcount=0
-            for  in adjacentsquares(row, col):
-                    if tiles[co][ro]==intimidates(tiles[col][row]):
-                        fearcount+=1
-                        if (co, ro) in wateringholes: 
-                            score+=10 #If you can scare a watering hole occupent, +10
-                        if fearcount>maxfearcount:
-                            maxfearcount=fearcount
-               #Can you get a hole next turn?:
-                if (coll, roww) in wateringholes:
-                    if holes==0:
-                        score+=5
-                    elif holes==1:
-                        score+=20
-                    elif holes==2: 
-                        score+=50
+        for piece in self.pieces:
+            if  (piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove):
+                for valid_move in piece.validmoves():
+                    score+=0.2
+                    fearcount=0
+                    #Going Through Adjacent Cells to All Validmoves
+                    for adjacent_square in piece.adjacent_squares(valid_move[2], valid_move[3]):
+                        #Does one of you pieces fear another piece the next turn
+                        if (self.board[adjacent_square[0]][adjacent_square[1]] != None) and ((self.board[valid_move[0]][valid_move[1]]).scares(self.board[adjacent_square[0]][adjacent_square[1]]))\
+                        and (abs(valid_move[2] -adjacent_square[0])<=1) and (abs(valid_move[3] - adjacent_square[1]) <=1):
+                            fearcount+=1
+                            if adjacent_square in Board.watering_holes: 
+                                score+=10 #If you can scare a watering hole occupent, +10
+                                if fearcount>maxfearcount:
+                                    maxfearcount=fearcount
+                   #Can you get a hole next turn?:
+                    if (valid_move[2], valid_move[3]) in Board.watering_holes:
+                        if holes==0:
+                            score+=5
+                        elif holes==1:
+                            score+=20
+                        elif holes==2: 
+                            score+=50
             if maxfearcount==1:
                 score+=5 #can scare one piece 
             if maxfearcount==2:
                 score+=15 #can scare two pieces
 
         #Are your pieces Afraid?
-        score-=5*len(set(afraid_pieces).intersection(set(piecess)))
+        for piece in self.pieces:
+            if ((piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove) )and piece.infear:
+            	score-=5
 
         return score
 
@@ -233,10 +240,12 @@ class Board:
                 
                 
     def check_victory(self):
-        counter = watering_hole_counter()
+        counter = self.watering_hole_counter()
         if counter[0] >= 3:
+            self.victory = "WHITE"
             return "WHITE"
         elif counter[1] >=3:
+            self.victory = "BLACK"
             return "BLACK"
         else:
             return None
@@ -244,10 +253,8 @@ class Board:
         
     def switch_turn(self):
         if not self.victory:
-            if self.turn =="BLACK":
-                self.turn == "WHITE"
-            else:
-                self.turn == "BLACK"
+            self.whitetomove = not self.whitetomove
+    
 
                 
     def update(self, source, dest):
@@ -267,15 +274,33 @@ class Board:
 class AI:
     def __init__(self, board):
         self.board = board
-        self.piece_move_stack = []
-        self.piece_fear_stack = []
+        
+    def AI_decide_self(self):                                        #AI turn
+        bestmove= ([0,0],[0,0], -1000)
+        current_evaluation = self.board.board_evaluation()
+        infear_array = [ piece.infear for piece in self.board.pieces]
+        trapped_array= [ piece.trapped for piece in self.board.pieces]
+        for piece in self.board.pieces:
+            if  (piece.color == "WHITE" and self.board.whitetomove) or (piece.color == "BLACK" and not self.board.whitetomove):
+                print(piece.color)
+                print(self.board.whitetomove)
+                for valid_move in piece.validmoves():
+                    self.board.update([valid_move[0], valid_move[1]], [valid_move[2], valid_move[3]])
+                    value=current_evaluation - self.board.board_evaluation()
+                    if value>bestmove[2]:
+                        bestmove=([valid_move[0],valid_move[1]], [valid_move[2],valid_move[3]] , value)
+                    self.board.update([valid_move[2], valid_move[3]], [valid_move[0], valid_move[1]])
+                    for piece in range(len(self.board.pieces)):
+                        self.board.pieces[piece].infear = infear_array[piece]
+                        self.board.pieces[piece].trapped = trapped_array[piece]
 
+        
+        return [bestmove[0], bestmove[1]]
+        
     def execute(self):
-        
-        
-        
-
-    
+        move = self.AI_decide_self()
+        self.board.update(move[0], move[1])
+    	
         
 ##########################################       
 class Game:
@@ -287,7 +312,7 @@ class Game:
         self.board = Board(whitetomove,humantomove, victory, pieces)
         self.human_source      = source
         self.human_dest        = dest
-        self.ai =               AI(board)
+        self.ai =               AI(self.board)
         
     def send_updated_data(self):
         return self.board.send_updated_data() + [self.human_source, self.human_dest]
@@ -295,6 +320,8 @@ class Game:
     def execute(self):
         self.board.update(self.human_source, self.human_dest)
         self.ai.execute()
+        for i in self.board.board:
+            print(i)
         
 
 ##########################################
@@ -303,7 +330,7 @@ class Backend:
         pass
 
     def send_new_data(self, whitetomove = True, humantomove = True,victory = False,pieces = [], cpu_source = None, cpu_dest = None):
-        Game.send_new_data(whitetomove,humantomove,victory, pieces, cpu_source, cpu_dest)
+        return Game.send_new_data(whitetomove,humantomove,victory, pieces, cpu_source, cpu_dest)
     
 
     def receive_data(self, whitetomove,humantomove, victory, pieces,human_source,human_dest):
@@ -312,7 +339,7 @@ class Backend:
 
 
     def send_updated_data(self):
-        return self.game.get_updated_data()
+        return self.game.send_updated_data()
 
 ##########################################
 class rest:
@@ -342,13 +369,51 @@ class rest:
 #########################################
     
 if __name__ == "__main__":
-    pass
-##    board = Board.send_new_data(True, True, False, [])
-##    board = Board(True, True, False, board[3])
-##    for i in board.board:
-##        print(i)
-##    for i in board.all_valid_moves():
-##        print (i)
+    backend = Backend()
+    output = backend.send_new_data()
+    backend.receive_data(True, True, False, [['BLACK', 'ELEPHANT', 9, 4, False, False],
+                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]], [1,4], [4,4])
+
     
+    output = backend.send_updated_data()
+    backend.receive_data(True, True, False, [['WHITE', 'ELEPHANT', 0, 4, False, False],
+                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                         ['WHITE', 'LION', 1, 3, False, False],
+                         ['WHITE', 'MOUSE', 1, 5, False, False],
+                         ['WHITE', 'LION', 1, 6, False, False],
+                         ['WHITE', 'MOUSE', 4, 4, True, False],
+                         ['BLACK', 'LION', 5, 3, False, False],
+                         ['BLACK', 'LION', 8, 3, False, False],
+                         ['BLACK', 'MOUSE', 8, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 5, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 5, False, False]], [4, 4], [2, 4])
     
+    output = backend.send_updated_data()
+    backend.receive_data(True, True, False,
+                         [['WHITE', 'ELEPHANT', 0, 4, False, False],
+                          ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                          ['WHITE', 'LION', 1, 3, False, False],
+                          ['WHITE', 'MOUSE', 1, 5, True, False],
+                          ['WHITE', 'LION', 1, 6, False, False],
+                          ['WHITE', 'MOUSE', 2, 4, False, False],
+                          ['BLACK', 'LION', 2, 6, False, False],
+                          ['BLACK', 'LION', 8, 3, False, False],
+                          ['BLACK', 'MOUSE', 8, 4, False, False],
+                          ['BLACK', 'MOUSE', 8, 5, False, False],
+                          ['BLACK', 'ELEPHANT', 9, 4, False, False],
+                          ['BLACK', 'ELEPHANT', 9, 5, False, False]], [1, 5], [6, 5])
+    output = backend.send_updated_data()
+
+
     
