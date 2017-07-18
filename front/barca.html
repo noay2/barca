@@ -60,9 +60,19 @@ var barca_array = [
 	['.','.','.','WL1','WR1','WR2','WL2','.','.','.'],
 	['.','.','.','.','WE1','WE2','.','.','.','.']
 ];
+var request = {
+	"whitemovetomake":true,
+	"humanmovetomake":true,
+	"victory":false,
+	"pieces":[],
+	"human_source":null,
+	"human_dest":null
+}
 var clicks_made = [];
 var player_TURN = "WHITE";
 var valid_clicks = [];
+var trapped_pieces = [];
+var scared_pieces = [];
 var checkForValue = function(i,j){
 	if((i+j)%2 != 0)
 	{
@@ -79,33 +89,108 @@ function newBoard(){
 	for(var i = 0; i < 10; i++){
 		for(var j = 0; j < 10; j++){
 			var title = "tile_"+i+","+j;
-			output += '<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(this,\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
+			output += '<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 		}
 	}
 	document.getElementById('barca_board').innerHTML = output;
 }
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
-	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/ElephantB.png" id = "BE1"/>';
-	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/ElephantB.png" id = "BE2"/>';
-	document.getElementById('tile_9,4').innerHTML += '<img src = "./images/elephantW.gif" id = "WE1"/>';
-	document.getElementById('tile_9,5').innerHTML += '<img src = "./images/elephantW.gif" id = "WE2"/>';
-	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/LionB.png" id = "BL1"/>';
-	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/MouseB.png" id = "BR1"/>';
-	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/MouseB.png" id = "BR2"/>';
-	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/LionB.png" id = "BL2"/>';
-	document.getElementById('tile_8,3').innerHTML += '<img src = "./images/lionW.gif" id = "WL1"/>';
-	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif" id = "WR1"/>';
-	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif" id = "WR2"/>';
-	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif" id = "WL2"/>';
+	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/ElephantB.png"/>';
+	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/ElephantB.png"/>';
+	document.getElementById('tile_9,4').innerHTML += '<img src = "./images/elephantW.gif"/>';
+	document.getElementById('tile_9,5').innerHTML += '<img src = "./images/elephantW.gif"/>';
+	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/LionB.png"/>';
+	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/MouseB.png"/>';
+	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/MouseB.png"/>';
+	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/LionB.png"/>';
+	document.getElementById('tile_8,3').innerHTML += '<img src = "./images/lionW.gif"/>';
+	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif"/>';
+	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
+	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif"/>';
 }
 function initValidClicks(){
+	if(player_TURN == "WHITE"){
+		valid_clicks.push("8,3");
+		valid_clicks.push("8,4");
+		valid_clicks.push("8,5");
+		valid_clicks.push("8,6");
+		valid_clicks.push("9,4");
+		valid_clicks.push("9,5");		
+	}
+}
+function verifyValidMove(from_row,from_col,to_row,to_col){
+	return true; // for now but it needs to be changed
+}
+function verifyValidClick(str){
+	for(var i = 0; i < valid_clicks.length; i++){
+		if(valid_clicks[i] === str){
+			return true;
+		}
+	}
+	return false;
+}
+function recomputeValidClicks(turn){
 
 }
 /*Function that detects clicks and displays a message about where the click
 	was made*/
-function clickMade(obj,id,val){
-	document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;
+function clickMade(id,row,col,val){
+	/*document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;*/
+	var str = row + "," + col;
+	if(verifyValidClick(str)){
+		clicks_made = [];
+		clicks_made.push(str);
+		document.getElementById("message").innerHTML = "Choose where you want to move the piece to or select another piece to move...";
+	}
+	else if(clicks_made.length == 1){
+		var rl = parseInt(clicks_made[0][0]);
+		var cl = parseInt(clicks_made[0][2]);
+		row = parseInt(row);
+		row = parseInt(col);
+		if(verifyValidMove(rl,cl,row,col))
+		{
+			document.getElementById("tile_"+clicks_made[0]).innerHTML = "";
+			if(barca_array[rl][cl][0] == "B")
+			{
+				if(barca_array[r1][c1][1] == "E"){
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/ElephantB.png"/>';								
+				}
+				else if(barca_array[r1][c1][1] == "R"){
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/MouseB.png"/>';				
+				}
+				else{
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/LionB.png"/>';
+				}
+			}
+			else
+			{
+				if(barca_array[r1][c1][1] == "E"){
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/elephantW.gif"/>';								
+				}
+				else if(barca_array[r1][c1][1] == "R"){
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/mouseW.gif"/>';				
+				}
+				else{
+					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/lionW.gif"/>';
+				}
+			}
+			barca_array[row][col] = barca_array[rl][cl];
+			barca_array[rl][cl] = '.';
+			/*Send API request*/
+			/*Get the move from AI*/
+			/*Compute new valid clicks and set new trapped and feared pieces*/
+			recomputeValidClicks();
+			/*Set clicks_made to empty array*/
+			clicks_made = [];
+		}
+		else{
+			document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
+		}
+	}
+	else{
+		document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
+	}
 }
 </script>
 </head>
@@ -132,5 +217,6 @@ function clickMade(obj,id,val){
 <div id="barca_board" class = "mainBox"></div>
 <script>newBoard();</script>
 <script>placeInitImage();</script>
+<script>initValidClicks();</script>
 </body>
 </html>
