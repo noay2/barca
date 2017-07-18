@@ -14,10 +14,11 @@ class Piece:
         return "*" +self.color[0] +self.type[0]+"*"
     
     def scares(self, piece):
-        if (  ((self.type == "ELEPHANT")and (piece.type == "LION"))\
+        if (self.color != piece.color) and
+            (  ((self.type == "ELEPHANT")and (piece.type == "LION"))\
             or ((self.type == "LION")   and (piece.type == "MOUSE"))\
             or ((self.type == "MOUSE")  and (piece.type == "ELEPHANT"))\
-            ) and self.color != piece.color:
+            ):
             return True
         else:
             return False
@@ -25,20 +26,24 @@ class Piece:
 
     def scared_of(self, piece):
         return piece.scares(self)
+    
+    def fears(self, piece):
+        if self.scares(piece)
+        and (abs(self.row - piece.row) <=1)
+        and (abs(self.col - piece.col) <=1):
+            return True
+        else:
+            return False
 
+    def infear_of(self, piece):
+        return piece.fears(self)
 
-    def adjacent_squares(self,row,col):
-        for rowt in range(row -1, row +2, 1):
-            for colt in range(col -1, col +2, 1):
-                if (rowt == row) and (colt == col):
-                    pass
-                elif (rowt <len(self.board)) and (rowt>=0) and (colt<len(self.board[0])) and (colt>=0):
-                    yield [rowt, colt]
 
     def potential_infear(self,row,col):
-        for square in self.adjacent_squares(row,col):
-            piece = self.board[square[0]][square[1]]
-            if (piece !=None) and (self.scared_of(piece)):
+        for piece in self.pieces:
+            if pieces.fears(self)
+            and (abs(row- piece.row) <=1)
+            and (abs(col- piece.col) <=1):
                 return True
         return False
 
@@ -117,19 +122,6 @@ class Board:
                               [rows/2 +1, cols/2 -2],[rows/2 +1, cols/2 +1]
                             
             ]
-
-    @staticmethod
-    def send_new_data(whitetomove, humantomove,victory, pieces):
-        counter = 0
-        for color in Board.colors:
-            for type in Board.types:
-                for i in range(2):
-                    pieces.append([color,type, 
-                        int(Board.init_piece_position[counter][0]), int(Board.init_piece_position[counter][1]),
-                                  False, False])
-                    counter +=1
-        return [whitetomove, humantomove, victory, pieces]
-
 
     
     def __init__(self,whitetomove,humantomove,victory, pieces):
@@ -296,46 +288,37 @@ class AI:
 
         
         return [bestmove[0], bestmove[1]]
-        
-    def execute(self):
-        move = self.AI_decide_self()
-        self.board.update(move[0], move[1])
     	
         
 ##########################################       
 class Game:
-    @staticmethod
-    def send_new_data(whitetomove, humantomove, victory, pieces, cpu_source, cpu_dest):
-        return Board.send_new_data(whitetomove, humantomove, victory, pieces) + [cpu_source, cpu_dest]
-    
+
     def __init__(self,whitetomove,humantomove, victory,pieces,source,dest):
         self.board = Board(whitetomove,humantomove, victory, pieces)
         self.human_source      = source
         self.human_dest        = dest
         self.ai =               AI(self.board)
+        self.ai_sourece        = None
+        self.ai_dest           = None
+        self.execute()
         
     def send_updated_data(self):
-        return self.board.send_updated_data() + [self.human_source, self.human_dest]
+        return self.board.send_updated_data() + [self.ai_sourece, self.ai_dest]
 
     def execute(self):
-        self.board.update(self.human_source, self.human_dest)
-        self.ai.execute()
-        for i in self.board.board:
-            print(i)
-        
+        if (not self.board.victory) and self.human_source != None) and (self.human_dest != None):
+            self.board.update(self.human_source, self.human_dest)
+        if (not self.board.victory):
+            self.ai_source, self.ai_dest = self.ai.AI_decide_self()
+            self.board.update(self.ai_source, self.ai_dest)
 
 ##########################################
 class Backend:
     def __init__(self):
         pass
 
-    def send_new_data(self, whitetomove = True, humantomove = True,victory = False,pieces = [], cpu_source = None, cpu_dest = None):
-        return Game.send_new_data(whitetomove,humantomove,victory, pieces, cpu_source, cpu_dest)
-    
-
     def receive_data(self, whitetomove,humantomove, victory, pieces,human_source,human_dest):
         self.game = Game(whitetomove,humantomove, victory, pieces,human_source,human_dest)
-        self.game.execute()
 
 
     def send_updated_data(self):
