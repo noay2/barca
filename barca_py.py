@@ -99,6 +99,7 @@ class Piece:
                 colt = self.col
         self.infear = True
         self.trapped= True
+        return
         
         
         
@@ -153,9 +154,9 @@ class Board:
     def watering_hole_counter(self):
         white_counter = 0
         black_counter = 0
-        for watering_hole in Board.watering_holes:
-            if (self.board[int(watering_hole[0])][int(watering_hole[1])]!= None):
-                if (self.board[int(watering_hole[0])][int(watering_hole[1])]).color == "BLACK":
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board[int(watering_hole_row)][int(watering_hole_col)]!= None):
+                if (self.board[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
                     black_counter +=1
                 else:
                     white_counter +=1
@@ -226,8 +227,7 @@ class Board:
     
     def fear_update(self,moving_piece):
         for piece in self.pieces:
-            if (piece.infear) or \
-               (piece.scared_of(moving_piece) and abs(piece.row -moving_piece.row)<=1 and abs(piece.col -moving_piece.col)<=1) :
+            if (piece.infear) or (piece.infear_of(moving_piece) :
                 piece.modify_fear()
                 
                 
