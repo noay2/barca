@@ -17,6 +17,7 @@ h1 {
 	height: 10%;
 	outline: 1px solid;
 	float: left;
+	display: flex;
 }
 .smallBox2{
 	background-color: #80ffd4;
@@ -24,6 +25,17 @@ h1 {
 	height: 10%;
     outline: 1px solid;
     float: left;
+	display: flex;
+}
+.smallBox1 > img {
+	margin: 0 auto;
+	width: 100%;
+	height: 100%;
+}
+.smallBox2 > img{
+	margin: 0 auto;
+	width: 100%;
+	height: 100%;
 }
 .mainBox{
 	background-color: #92f359;
@@ -36,8 +48,7 @@ h1 {
 
 </style>
 <script>
-var barca_array = 
-[
+var barca_array = [
 	['.','.','.','.','BE1','BE2','.','.','.','.'],
 	['.','.','.','BL1','BR1','BR2','BL2','.','.','.'],
 	['.','.','.','.','.','.','.','.','.','.'],
@@ -49,9 +60,9 @@ var barca_array =
 	['.','.','.','WL1','WR1','WR2','WL2','.','.','.'],
 	['.','.','.','.','WE1','WE2','.','.','.','.']
 ];
-
 var clicks_made = [];
 var player_TURN = "WHITE";
+var valid_clicks = [];
 var checkForValue = function(i,j){
 	if((i+j)%2 != 0)
 	{
@@ -62,63 +73,64 @@ var checkForValue = function(i,j){
 		return (player_TURN === "WHITE") ? "smallBox2" : "smallBox1";
 	}
 }
+/*Function that initializes the board*/
 function newBoard(){
 	var output = "";
 	for(var i = 0; i < 10; i++){
 		for(var j = 0; j < 10; j++){
-			output += "<div id= title_"+ i + "," + j +" class=" + checkForValue(i,j) + "></div>";
+			var title = "tile_"+i+","+j;
+			output += '<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(this,\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 		}
 	}
 	document.getElementById('barca_board').innerHTML = output;
 }
-/*function clickMade(tile,){
-} "onclick=clickMade(this,"+barca_array[i][j]+
-*/
-
-function placeImage(){
-	for(var i=0;i<10;++i)
-	{
-		for(var j=0; j<10; ++j)
-		{
-			if(barca_array[i][j] != '.')
-			{
-				var name_of_div = 'title_'+i+','+j;
-				var div = document.getElementById(name_of_div);
-				div.innerHTML = div.innerHTML + 'Data';
-			}
-		}
-	}
+/*Function that positions initial images onto the board*/
+function placeInitImage(){
+	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/ElephantB.png" id = "BE1"/>';
+	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/ElephantB.png" id = "BE2"/>';
+	document.getElementById('tile_9,4').innerHTML += '<img src = "./images/elephantW.gif" id = "WE1"/>';
+	document.getElementById('tile_9,5').innerHTML += '<img src = "./images/elephantW.gif" id = "WE2"/>';
+	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/LionB.png" id = "BL1"/>';
+	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/MouseB.png" id = "BR1"/>';
+	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/MouseB.png" id = "BR2"/>';
+	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/LionB.png" id = "BL2"/>';
+	document.getElementById('tile_8,3').innerHTML += '<img src = "./images/lionW.gif" id = "WL1"/>';
+	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif" id = "WR1"/>';
+	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif" id = "WR2"/>';
+	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif" id = "WL2"/>';
 }
+function initValidClicks(){
 
+}
+/*Function that detects clicks and displays a message about where the click
+	was made*/
+function clickMade(obj,id,val){
+	document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;
+}
 </script>
 </head>
 <body>
 <div class = "row">
 	<div class = "col-xs-1"></div>
-	<div class = "col-xs-11">
-		<h1>Welcome To Barca!</h1>
+	<div class = "col-xs-3">
+		<h4>Welcome To Barca!</h4>
 	</div>
-</div>
-<br>
-<div class = "row">
-	<div class = "col-xs-4 text-center">
-		Choose side... &nbsp; &nbsp; &nbsp;
+	<div class = "col-xs-8">
+<!--		Choose side... &nbsp; &nbsp;
 		<select class = "selectpicker show-tick" id = "player">		
 		  <option value="white">White</option>
 		  <option value="black">Black</option>
-		</select>
-	</div>
-	<div class = "col-xs-8"></div>
-</div>
-<br>
-<div class = "row">
-	<div class = "col-xs-4 text-center">
+		</select> &nbsp; &nbsp;
 		<button type = "button" class = "btn btn-primary" id = "player-selection">Start Game!</button>				
-	</div>
-	<div class = "col-xs-8"></div>
+-->
+	</div>	
+</div>
+<div class = "row">
+	<div class = "col-xs-12 text-center" id = "message"></div>
 </div>
 <br>
 <div id="barca_board" class = "mainBox"></div>
 <script>newBoard();</script>
+<script>placeInitImage();</script>
 </body>
 </html>
