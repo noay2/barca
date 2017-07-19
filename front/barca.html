@@ -62,24 +62,15 @@ var barca_array = [
 ];
 var request = {
 	"whitemovetomake":true,
-	"humanmovetomake":true,
-	"victory":false,
 	"pieces":[],
-	"human_source":null,
-	"human_dest":null
 }
 var clicks_made = [];
 var player_TURN = "WHITE";
-var mode = "PLAYER V PLAYER";
 var valid_clicks = [];
 var trapped_pieces = [];
 var scared_pieces = [];
 var checkForValue = function(i,j){
-	if(mode == "PLAYER V PLAYER")
-	{
-		return (i+j)%2 != 0 ? "smallBox1" : "smallBox2"; 
-	}
-	else if((i+j)%2 != 0)
+	if((i+j)%2 != 0)
 	{
 		return (player_TURN === "WHITE") ? "smallBox1" : "smallBox2"; 
 	}
@@ -152,12 +143,14 @@ function verifyValidMove(from_row,from_col,to_row,to_col){
 	}
 	else
 	{
+		var side = piece[0];
 		if(piece[1] === "L")
 		{
 			if(direction !== "DIAGONAL"){
 				return false;
 			}
 			else{
+			
 			}
 		}
 		else if(piece[1] === "E")
@@ -260,7 +253,9 @@ function clickMade(id,row,col,val){
 	</div>	
 </div>
 <div class = "row">
-	<div class = "col-xs-12 text-center" id = "message"></div>
+	<div class = "col-xs-12 text-center" id = "message">
+		Click on start game button to start the game!
+	</div>
 </div>
 <div id="barca_board" class = "mainBox"></div>
 <script>newBoard();</script>
