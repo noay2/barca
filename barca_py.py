@@ -245,7 +245,6 @@ class AI:
 
     def __init__(self,whitetomove, pieces):
         self.board = Board(whitetomove, pieces)
-        self.execute()
                                   
     def AI_decide_self(self):                                        
         current_worst_move = 100000000000
@@ -274,9 +273,6 @@ class AI:
         if (not self.board.victory()):
             ai_source, ai_dest = self.AI_decide_self()
             self.board.update(ai_source, ai_dest)
-        for i in self.board.board:
-            print(i)
-        print()
 
 ##########################################
 class Backend:
@@ -285,6 +281,7 @@ class Backend:
 
     def receive_data(self, whitetomove, pieces):
         self.AI = AI(whitetomove, pieces)
+        self.AI.execute()
 
 
     def send_updated_data(self):
