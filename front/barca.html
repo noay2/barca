@@ -70,11 +70,16 @@ var request = {
 }
 var clicks_made = [];
 var player_TURN = "WHITE";
+var mode = "PLAYER V PLAYER";
 var valid_clicks = [];
 var trapped_pieces = [];
 var scared_pieces = [];
 var checkForValue = function(i,j){
-	if((i+j)%2 != 0)
+	if(mode == "PLAYER V PLAYER")
+	{
+		return (i+j)%2 != 0 ? "smallBox1" : "smallBox2"; 
+	}
+	else if((i+j)%2 != 0)
 	{
 		return (player_TURN === "WHITE") ? "smallBox1" : "smallBox2"; 
 	}
@@ -109,6 +114,8 @@ function placeInitImage(){
 	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
 	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif"/>';
 }
+/*Computes the possible valid clicks for a player only if he plays 
+on the white side*/
 function initValidClicks(){
 	if(player_TURN == "WHITE"){
 		valid_clicks.push("8,3");
@@ -119,8 +126,51 @@ function initValidClicks(){
 		valid_clicks.push("9,5");		
 	}
 }
+/*Returns the direction of movement*/
+function directionMovedIn(from_row,from_col,to_row,to_col)
+{
+	if(from_row-to_row == 0 && from_col-to_col != 0){
+		return "HORIZONTAL";
+	}
+	else if(from_row-to_row != 0 && from_col-to_col == 0){
+		return "VERTICAL";
+	}
+	else if(abs(from_row-to_row) == abs(from_col-to_col)){
+		return "DIAGONAL";
+	}
+	else{
+		return "INVALID";
+	}
+}
+/*Checks if the move made is valid or invalid*/
 function verifyValidMove(from_row,from_col,to_row,to_col){
-	return true; // for now but it needs to be changed
+	var piece = barca_array[from_row][from_col];
+	var direction = directionMovedIn(from_row,from_col,to_row,to_col);
+	if(direction === "INVALID")
+	{
+		return false;
+	}
+	else
+	{
+		if(piece[1] === "L")
+		{
+			if(direction !== "DIAGONAL"){
+				return false;
+			}
+			else{
+				for(var i = from_row-to_row, var j = from_col-to_col; i)
+			}
+		}
+		else if(piece[1] === "E")
+		{
+		}
+		else
+		{
+			if(direction !== "VERTICAL" || direction !== "HORIZONTAL"){
+				return false;
+			}
+		}	
+	}
 }
 function verifyValidClick(str){
 	for(var i = 0; i < valid_clicks.length; i++){
@@ -180,7 +230,7 @@ function clickMade(id,row,col,val){
 			/*Send API request*/
 			/*Get the move from AI*/
 			/*Compute new valid clicks and set new trapped and feared pieces*/
-			recomputeValidClicks();
+			recomputeValidClicks(player_TURN);
 			/*Set clicks_made to empty array*/
 			clicks_made = [];
 		}
@@ -213,7 +263,6 @@ function clickMade(id,row,col,val){
 <div class = "row">
 	<div class = "col-xs-12 text-center" id = "message"></div>
 </div>
-<br>
 <div id="barca_board" class = "mainBox"></div>
 <script>newBoard();</script>
 <script>placeInitImage();</script>
