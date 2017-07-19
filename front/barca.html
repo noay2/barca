@@ -62,7 +62,7 @@ var barca_array = [
 ];
 var request = {
 	"whitemovetomake":true,
-	"pieces":[],
+	"pieces":[]
 }
 var clicks_made = [];
 var player_TURN = "WHITE";
@@ -72,11 +72,11 @@ var scared_pieces = [];
 var checkForValue = function(i,j){
 	if((i+j)%2 != 0)
 	{
-		return (player_TURN === "WHITE") ? "smallBox1" : "smallBox2"; 
+		return "smallBox1"; 
 	}
 	else
 	{
-		return (player_TURN === "WHITE") ? "smallBox2" : "smallBox1";
+		return "smallBox2";
 	}
 }
 /*Function that initializes the board*/
@@ -109,17 +109,20 @@ function placeInitImage(){
 on the white side*/
 function initValidClicks(){
 	if(player_TURN == "WHITE"){
-		valid_clicks.push("8,3");
-		valid_clicks.push("8,4");
-		valid_clicks.push("8,5");
-		valid_clicks.push("8,6");
-		valid_clicks.push("9,4");
-		valid_clicks.push("9,5");		
+		valid_clicks.push("83");
+		valid_clicks.push("84");
+		valid_clicks.push("85");
+		valid_clicks.push("86");
+		valid_clicks.push("94");
+		valid_clicks.push("95");		
 	}
 }
 /*Returns the direction of movement*/
 function directionMovedIn(from_row,from_col,to_row,to_col)
 {
+	if(from_row-to_row == 0 && from_col-to_col == 0){
+		return "INVALID";
+	}
 	if(from_row-to_row == 0 && from_col-to_col != 0){
 		return "HORIZONTAL";
 	}
@@ -133,45 +136,71 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 		return "INVALID";
 	}
 }
+/*Checks if a particular piece is scared or not if the next move is made*/
+function checkIfPieceIsScared(to_row,to_col,side){
+
+}
+/*Checks all directions to make sure a piece is not jumping over another piece 
+while making a move*/
+function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
+{
+	var y_dif = from_row - to_row;
+	var x_dif = from_col - to_col;
+	var x_inc = 0;
+	var y_inc = 0;
+	while(y_inc != y_dif || x_inc != x_dif){
+		x_inc = (x_dif == 0) ? 0 : ((x_dif < 0) ? x_inc - 1 : x_inc + 1);
+		y_inc = (y_dif == 0) ? 0 : ((y_dif < 0) ? y_inc - 1 : y_inc + 1);
+		if(barca_array[from_row+y_inc][from_col+x_inc] != '.'){
+			return true;
+		}
+	}
+}
 /*Checks if the move made is valid or invalid*/
 function verifyValidMove(from_row,from_col,to_row,to_col){
 	var piece = barca_array[from_row][from_col];
 	var direction = directionMovedIn(from_row,from_col,to_row,to_col);
-	if(direction === "INVALID")
+	var side = piece[0];
+	/*Checks if the piece is moved in invalid direction*/
+	if(direction == "INVALID")
 	{
 		return false;
 	}
+	else if(checkIfPieceIsScared(to_row,to_col,side))
+	{
+		return false;
+	}		
+	else if(piece[1] == 'L')
+	{
+		if(direction != "DIAGONAL" || 
+			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			return false;
+		}
+	}
+	else if(piece[1] == 'E')
+	{
+		if(checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			return false;
+		}
+	}
 	else
 	{
-		var side = piece[0];
-		if(piece[1] === "L")
-		{
-			if(direction !== "DIAGONAL"){
-				return false;
-			}
-			else{
-			
-			}
+		if(direction != "VERTICAL" || direction != "HORIZONTAL" ||
+			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			return false;
 		}
-		else if(piece[1] === "E")
-		{
-		}
-		else
-		{
-			if(direction !== "VERTICAL" || direction !== "HORIZONTAL"){
-				return false;
-			}
-		}	
 	}
+	return true;
 }
 function verifyValidClick(str){
 	for(var i = 0; i < valid_clicks.length; i++){
-		if(valid_clicks[i] === str){
+		if(valid_clicks[i] == str){
 			return true;
 		}
 	}
 	return false;
 }
+/*Function that computes the pieces a certain user can move*/
 function recomputeValidClicks(turn){
 
 }
@@ -179,7 +208,7 @@ function recomputeValidClicks(turn){
 	was made*/
 function clickMade(id,row,col,val){
 	/*document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;*/
-	var str = row + "," + col;
+	var str = row + "" + col;
 	if(verifyValidClick(str)){
 		clicks_made = [];
 		clicks_made.push(str);
@@ -187,18 +216,18 @@ function clickMade(id,row,col,val){
 	}
 	else if(clicks_made.length == 1){
 		var rl = parseInt(clicks_made[0][0]);
-		var cl = parseInt(clicks_made[0][2]);
+		var cl = parseInt(clicks_made[0][1]);
 		row = parseInt(row);
 		row = parseInt(col);
 		if(verifyValidMove(rl,cl,row,col))
 		{
-			document.getElementById("tile_"+clicks_made[0]).innerHTML = "";
-			if(barca_array[rl][cl][0] == "B")
+			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
+			if(barca_array[rl][cl][0] == 'B')
 			{
-				if(barca_array[r1][c1][1] == "E"){
+				if(barca_array[r1][c1][1] == 'E'){
 					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/ElephantB.png"/>';								
 				}
-				else if(barca_array[r1][c1][1] == "R"){
+				else if(barca_array[r1][c1][1] == 'R'){
 					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/MouseB.png"/>';				
 				}
 				else{
@@ -207,10 +236,10 @@ function clickMade(id,row,col,val){
 			}
 			else
 			{
-				if(barca_array[r1][c1][1] == "E"){
+				if(barca_array[r1][c1][1] == 'E'){
 					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/elephantW.gif"/>';								
 				}
-				else if(barca_array[r1][c1][1] == "R"){
+				else if(barca_array[r1][c1][1] == 'R'){
 					document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/mouseW.gif"/>';				
 				}
 				else{
@@ -254,7 +283,8 @@ function clickMade(id,row,col,val){
 </div>
 <div class = "row">
 	<div class = "col-xs-12 text-center" id = "message">
-		Click on start game button to start the game!
+		Click on start game button to start the game and also choose which 
+		side you want to play on...!
 	</div>
 </div>
 <div id="barca_board" class = "mainBox"></div>
