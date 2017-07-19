@@ -252,8 +252,8 @@ class AI:
         current_dest   = [0,0]                               
         for piece in self.board.current_pieces():
             for source_row, source_col, dest_row, dest_col in piece.valid_moves():            
-                infear_array = [ piece.infear for piece in self.board.pieces]
-                trapped_array= [ piece.trapped for piece in self.board.pieces]
+ #               infear_array = [ piece.infear for piece in self.board.pieces]
+#                trapped_array= [ piece.trapped for piece in self.board.pieces]
                 
                 self.board.update([source_row, source_col], [dest_row, dest_col])                               
                 board_state = self.board.board_evaluation()
@@ -263,9 +263,9 @@ class AI:
                     current_dest = [dest_row, dest_col]
                 self.board.update([dest_row, dest_col], [source_row, source_col])
                 
-                for piece in range(len(self.board.pieces)):
-                    self.board.pieces[piece].infear = infear_array[piece]
-                    self.board.pieces[piece].trapped = trapped_array[piece]
+ #               for piece in range(len(self.board.pieces)):
+#                    self.board.pieces[piece].infear = infear_array[piece]
+#                    self.board.pieces[piece].trapped = trapped_array[piece]
             
         return [current_source, current_dest]
 
@@ -273,6 +273,10 @@ class AI:
         if (not self.board.victory()):
             ai_source, ai_dest = self.AI_decide_self()
             self.board.update(ai_source, ai_dest)
+            for i in self.board.board:
+                print(i)
+            print()
+
 
 ##########################################
 class Backend:
@@ -282,6 +286,7 @@ class Backend:
     def receive_data(self, whitetomove, pieces):
         self.AI = AI(whitetomove, pieces)
         self.AI.execute()
+
 
 
     def send_updated_data(self):
@@ -314,51 +319,51 @@ class Backend:
     
 if __name__ == "__main__":
     pass
-##    backend = Backend()
-##    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
-##                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
-##                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-##                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
-##                                                                   ['BLACK', 'LION', 8, 3, False, False],
-##                                                                   ['BLACK', 'LION', 8, 6, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-##                                                                   ['WHITE', 'LION', 1, 3, False, False],
-##                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-##
-##    
-##    output = backend.send_updated_data()
-##    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                         ['WHITE', 'LION', 1, 3, False, False],
-##                         ['WHITE', 'MOUSE', 1, 5, False, False],
-##                         ['WHITE', 'LION', 1, 6, False, False],
-##                         ['WHITE', 'MOUSE', 1, 4, True, False],
-##                         ['BLACK', 'LION', 5, 3, False, False],
-##                         ['BLACK', 'LION', 7, 4, False, False],
-##                         ['BLACK', 'MOUSE', 8, 4, False, False],
-##                         ['BLACK', 'MOUSE', 8, 5, False, False],
-##                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
-##                         ['BLACK', 'ELEPHANT', 9, 5, False, False]])
-##    
-##    output = backend.send_updated_data()
-##    backend.receive_data(True,
-##                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
-##                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-##                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
-##                                                                   ['BLACK', 'LION', 8, 3, False, False],
-##                                                                   ['BLACK', 'LION', 8, 6, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-##                                                                   ['WHITE', 'LION', 1, 3, False, False],
-##                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-##
-##
-##    output = backend.send_updated_data()
+    backend = Backend()
+    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
+                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]])
+
+    
+    output = backend.send_updated_data()
+    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
+                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                         ['WHITE', 'LION', 1, 3, False, False],
+                         ['WHITE', 'MOUSE', 1, 5, False, False],
+                         ['WHITE', 'LION', 1, 6, False, False],
+                         ['WHITE', 'MOUSE', 1, 4, True, False],
+                         ['BLACK', 'LION', 5, 3, False, False],
+                         ['BLACK', 'LION', 7, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 5, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 5, False, False]])
+    
+    output = backend.send_updated_data()
+    backend.receive_data(True,
+                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]])
+
+
+    output = backend.send_updated_data()
 
 
     
