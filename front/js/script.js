@@ -1,4 +1,3 @@
-
 var barca_array = [
 	[".",".",".",".","BE1","BE2",".",".",".","."],
 	[".",".",".","BL1","BR1","BR2","BL2",".",".","."],
@@ -45,11 +44,12 @@ var pieces_afraid_of = {
 var clicks_made = [];
 var player_TURN = "WHITE";
 var valid_clicks = [];
-var scared_pieces = [];
+var scared_pieces = new set();
 var trapped_pieces = [];
 var victory = false;
 var who_won = "";
 var mode = "PLAYER V. AI";
+
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
 	{
@@ -60,6 +60,7 @@ function checkForValue(i,j){
 		return "smallBox2";
 	}
 }
+
 /*Function that initializes the board*/
 function newBoard(){
 	var output = "";
@@ -71,6 +72,7 @@ function newBoard(){
 	}
 	document.getElementById('barca_board').innerHTML = output;
 }
+
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
 	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/ElephantB.png"/>';
@@ -86,6 +88,7 @@ function placeInitImage(){
 	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
 	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif"/>';
 }
+
 /*Initializes the initial valid clicks on the board*/
 function initValidClicks(){
 	if(player_TURN == "WHITE"){
@@ -98,7 +101,6 @@ function initValidClicks(){
 	}
 	else if(mode == "PLAYER V. AI"){
 		getAIMove();
-		reComputeValidClicks(player_TURN);
 	}
 	else{
 		barca_array[0][4] = "WE1";
@@ -129,6 +131,7 @@ function initValidClicks(){
 		piece_locations["BE2"] = 95;
 	}
 }
+
 /*Returns the direction of movement*/
 function directionMovedIn(from_row,from_col,to_row,to_col)
 {
@@ -148,21 +151,28 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 		return "INVALID";
 	}
 }
+
 /*Switches turn of players in two-player mode*/
 function switchTurn(){
 	PLAYER_TURN = (PLAYER_TURN == "WHITE") ? "BLACK" : "WHITE";
 }
+
 /*Checks if a particular piece is scared or not if the next move is made*/
 function checkIfPieceIsScared(piece,to_row,to_col){
 	var data = pieces_afraid_of[piece];
 	for(var str in data){
 		var value = piece_locations[str];
-		if(Math.abs(to_col-value%10)<=0 && Math.abs(to_col-Math.floor(value/10)) <= 0){
-			return true;
+		r1 = Math.floor(value/10);
+		c1 = value%10;
+		if(!(to_col-c1 == 0 && to_row-r1 == 0)){
+			if(Math.abs(to_row-r1) <= 1 && Math.abs(to_col-c1) <= 1){
+				return true;
+			}
 		}	
 	}
 	return false;
 }
+
 /*Checks the appropriate direction to make sure a piece is not jumping over 
 another piece while making a move*/
 function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
@@ -179,6 +189,184 @@ function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
 		}
 	}
 }
+
+/*Checks if a valid move exists for elephant*/
+function checkIfASingleValidMoveExistsForElephant(value){
+	var obstacles = [false,false,false,false,false,false,false,false];
+	var move_adv = 0;
+	while(!obstacles[0] || !obstacles[1] || !obstacles[2] || !obstacles[3] ||
+		!obstacles[4] || !obstacles[5] || !obstacles[6] || !obstacles[7])
+	{
+		move_adv++;
+		if(!obstacles[0]){		
+		}
+		if(!obstacles[1]){
+			
+		}
+		if(!obstacles[2]){
+			
+		}
+		if(!obstacles[3]){
+			
+		}
+		if(!obstacles[4]){
+			
+		}
+		if(!obstacles[5]){
+			
+		}
+		if(!obstacles[6]){
+			
+		}
+		if(!obstacles[7]){
+			
+		}
+	}
+	return false;
+}
+
+/*Checks if a valid move exists for lion*/
+function checkIfASingleValidMoveExistsForLion(value){
+	var obstacles = [false,false,false,false];
+	var move_adv = 0;
+	var location_piece = piece_locations[value];
+	var row = Math.floor(location_piece/10);
+	var col = location_piece%10;
+	while(!obstacles[0] || !obstacles[1] || !obstacles[2] || !obstacles[3])
+	{
+		move_adv++;
+		/*Check one move in diagonal upper left*/
+		if(!obstacles[0] && (row - move_adv) >= 0 && (col - move_adv) >= 0){
+			if(barca_array[row-move_adv][col-move_adv] != "." && 
+				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[0] = (barca_array[row-move_adv][col+move_adv] != ".") ? true : obstacles[0];
+		}
+		/*Check one move in diagonal upper right*/	
+		if(!obstacles[1] && (row - move_adv) >= 0 && (col + move_adv) < 10){
+			if(barca_array[row-move_adv][col+move_adv] != "." && 
+				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[1] = (barca_array[row-move_adv][col+move_adv] != ".") ? true : obstacles[1];
+		}
+		/*Check one move in diagonal bottom right*/
+		if(!obstacles[2] && (row + move_adv) < 10 && (col + move_adv) < 10){
+			if(barca_array[row+move_adv][col+move_adv] != "." && 
+				checkIfPieceIsScared(value,row+move_adv,col+move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[2] = (barca_array[row+move_adv][col+move_adv] != ".") ? true : obstacles[3];			
+		}
+		/*Check one move in diagonal bottom left*/
+		if(!obstacles[3] && (row + move_adv) < 10 && (col - move_adv) >= 0){
+			if(barca_array[row+move_adv][col-move_adv] != "." && 
+				checkIfPieceIsScared(value,row+move_adv,col-move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[3] = (barca_array[row+move_adv][col-move_adv] != ".") ? true : obstacles[2];			
+		}		
+	}
+}
+
+/*Checks if a valid move exists for mouse*/
+function checkIfASingleValidMoveExistsForMouse(value){
+	var obstacles = [false,false,false,false];
+	var move_adv = 0;
+	var location_piece = piece_locations[value];
+	var row = Math.floor(location_piece/10);
+	var col = location_piece%10;
+
+	while(!obstacles[0] || !obstacles[1] || !obstacles[2] || !obstacles[3]) 
+	{
+		move_adv++;
+		/*Check a move in up direction*/
+		if(!obstacles[0] && (row - move_adv) >= 0){
+			if(barca_array[row-move_adv][col] != "." && 
+				checkIfPieceIsScared(value,row-move_adv,col) == false)
+			{
+				return true;
+			}
+			obstacles[0] = (barca_array[row-move_adv][col] != ".") ? true : obstacles[0];
+		}
+		/*Check a move in right direction*/
+		if(!obstacles[1] && (col + move_adv) < 10){
+			if(barca_array[row][col+move_adv] != "." && 
+				checkIfPieceIsScared(value,row,col+move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[1] = (barca_array[row][col+move_adv] != ".") ? true : obstacles[1];
+		}
+		/*Check a move in down direction*/
+		if(!obstacles[2] && (row + move_adv) < 10){
+			if(barca_array[row+move_adv][col] != "." && 
+				checkIfPieceIsScared(value,row+move_adv,col) == false)
+			{
+				return true;
+			}
+			obstacles[2] = (barca_array[row+move_adv][col] != ".") ? true : obstacles[2];
+		}
+		/*Check a move in left direction*/		
+		if(!obstacles[3] && (col - move_adv) >= 0){
+			if(barca_array[row][col-move_adv] != "." && 
+				checkIfPieceIsScared(value,row,col-move_adv) == false)
+			{
+				return true;
+			}
+			obstacles[3] = (barca_array[row][col-move_adv] != ".") ? true : obstacles[3];
+		}
+	}
+	return false;
+}
+
+/*Calculates new scared pieces because of the move made*/
+function calculateScaredPieces(){
+	scared_pieces = new set();
+	for (var key in piece_locations){
+		var piece_location_of_key = piece_locations[key];
+		var r1 = Math.floor(piece_location_of_key/10);
+		var c1 = piece_location_of_key%10;
+		if(checkIfPieceIsScared(key,r1,c1)){
+			scared_pieces.add(key);
+		}
+	}
+}
+
+/*Calculate new trapped pieces because of the move made and 
+also remove the pieces that are trapped from the scared pieces 
+list. Goal: just find one possible valid move for the piece,
+if you find it, it is not trapped*/
+function calculateTrappedPieces(){
+	var trapped_piece_array = scared_pieces;
+	for(var value in trapped_piece_array){
+		var validMoveFound = false;
+		if(value[1] == 'E'){
+			if(checkIfASingleValidMoveExistsForElephant(value)){
+				trapped_pieces.push(value);
+				scared_pieces.delete(value);
+			}
+		}
+		if(value[1] == 'L'){
+			if(checkIfASingleValidMoveExistsForLion(value)){
+				trapped_pieces.push(value);
+				scared_pieces.delete(value);
+			}
+		}
+		if(value[1] == 'R'){
+			if(checkIfASingleValidMoveExistsForMouse(value)){
+				trapped_pieces.push(value);
+				scared_pieces.delete(value);
+			}
+		}
+	}
+}
+
 /*Checks if the move made is valid or invalid*/
 function verifyValidMove(from_row,from_col,to_row,to_col){
 	var piece = barca_array[from_row][from_col];
@@ -215,6 +403,8 @@ function verifyValidMove(from_row,from_col,to_row,to_col){
 	}
 	return true;
 }
+
+/*Verify if the piece that user is trying to move is in the list*/
 function verifyValidClick(str){
 	for(var i = 0; i < valid_clicks.length; i++){
 		if(valid_clicks[i] == str){
@@ -223,6 +413,7 @@ function verifyValidClick(str){
 	}
 	return false;
 }
+
 /*Function that checks for victory*/
 function checkVictory(){
 	if(barca_array[4][4] != "." && barca_array[4][4][0] == barca_array[4][7][0] && 
@@ -253,12 +444,42 @@ function checkVictory(){
 	}	
 	return false;
 }
+
 /*Function that computes the pieces a certain user can move*/
 function recomputeValidClicks(turn){
-	/*Recalculate all the scared pieces*/
-	/*Recalculate all trapped pieces among the scared ones*/
-	/*Recalculate valid moves*/
+	valid_clicks = [];
+	if(turn == "WHITE"){
+		scared_pieces.forEach(function(value){
+			if(value[0] == 'B'){
+				valid_clicks.push(piece_locations[value]);
+			}
+		}
+		if(valid_clicks.length == 0){
+			valid_clicks.push(piece_locations["WE1"]);
+			valid_clicks.push(piece_locations["WE2"]);
+			valid_clicks.push(piece_locations["WL1"]);
+			valid_clicks.push(piece_locations["WL2"]);
+			valid_clicks.push(piece_locations["WR1"]);
+			valid_clicks.push(piece_locations["WR2"]);			
+		}
+	}
+	else{
+		scared_pieces.forEach(function(value){
+			if(value[0] == 'B'){
+				valid_clicks.push(piece_locations[value]);
+			}
+		}
+		if(valid_clicks.length == 0){
+			valid_clicks.push(piece_locations["BE1"]);
+			valid_clicks.push(piece_locations["BE2"]);
+			valid_clicks.push(piece_locations["BL1"]);
+			valid_clicks.push(piece_locations["BL2"]);
+			valid_clicks.push(piece_locations["BR1"]);
+			valid_clicks.push(piece_locations["BR2"]);			
+		}		
+	}
 }
+
 /*Function that returns right image extension for the piece*/
 function findImgName(side,type){
 	switch(type){
@@ -267,14 +488,17 @@ function findImgName(side,type){
 		default: return (side == 'W') ? "mouseW.gif" : "MouseB.png";		
 	}
 }
+
 /*Function set image to black*/
 function movePiece(side,type,row,col){
 	document.getElementById("tile_"+row+","+col).innerHTML = '<img src = "./images/"+\''+findImgName(side,type)+"/"+'/>';								
 }
+
 function getAIMove(){
 	/*Send API request*/
 	/*Get the move from AI*/	
 }
+
 /*Function that detects clicks and displays interactive user messages*/
 function clickMade(row,col,id,val){
 	/*document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;*/
@@ -295,10 +519,15 @@ function clickMade(row,col,id,val){
 		var cl = clicks_made[0]%10;
 		if(verifyValidMove(rl,cl,row,col))
 		{
+			console.log("Move made");
 			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
 			movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
 			barca_array[row][col] = barca_array[rl][cl];
-			barca_array[rl][cl] = '.';
+			barca_array[rl][cl] = ".";
+			piece_locations[barca_array[row][col]] = row * 10 + col;
+			calculateScaredPieces();
+			calculateTrappedPieces();
+
 			if(checkVictory()){
 				return;			
 			}
@@ -308,16 +537,14 @@ function clickMade(row,col,id,val){
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
+				/*No need to do this computation for AI mode*/
 				switchTurn();
+				recomputeValidClicks(player_TURN);
 			}
 			
 			if(checkVictory()){
 				return;
 			}
-			/*This is done always no matter which mode it is*/
-			recomputeValidClicks(player_TURN);
-			/*Set clicks_made to empty array*/
-			clicks_made = [];			
 		}
 		else{
 			document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
