@@ -1,6 +1,8 @@
+
+import time
 ##########################################
 class Piece:
-    def __init__(self, piece_arr, board, pieces):
+    def __init__(self, piece_arr, board, pieces, scared_of_pieces):
         self.color   = piece_arr[0]
         self.type    = piece_arr[1]
         self.row     = piece_arr[2]
@@ -8,7 +10,9 @@ class Piece:
         self.infear  = piece_arr[4]
         self.trapped = piece_arr[5]
         self.board = board
+        self.board[self.row][self.col]  = self
         self.pieces = pieces
+        self.scared_of_pieces = scared_of_pieces
 
     def __repr__(self):
         return "*" +self.color[0] +self.type[0]+"*"
@@ -17,39 +21,28 @@ class Piece:
         return (abs(row- self.row) <=1) and (abs(col - self.col) <=1)
     
     def scares(self, piece):
-        if (self.color != piece.color) and\
-            (  ((self.type == "ELEPHANT")and (piece.type == "LION"))\
-            or ((self.type == "LION")   and (piece.type == "MOUSE"))\
-            or ((self.type == "MOUSE")  and (piece.type == "ELEPHANT"))\
-            ):
-            return True
-        else:
-            return False
+        return piece.scared_of(self)
 
     def scared_of(self, piece):
-        return piece.scares(self)
+        return piece in self.scared_of_pieces
     
     def intimidates(self, piece):
-        if self.scares(piece) and self.adjacent_to(piece.row, piece.col):
+        if piece.scared_of(self) and self.adjacent_to(piece.row, piece.col):
             return True
         else:
             return False
 
     def infear_of(self, piece):
-        return piece.intimidates(self)
-
+        if self.scared_of(piece) and self.adjacent_to(piece.row, piece.col):
+            return True
+        else:
+            return False
 
     def potential_infear_of(self,row,col):
-        for piece in self.pieces:
-            if piece.scares(self) and piece.adjacent_to(row, col):
+        for piece in self.scared_of_pieces:
+            if piece.adjacent_to(row, col):
                 return True
-        return False
-
-    def potential_intimidates(self, row, col):
-        for piece in self.pieces:
-            if pieces.scared_of(self) and piece.adjacent_to(row, col):
-                return True
-        return False       
+        return False      
     
     def valid_moves(self):
         if not(self.infear):
@@ -106,36 +99,41 @@ class Piece:
         
         
         
-##########################################              
+#)#########################################              
 class Board:
     colors = ["BLACK", "WHITE"]
     types  = ["ELEPHANT", "MOUSE", "LION"]
     rows = 10                                  
     cols = 10
     init_piece_position =\
-            [
-                                [int(rows -1),int(cols/2 -1)], [int(rows -1),int(cols/2)],[int(rows -2),int(cols/2 -1)],
-                                [int(rows -2),int(cols/2)],   [int(rows -2),int(cols/2 -2)],[int(rows -2),int(cols/2 +1)],
+            {
+                                (int(rows -1),int(cols/2 -1)), (int(rows -1),int(cols/2)),(int(rows -2),int(cols/2 -1)),
+                                (int(rows -2),int(cols/2)),   (int(rows -2),int(cols/2 -2)),(int(rows -2),int(cols/2 +1)),
            
-                                [int(0),int(cols/2 -1)],[int(0),int(cols/2)], [int(1),int(cols/2 -1)],
-                                [int(1),int(cols/2)], [int(1),int(cols/2 -2)], [int(1),int(cols/2 +1)]
-             ]
+                                (int(0),int(cols/2 -1)),(int(0),int(cols/2)), (int(1),int(cols/2 -1)),
+                                (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
+             }
     watering_holes      =\
-            [
-                              [int(rows/2 -2),int( cols/2 -2)],[int(rows/2 -2),int( cols/2 +1)],
-                              [int(rows/2 +1),int( cols/2 -2)],[int(rows/2 +1),int( cols/2 +1)]
+            {
+                              (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
+                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))
                             
-            ]
+            }
+    piece_color_val = {"BLACK": 0, "WHITE": 1}
+    piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
 
     
     def __init__(self,whitetomove, pieces):
-        self.whitetomove = whitetomove
+        piece_array = [[set() for j in range(3)]for i in range(2)]
         self.board = [[None for j in range(10)] for i in range(10) ]
+        self.whitetomove = whitetomove
         self.pieces = []
         for piece in pieces:
-            self.pieces.append(Piece(piece, self.board, self.pieces))
-        for piece in self.pieces:
-            self.board[piece.row][piece.col]  = piece
+                piece_instance = Piece(piece, self.board, self.pieces,
+                piece_array[(Board.piece_color_val[piece[0]] + 1)%2][(Board.piece_type_val[piece[1]] + 1)%3])
+                self.pieces.append(piece_instance)
+                piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]].add(piece_instance)
+                
 
                                 
     def watering_hole_counter(self):
@@ -188,10 +186,10 @@ class Board:
                     if other_piece.scared_of(piece) and other_piece.adjacent_to(dest_row, dest_col):
                         score +=.4
                         #If you can fear a watering hole occupent the next turn, +10
-                        if [other_piece.row, other_piece.col] in Board.watering_holes: 
+                        if(other_piece.row, other_piece.col) in Board.watering_holes: 
                             score+=2 
                 #Can you get a hole next turn, that is nice:)
-                if [dest_row, dest_col] in Board.watering_holes:
+                if (dest_row, dest_col) in Board.watering_holes:
                     score +=[5,10,20,10000000,1000000][holes]
 
 
@@ -273,9 +271,8 @@ class AI:
         if (not self.board.victory()):
             ai_source, ai_dest = self.AI_decide_self()
             self.board.update(ai_source, ai_dest)
-            for i in self.board.board:
-                print(i)
-            print()
+            
+
 
 
 ##########################################
@@ -319,51 +316,4 @@ class Backend:
     
 if __name__ == "__main__":
     pass
-    backend = Backend()
-    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
-                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-
-    
-    output = backend.send_updated_data()
-    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
-                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                         ['WHITE', 'LION', 1, 3, False, False],
-                         ['WHITE', 'MOUSE', 1, 5, False, False],
-                         ['WHITE', 'LION', 1, 6, False, False],
-                         ['WHITE', 'MOUSE', 1, 4, True, False],
-                         ['BLACK', 'LION', 5, 3, False, False],
-                         ['BLACK', 'LION', 7, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 5, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 5, False, False]])
-    
-    output = backend.send_updated_data()
-    backend.receive_data(True,
-                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-
-
-    output = backend.send_updated_data()
-
-
-    
+ 
