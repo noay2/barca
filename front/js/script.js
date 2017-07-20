@@ -1,3 +1,4 @@
+
 var barca_array = [
 	[".",".",".",".","BE1","BE2",".",".",".","."],
 	[".",".",".","BL1","BR1","BR2","BL2",".",".","."],
@@ -10,6 +11,7 @@ var barca_array = [
 	[".",".",".","WL1","WR1","WR2","WL2",".",".","."],
 	[".",".",".",".","WE1","WE2",".",".",".","."]
 ];
+
 /*Extra information that is necessary to retrieve information about 
 pieces on the board quickly*/
 var piece_locations = {
