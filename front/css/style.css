@@ -5,46 +5,44 @@ h1 {
     color: Black;
 }
 
+
 .mainBox{
 	background-color: #92f359;
-	width: 90%;
-	height: 90%;
-	border-style: solid;
+	width: 730px;
 	z-index: 1;
+
 	
 }
 
-.smallBox11{
+.smallBox1{
 	width: 70px;
     height: 70px;
     outline: 1px solid;
     float: left;
 	background-color: #66ff99;
+	display: flex;
+
 	
 }
 
-.smallBox21{
+.smallBox2{
 	width: 70px;
     height: 70px;
     outline: 1px solid;
     float: left;
 	background-color: #ccccff;
+	display: flex;
+
 	
 }
-.smallBox1{
-	background-color: #ccff66;
-	width: 10%;
-	height: 10%;
-	outline: 1px solid;
-	float: left;
 
+.smallBox1 > img {
+	margin: 0 auto;
+	width: 100%;
+	height: 100%;
 }
-
-.smallBox2{
-	background-color: #80ffd4;
-	width: 10%;
-	height: 10%;
-    outline: 1px solid;
-    float: left;
-
+.smallBox2 > img{
+	margin: 0 auto;
+	width: 100%;
+	height: 100%;
 }
