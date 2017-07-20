@@ -189,7 +189,7 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 	else if(from_row-to_row != 0 && from_col-to_col == 0){
 		return "VERTICAL";
 	}
-	else if(abs(from_row-to_row) == abs(from_col-to_col)){
+	else if(Math.abs(from_row-to_row) == Math.abs(from_col-to_col)){
 		return "DIAGONAL";
 	}
 	else{
@@ -203,7 +203,7 @@ function switchTurn(){
 /*Checks if a particular piece is scared or not if the next move is made*/
 function checkIfPieceIsScared(piece,to_row,to_col){
 	var data = pieces_afraid_of[piece];
-	for(var str: data){
+	for(var str in data){
 		var value = piece_locations[str];
 		if(Math.abs(to_col-value%10)<=0 && Math.abs(to_col-Math.floor(value/10)) <= 0){
 			return true;
