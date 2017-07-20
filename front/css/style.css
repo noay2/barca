@@ -8,7 +8,7 @@ h1 {
 
 .mainBox{
 	background-color: #92f359;
-	width: 730px;
+	width: 510;
 	z-index: 1;
 	margin: 0 auto;
 
@@ -17,8 +17,8 @@ h1 {
 }
 
 .smallBox1{
-	width: 70px;
-    height: 70px;
+	width: 50px;
+    height: 50px;
     outline: 1px solid;
     float: left;
 	background-color: #66ff99;
@@ -28,8 +28,8 @@ h1 {
 }
 
 .smallBox2{
-	width: 70px;
-    height: 70px;
+	width: 50px;
+    height: 50px;
     outline: 1px solid;
     float: left;
 	background-color: #ccccff;
