@@ -91,12 +91,18 @@ function placeInitImage(){
 }
 
 function placeWateringHoles() {
-	 $('tile_3,3').css("background-color", "yellow");
-	 
+
 	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif"/>';
 	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif"/>';
 	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif"/>';
 	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well.gif"/>';
+
+	document.getElementById('tile_3,3').style.backgroundColor = "FFFFFF";
+	document.getElementById('tile_3,6').style.backgroundColor = "FFFFFF";
+	document.getElementById('tile_6,3').style.backgroundColor = "FFFFFF";
+	document.getElementById('tile_6,6').style.backgroundColor = "FFFFFF";
+
+
 }
 
 /*Initializes the initial valid clicks on the board*/
