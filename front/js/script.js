@@ -51,6 +51,7 @@ var victory = false;
 var who_won = "";
 var mode = "PLAYER V. PLAYER";
 var singleMoveExists = {};
+var fear_counter = 0;
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -178,8 +179,13 @@ function switchTurn(){
 }
 
 function printTurn(){
-	document.getElementById('turnDiv').innerHTML = "TURN :" + player_TURN;
-
+	if(mode == "PLAYER V. PLAYER"){
+		document.getElementById('turnDiv').innerHTML = "TURN :" + player_TURN;
+	}
+	else{
+		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
+		document.getElementById('turnDiv').innerHTML = "TURN: " +turn;
+	}
 }
 
 /*Checks if a particular piece is scared or not if the next move is made*/
@@ -202,25 +208,27 @@ function checkIfPieceIsScared(piece,to_row,to_col){
 another piece while making a move*/
 function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
 {
-	console.log("In checking obstacle directions");
+	//console.log("In checking obstacle directions");
 	var y_dif = to_row - from_row;
 	var x_dif = to_col - from_col;
 	var x_inc = 0;
 	var y_inc = 0;
-	//console.log("from_row: " + from_row + ",from_col: " + from_col + ",to_row: " + to_row + ",to_col" + to_col);
-	//console.log("x_dif: " + x_dif + ", y_dif: " + y_dif);
 	while(y_inc != y_dif || x_inc != x_dif){
 		x_inc = (x_dif == 0) ? 0 : ((x_dif < 0) ? x_inc - 1 : x_inc + 1);
 		y_inc = (y_dif == 0) ? 0 : ((y_dif < 0) ? y_inc - 1 : y_inc + 1);
-//		console.log("x_inc: " + x_inc + ", y_inc: " + y_inc);
-//		console.log(barca_array[from_row+y_inc][from_col+x_inc]);
 		if(barca_array[from_row+y_inc][from_col+x_inc] != "."){
-			//console.log("TRUE IN OBSTACLES");
 			return true;
 		}
 	}
-	//console.log("FALSE IN OBSTACLES");
 	return false;
+}
+
+function getRow(piece){
+	return Math.floor(piece_locations[piece]/10);
+}
+
+function getCol(piece){
+	return piece_locations[piece]%10;
 }
 
 /*Checks if a valid move exists for elephant*/
@@ -427,7 +435,7 @@ function calculateScaredPieces(){
 			scared_pieces.add(key);
 		}
 	}
-	console.log(scared_pieces.size);
+	//console.log(scared_pieces.size);
 }
 
 /*Calculate new trapped pieces because of the move made and
@@ -482,12 +490,26 @@ function checkIfInTrappedPieces(piece){
 
 function placeImageForScaredAndTrappedPieces(){
 	for(var i in trapped_pieces){
+		//console.log(getDiv(i));
 		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+		fear_counter++;
 	}
-
+// id = "fear_"+\''+fear_counter+'\'
 	for(let i of scared_pieces){
+		console.log(getDiv(i));
 		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+		fear_counter++;
 	}
+}
+
+function removeImageForScaredAndTrappedPieces(){
+/*	for(var i = fear_counter-1; i >= 0; i--){
+		if(document.getElementById("fear_"+fear_counter)){
+			var element = document.getElementById("fear_"+fear_counter); // will return element
+			element.parentNode.removeChild(element); // will remove the element from DOM
+		}
+	}
+*/
 }
 
 /*Checks if the move made is valid or invalid*/
@@ -660,6 +682,7 @@ function clickMade(row,col,id,val){
 		if(value)
 		{
 			//console.log("Move made");
+			removeImageForScaredAndTrappedPieces();
 			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
 			movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
 			barca_array[row][col] = barca_array[r1][c1];
@@ -669,6 +692,7 @@ function clickMade(row,col,id,val){
 			singleMoveExists = {};
 			calculateScaredPieces();
 			calculateTrappedPieces();
+			placeImageForScaredAndTrappedPieces();
 /*			for(var i = 0; i < trapped_pieces.length; i++){
 				console.log("Trapped: " + trapped_pieces[i]);
 			}
@@ -678,11 +702,18 @@ function clickMade(row,col,id,val){
 			}
 			/* IF MODE IS PLAYER V. AI*/
 			else if(mode == "PLAYER V. AI"){
+				printTurn();
 				getAIMove();
+				recomputeValidClicks(player_TURN);
+				removeImageForScaredAndTrappedPieces();
+//				setBoardPieces();
+//				setScaredPieces();
+//        setTrappedPieces();
+//				setPieceLocations();
+				placeImageForScaredAndTrappedPieces();
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
-				/*No need to do this computation for AI mode*/
 				switchTurn();
 				recomputeValidClicks(player_TURN);
 			}
