@@ -175,7 +175,7 @@ function switchTurn(){
 	player_TURN = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
 	placeImageForScaredAndTrappedPieces();
 	printTurn();
-
+	
 }
 
 function printTurn(){
