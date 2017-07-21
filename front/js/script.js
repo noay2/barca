@@ -160,8 +160,8 @@ function switchTurn(){
 /*Checks if a particular piece is scared or not if the next move is made*/
 function checkIfPieceIsScared(piece,to_row,to_col){
 	var data = pieces_afraid_of[piece];
-	for(var str in data){
-		var value = piece_locations[str];
+	for(var i = 0; i < data.length; i++){
+		var value = piece_locations[data[i]];
 		r1 = Math.floor(value/10);
 		c1 = value%10;
 		if(!(to_col-c1 == 0 && to_row-r1 == 0)){
@@ -186,8 +186,8 @@ function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
 	while(y_inc != y_dif || x_inc != x_dif){
 		x_inc = (x_dif == 0) ? 0 : ((x_dif < 0) ? x_inc - 1 : x_inc + 1);
 		y_inc = (y_dif == 0) ? 0 : ((y_dif < 0) ? y_inc - 1 : y_inc + 1);
-		console.log("x_inc: " + x_inc + ", y_inc: " + y_inc);
-		console.log(barca_array[from_row+y_inc][from_col+x_inc]);
+//		console.log("x_inc: " + x_inc + ", y_inc: " + y_inc);
+//		console.log(barca_array[from_row+y_inc][from_col+x_inc]);
 		if(barca_array[from_row+y_inc][from_col+x_inc] != "."){
 			//console.log("TRUE IN OBSTACLES");
 			return true;
@@ -583,8 +583,8 @@ function clickMade(row,col,id,val){
 	col = parseInt(col);
 	var num = row*10 + col;
 	//console.log(num); /*For debugging purposes, click F12 and check the console*/
-	console.log("Barca piece: " + barca_array[row][col]);
-	console.log(clicks_made.length); /*For debugging purposes, click F12 and check the console*/
+	//console.log("Barca piece: " + barca_array[row][col]);
+	//console.log(clicks_made.length); /*For debugging purposes, click F12 and check the console*/
 	if(victory){
 		document.getElementById("message").innerHTML = "Game is over...";
 	}
@@ -602,7 +602,7 @@ function clickMade(row,col,id,val){
 		
 		if(value)
 		{
-			console.log("Move made");
+			//console.log("Move made");
 			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
 			movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
 			barca_array[row][col] = barca_array[r1][c1];
