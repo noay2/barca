@@ -52,6 +52,7 @@ var who_won = "";
 var mode = "PLAYER V. PLAYER";
 var singleMoveExists = {};
 var fear_counter = 0;
+var wateringHoleCounter = 0;
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -95,7 +96,6 @@ function placeInitImage(){
 }
 
 function placeWateringHoles() {
-
 	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_0"/>';
 	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_1"/>';
 	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_2"/>';
@@ -677,6 +677,37 @@ function movePiece(side,type,row,col){
 }
 
 function getAIMove(){
+	var API_request = {};
+	var API_response = {};
+
+	API_request["pieces"] = [];
+	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
+
+	for(var piece in piece_locations){
+		var info = [[null,null,null,null,null,null]];
+		info[0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
+		info[1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
+		info[2] = getRow(piece);
+		info[3] = getCol(piece);
+		info[4] = checkIfInTrappedPieces(piece) || checkIfPieceIsScared(piece);
+		info[5] = checkIfInTrappedPieces(piece);
+		API_request["pieces"].push(info);
+	}
+
+	$.ajax({
+			type: "POST",
+			url: "https://serene-everglades-79780.herokuapp.com/api",
+			data: JSON.stringify(API_request),
+			dataType: "json",
+			contentType: 'application/json',
+			success: function(data){
+				alert(data["whitetomove"]);
+			},
+			error: function(data){
+				console.log(API_request);
+				alert("fail");
+			}
+		});
 	/*Send API request*/
 	/*Get the move from AI*/
 }
@@ -689,6 +720,9 @@ function clickMade(row,col,id,val){
 
 	if(victory){
 		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
+	}
+	else if(mode === "PLAYER V. AI" && player_TURN === "BLACK"){
+		getAIMove();
 	}
 	else if(verifyValidClick(num)){
 		clicks_made = [];
@@ -729,11 +763,13 @@ function clickMade(row,col,id,val){
 				getAIMove();
 				recomputeValidClicks(player_TURN);
 				removeImageForScaredAndTrappedPieces();
+				removeImageForWateringHoles();
 //				setBoardPieces();
 //				setScaredPieces();
 //        setTrappedPieces();
 //				setPieceLocations();
 				placeImageForScaredAndTrappedPieces();
+				placeImageForWateringHolesIfEmpty();
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
