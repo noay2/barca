@@ -80,14 +80,14 @@ function newBoard(){
 
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
-	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/ElephantB.png"/>';
-	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/ElephantB.png"/>';
+	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/BElephant.gif"/>';
+	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/BElephant.gif"/>';
 	document.getElementById('tile_9,4').innerHTML += '<img src = "./images/elephantW.gif"/>';
 	document.getElementById('tile_9,5').innerHTML += '<img src = "./images/elephantW.gif"/>';
-	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/LionB.png"/>';
-	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/MouseB.png"/>';
-	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/MouseB.png"/>';
-	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/LionB.png"/>';
+	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/BLion.gif"/>';
+	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/BMouse.gif"/>';
+	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/BMouse.gif"/>';
+	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/BLion.gif"/>';
 	document.getElementById('tile_8,3').innerHTML += '<img src = "./images/lionW.gif"/>';
 	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif"/>';
 	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
@@ -96,17 +96,47 @@ function placeInitImage(){
 
 function placeWateringHoles() {
 
-	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif"/>';
-	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif"/>';
-	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif"/>';
-	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well.gif"/>';
+	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_0"/>';
+	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_1"/>';
+	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_2"/>';
+	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_3"/>';
 
-	document.getElementById('tile_3,3').style.backgroundColor = "FFFFFF";
-	document.getElementById('tile_3,6').style.backgroundColor = "FFFFFF";
-	document.getElementById('tile_6,3').style.backgroundColor = "FFFFFF";
-	document.getElementById('tile_6,6').style.backgroundColor = "FFFFFF";
+	wateringHoleCounter = 4;
+}
 
+function placeImageForWateringHolesIfEmpty(){
+//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
+//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
+	if(!(document.getElementById('tile_3,3').innerHTML)){
+		var id = "wateringhole_" + wateringHoleCounter;
+		document.getElementById('tile_3,3').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		wateringHoleCounter++;
+	}
+	if(!(document.getElementById('tile_3,6').innerHTML)){
+		var id = "wateringhole_" + wateringHoleCounter;
+		document.getElementById('tile_3,6').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		wateringHoleCounter++;
+	}
+	if(!(document.getElementById('tile_6,3').innerHTML)){
+		var id = "wateringhole_" + wateringHoleCounter;
+		document.getElementById('tile_6,3').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		wateringHoleCounter++;
+	}
+	if(!(document.getElementById('tile_6,6').innerHTML)){
+		var id = "wateringhole_" + wateringHoleCounter;
+		document.getElementById('tile_6,6').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		wateringHoleCounter++;
+	}
+}
 
+function removeImageForWateringHoles(){
+	for(var i = wateringHoleCounter-1; i >= 0; i--){
+		if(document.getElementById("wateringhole_"+i)){
+			var element = document.getElementById("wateringhole_"+i);
+			element.parentNode.removeChild(element);
+		}
+	}
+	wateringHoleCounter = 0;
 }
 
 /*Initializes the initial valid clicks on the board*/
@@ -208,7 +238,6 @@ function checkIfPieceIsScared(piece,to_row,to_col){
 another piece while making a move*/
 function checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)
 {
-	//console.log("In checking obstacle directions");
 	var y_dif = to_row - from_row;
 	var x_dif = to_col - from_col;
 	var x_inc = 0;
@@ -489,27 +518,29 @@ function checkIfInTrappedPieces(piece){
 }
 
 function placeImageForScaredAndTrappedPieces(){
+	//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
+	//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
+	//'<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
 	for(var i in trapped_pieces){
-		//console.log(getDiv(i));
-		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+		var id = "fear_"+fear_counter;
+		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
-// id = "fear_"+\''+fear_counter+'\'
 	for(let i of scared_pieces){
-		console.log(getDiv(i));
-		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+		var id = "fear_"+fear_counter;
+		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
 }
 
 function removeImageForScaredAndTrappedPieces(){
-/*	for(var i = fear_counter-1; i >= 0; i--){
-		if(document.getElementById("fear_"+fear_counter)){
-			var element = document.getElementById("fear_"+fear_counter); // will return element
-			element.parentNode.removeChild(element); // will remove the element from DOM
+	for(var i = fear_counter-1; i >= 0; i--){
+		if(document.getElementById("fear_"+i)){
+			var element = document.getElementById("fear_"+i);
+			element.parentNode.removeChild(element);
 		}
 	}
-*/
+	fear_counter = 0;
 }
 
 /*Checks if the move made is valid or invalid*/
@@ -520,27 +551,23 @@ function verifyValidMove(from_row,from_col,to_row,to_col){
 	/*Checks if the piece is moved in invalid direction*/
 	if(direction == "INVALID")
 	{
-//		console.log("INVALID");
 		return false;
 	}
 	else if(!checkIfInTrappedPieces(piece) &&
 		checkIfPieceIsScared(piece,to_row,to_col))
 	{
-//		console.log("SCARED");
 		return false;
 	}
 	else if(piece[1] == 'L')
 	{
 		if(direction !== "DIAGONAL" ||
 			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
-//			console.log("Direction for L: "+direction);
 			return false;
 		}
 	}
 	else if(piece[1] == 'E')
 	{
 		if(checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
-//			console.log("Direction for E: "+direction);
 			return false;
 		}
 	}
@@ -548,7 +575,6 @@ function verifyValidMove(from_row,from_col,to_row,to_col){
 	{
 		if((direction !== "VERTICAL" && direction !== "HORIZONTAL") ||
 			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
-//			console.log("Direction for R: "+direction);
 			return false;
 		}
 	}
@@ -567,30 +593,30 @@ function verifyValidClick(str){
 
 /*Function that checks for victory*/
 function checkVictory(){
-	if(barca_array[4][4] != "." && barca_array[4][4][0] == barca_array[4][7][0] &&
-		barca_array[4][7][0] == barca_array[7][4][0]){
+	if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[3][6][0] &&
+		barca_array[3][6][0] == barca_array[6][3][0]){
 		victory = true;
-		who_won = (barca_array[4][4][0] == 'W') ? "WHITE" : "BLACK";
+		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 	}
-	else if(barca_array[4][4] != "." && barca_array[4][4][0] == barca_array[7][4][0] &&
-		barca_array[7][4][0] == barca_array[7][7][0]){
+	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
+		barca_array[6][3][0] == barca_array[6][6][0]){
 		victory = true;
-		who_won = (barca_array[4][4][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over...";
+		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
+		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
 		return true;
 	}
-	else if(barca_array[4][4] != "." && barca_array[4][4][0] == barca_array[7][7][0] &&
-		barca_array[7][7][0] == barca_array[4][7][0]){
+	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
+		barca_array[6][3][0] == barca_array[3][6][0]){
 		victory = true;
-		who_won = (barca_array[4][4][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over...";
+		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
+		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
 		return true;
 	}
-	else if(barca_array[4][7] != "." && barca_array[4][7][0] == barca_array[7][4][0] &&
-		barca_array[7][4][0] == barca_array[7][7][0]){
+	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
+		barca_array[6][3][0] == barca_array[6][6][0]){
 		victory = true;
-		who_won = (barca_array[4][7][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over...";
+		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
+		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
 		return true;
 	}
 	return false;
@@ -639,9 +665,9 @@ function recomputeValidClicks(turn){
 /*Function that returns right image extension for the piece*/
 function findImgName(side,type){
 	switch(type){
-		case 'E': return (side == 'W') ? "elephantW.gif" : "ElephantB.png";
-		case 'L': return (side == 'W') ? "lionW.gif" : "LionB.png";
-		default: return (side == 'W') ? "mouseW.gif" : "MouseB.png";
+		case 'E': return (side == 'W') ? "elephantW.gif" : "BElephant.gif";
+		case 'L': return (side == 'W') ? "lionW.gif" : "BLion.gif";
+		default: return (side == 'W') ? "mouseW.gif" : "BMouse.gif";
 	}
 }
 
@@ -657,15 +683,12 @@ function getAIMove(){
 
 /*Function that detects clicks and displays interactive user messages*/
 function clickMade(row,col,id,val){
-	/*document.getElementById("message").innerHTML = "Click made at this value " + val + ", id: " + id;*/
 	row = parseInt(row);
 	col = parseInt(col);
 	var num = row*10 + col;
-	//console.log(num); /*For debugging purposes, click F12 and check the console*/
-	//console.log("Barca piece: " + barca_array[row][col]);
-	//console.log(clicks_made.length); /*For debugging purposes, click F12 and check the console*/
+
 	if(victory){
-		document.getElementById("message").innerHTML = "Game is over...";
+		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
 	}
 	else if(verifyValidClick(num)){
 		clicks_made = [];
@@ -676,13 +699,12 @@ function clickMade(row,col,id,val){
 		//console.log("In clicks_made");
 		var r1 = Math.floor(clicks_made[0]/10);
 		var c1 = clicks_made[0]%10;
-//		console.log("IN CLICKS_MADE");
 		var value = verifyValidMove(r1,c1,row,col);
 
 		if(value)
 		{
-			//console.log("Move made");
 			removeImageForScaredAndTrappedPieces();
+			removeImageForWateringHoles();
 			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
 			movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
 			barca_array[row][col] = barca_array[r1][c1];
@@ -693,6 +715,7 @@ function clickMade(row,col,id,val){
 			calculateScaredPieces();
 			calculateTrappedPieces();
 			placeImageForScaredAndTrappedPieces();
+			placeImageForWateringHolesIfEmpty();
 /*			for(var i = 0; i < trapped_pieces.length; i++){
 				console.log("Trapped: " + trapped_pieces[i]);
 			}
