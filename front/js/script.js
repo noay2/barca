@@ -661,3 +661,11 @@ function clickMade(row,col,id,val){
 		document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
 	}
 }
+
+/* Returns the div of the piece*/
+function getDiv(piece){
+	var location_piece = piece_locations[piece];
+	var row = Math.floor(location_piece/10);
+	var col = location_piece%10;
+	return "tile_" + row + "," + col;
+}
