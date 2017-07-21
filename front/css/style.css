@@ -7,13 +7,10 @@ h1 {
 
 
 .mainBox{
-	background-color: #92f359;
-	width: 510;
+	width: 540px;
 	z-index: 1;
 	margin: 0 auto;
-
-
-	
+	padding: 10px;
 }
 
 .smallBox1{
@@ -23,8 +20,6 @@ h1 {
     float: left;
 	background-color: #66ff99;
 	display: flex;
-
-	
 }
 
 .smallBox2{
@@ -34,8 +29,6 @@ h1 {
     float: left;
 	background-color: #ccccff;
 	display: flex;
-
-	
 }
 
 .smallBox1 > img {
@@ -47,4 +40,8 @@ h1 {
 	margin: 0 auto;
 	width: 100%;
 	height: 100%;
+}
+
+.turnDivClass{
+
 }

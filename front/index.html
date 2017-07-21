@@ -19,20 +19,21 @@ https://serene-everglades-79780.herokuapp.com/api
 </head>
 <body>
 
-<div class = "row">
-	<div class = "col-xs-1"></div>
-	<div class = "col-xs-3">
+<div class = "row text-center">
 		<h4>Welcome To Barca!</h4>
-	</div>
-	<div class = "col-xs-8">
-	</div>	
+
 </div>
 <div class = "row">
-	<div class = "col-xs-7 text-center" id = "message">
-		Click on start game button to start the game and also choose which 
-		side you want to play on...!
+	<div class = "text-center" id = "message">
+		Click on start game button to start the game 
+		and also choose which side you want to play on!
 	</div>
+	<br>
+		<div id="turnDiv" class=" text-center turnDivClass"></div>
+
+
 </div>
+
 <div id="barca_board" class = "mainBox "></div>
 <script>newBoard();</script>
 <script>placeWateringHoles();</script>

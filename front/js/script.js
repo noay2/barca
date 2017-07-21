@@ -64,6 +64,8 @@ function checkForValue(i,j){
 
 /*Function that initializes the board*/
 function newBoard(){
+		document.getElementById('turnDiv').innerHTML = "Player :" + player_TURN;
+
 	var output = "";
 	for(var i = 0; i < 10; i++){
 		for(var j = 0; j < 10; j++){
@@ -171,6 +173,14 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 /*Switches turn of players in two-player mode*/
 function switchTurn(){
 	player_TURN = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
+	placeImageForScaredAndTrappedPieces();
+	printTurn();
+
+}
+
+function printTurn(){
+	document.getElementById('turnDiv').innerHTML = "TURN :" + player_TURN;
+
 }
 
 /*Checks if a particular piece is scared or not if the next move is made*/
@@ -451,6 +461,16 @@ function checkIfInTrappedPieces(piece){
 		}
 	}
 	return false;
+}
+
+function placeImageForScaredAndTrappedPieces(){
+	for(var i in trapped_pieces){
+		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+	}
+
+	for(var i in scared_pieces){
+		document.getElementById(getDiv(i)).innerHTML += '<img src = "./images/cross.gif"/>';
+	}
 }
 
 /*Checks if the move made is valid or invalid*/
