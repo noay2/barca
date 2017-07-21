@@ -41,6 +41,7 @@ var pieces_afraid_of = {
 	"BR1": ["WL1","WL2"],
 	"BR2": ["WL1","WL2"]
 };
+
 var clicks_made = [];
 var player_TURN = "WHITE";
 var valid_clicks = [];
@@ -87,6 +88,15 @@ function placeInitImage(){
 	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif"/>';
 	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
 	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif"/>';
+}
+
+function placeWateringHoles() {
+	 $('tile_3,3').css("background-color", "yellow");
+	 
+	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif"/>';
+	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif"/>';
+	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif"/>';
+	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well.gif"/>';
 }
 
 /*Initializes the initial valid clicks on the board*/
