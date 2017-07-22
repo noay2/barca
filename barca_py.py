@@ -273,9 +273,7 @@ class AI:
                                   
     def AI_decide_self(self, recurse):
         if recurse == 0:
-            return  self.board.board_evaluation()
-             
-
+            return  [None, None,self.board.board_evaluation()]
 
         else:
             current_best_source = None
@@ -290,16 +288,13 @@ class AI:
                     self.board.update([source_row, source_col], [dest_row, dest_col])
                     board_state = self.AI_decide_self(  recurse-1)
                     self.board.update( [dest_row, dest_col],[source_row, source_col])
-                    if current_function(board_state, current_best_score):
+                    if current_function(board_state[2], current_best_score):
                         current_best_source = [source_row, source_col]
                         current_best_dest = [dest_row, dest_col ]
-                        current_best_score=board_state
+                        current_best_score=board_state[2]
 
 
-            if recurse ==self.recurse:
-                return [current_best_source, current_best_dest]
-            else:
-                return current_best_score 
+            return [current_best_source, current_best_dest, current_best_score]
 
     def execute(self):
         if (not self.board.victory()):
