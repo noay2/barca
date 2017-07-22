@@ -264,41 +264,46 @@ class Board:
         return [self.whitetomove ]+ [ piece.send_updated_data() for piece in self.all_pieces()]
             
         
-##########################################       
 class AI:
 
     def __init__(self,whitetomove, pieces):
         self.board = Board(whitetomove, pieces)
+        self.original_turn = whitetomove
+        self.recurse = 2
                                   
-    def AI_decide_self(self, recurse = 2):
+    def AI_decide_self(self, recurse):
         if recurse == 0:
             return  self.board.board_evaluation()
              
 
 
-        else:            
-            current_best_source = [0,0]
-            current_best_dest   = [0,0]
-            current_best_score   = 100000000000
+        else:
+            current_best_source = None
+            current_best_dest   = None
+            current_best_score   = (-10000000000.0 if (self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or
+                                   (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove) else 10000000000.0)
+            current_function     = (float.__gt__ if (self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or
+                                   (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove) else float.__lt__)
+            
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                     self.board.update([source_row, source_col], [dest_row, dest_col])
                     board_state = self.AI_decide_self(  recurse-1)
                     self.board.update( [dest_row, dest_col],[source_row, source_col])
-                    if board_state<current_best_score:
+                    if current_function(board_state, current_best_score):
                         current_best_source = [source_row, source_col]
                         current_best_dest = [dest_row, dest_col ]
                         current_best_score=board_state
 
 
-            if recurse ==2:
+            if recurse ==self.recurse:
                 return [current_best_source, current_best_dest]
             else:
-                return current_best_score
+                return current_best_score 
 
     def execute(self):
         if (not self.board.victory()):
-            ai_source, ai_dest = self.AI_decide_self()
+            ai_source, ai_dest = self.AI_decide_self(self.recurse)
             self.board.update(ai_source, ai_dest)
             
 
@@ -341,57 +346,4 @@ class Backend:
 #########################################
     
 if __name__ == "__main__":
-    j  = time.time()
-    backend = Backend()
-    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
-                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-
-    for i in backend.AI.board.board:
-        print(i)
-    print()
-    output = backend.send_updated_data()
-    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
-                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                         ['WHITE', 'LION', 1, 3, False, False],
-                         ['WHITE', 'MOUSE', 1, 5, False, False],
-                         ['WHITE', 'LION', 1, 6, False, False],
-                         ['WHITE', 'MOUSE', 1, 4, True, False],
-                         ['BLACK', 'LION', 5, 3, False, False],
-                         ['BLACK', 'LION', 7, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 5, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 5, False, False]])
-    for i in backend.AI.board.board:
-        print(i)
-    print()
-    output = backend.send_updated_data()
-    backend.receive_data(True,
-                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]])
-
-
-    for i in backend.AI.board.board:
-        print(i)
-    print()
-    output = backend.send_updated_data()
-    print(time.time() -j)
+    pass
