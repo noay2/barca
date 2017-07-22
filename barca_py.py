@@ -279,13 +279,13 @@ class AI:
         else:            
             current_best_source = [0,0]
             current_best_dest   = [0,0]
-            current_best_score   = -100000000000
+            current_best_score   = 100000000000
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                     self.board.update([source_row, source_col], [dest_row, dest_col])
                     board_state = self.AI_decide_self(  recurse-1)
                     self.board.update( [dest_row, dest_col],[source_row, source_col])
-                    if board_state>current_best_score:
+                    if board_state<current_best_score:
                         current_best_source = [source_row, source_col]
                         current_best_dest = [dest_row, dest_col ]
                         current_best_score=board_state
