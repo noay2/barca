@@ -601,14 +601,13 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 // bhuvnesh added this. wasnt there originally, can be removed if not needed , though i think it is
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
-		placeCrownOnWinninPieces()
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
-		placeCrownOnWinninPieces()
+		placeCrownOnWinningPieces()
 		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
@@ -616,7 +615,7 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
-		placeCrownOnWinninPieces()
+		placeCrownOnWinningPieces()
 		return true;
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
@@ -624,13 +623,13 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
-		placeCrownOnWinninPieces()
+		placeCrownOnWinningPieces()
 		return true;
 	}
 	return false;
 }
 
-function placeCrownOnWinninPieces() {
+function placeCrownOnWinningPieces() {
 
 	if(who_won == "BLACK"){
 			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" />';
