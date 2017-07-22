@@ -180,7 +180,13 @@ class Board:
         for piece in (self.white_pieces + self.black_pieces):
             yield piece
 
-    def watering_hole_counter(self):
+    
+    def board_evaluation(self):
+        score=0
+
+
+
+        #How many watering holes you have:
         white_counter = 0
         black_counter = 0
         for watering_hole_row, watering_hole_col in Board.watering_holes:
@@ -189,14 +195,7 @@ class Board:
                     black_counter +=1
                 else:
                     white_counter +=1
-        return [white_counter, black_counter]
-    
-    def board_evaluation(self):
-        score=0
-
-        #How many watering holes you have:
-        acquired_holes_white, acquired_holes_black= self.watering_hole_counter()
-        holes = acquired_holes_white if self.whitetomove else acquired_holes_black
+        holes = white_counter if self.whitetomove else black_counter
         score += [0,20,50,1000000,1000000][holes]
 
         #Are you next to a watering hole:
@@ -209,23 +208,7 @@ class Board:
         for piece in self.other_pieces():
             if piece.infear:
                 score +=4
-
-        #Going Through All Validmoves
-        for piece in self.current_pieces():
-            for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                #Every Available Validmove is good
-                score+=0.2
-                for other_piece in self.other_pieces():
-                    #If you can fear an opponent the next turn
-                    if other_piece.scared_of(piece) and other_piece.adjacent_to(dest_row, dest_col):
-                        score +=.4
-                        #If you can fear a watering hole occupent the next turn, +10
-                        if(other_piece.row, other_piece.col) in Board.watering_holes: 
-                            score+=2 
-                #Can you get a hole next turn, that is nice:)
-                if (dest_row, dest_col) in Board.watering_holes:
-                    score +=[5,10,20,10000000,1000000][holes]
-
+                
 
         #Are your pieces Afraid?
         for piece in self.current_pieces():
@@ -242,7 +225,14 @@ class Board:
                 
                 
     def victory(self):
-        black_counter, white_counter = self.watering_hole_counter()
+        white_counter = 0
+        black_counter = 0
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board[int(watering_hole_row)][int(watering_hole_col)]!= None):
+                if (self.board[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
         if black_counter >= 3:
             self.victory = "WHITE"
             return "WHITE"
@@ -280,28 +270,31 @@ class AI:
     def __init__(self,whitetomove, pieces):
         self.board = Board(whitetomove, pieces)
                                   
-    def AI_decide_self(self):                                        
-        current_worst_move = 100000000000
-        current_source = [0,0]
-        current_dest   = [0,0]                               
-        for piece in self.board.current_pieces():
-            for source_row, source_col, dest_row, dest_col in piece.valid_moves():            
- #               infear_array = [ piece.infear for piece in self.board.pieces]
-#                trapped_array= [ piece.trapped for piece in self.board.pieces]
-                
-                self.board.update([source_row, source_col], [dest_row, dest_col])                               
-                board_state = self.board.board_evaluation()
-                if board_state<current_worst_move:
-                    current_worst_move=board_state
-                    current_source = [source_row, source_col]
-                    current_dest = [dest_row, dest_col]
-                self.board.update([dest_row, dest_col], [source_row, source_col])
-                
- #               for piece in range(len(self.board.pieces)):
-#                    self.board.pieces[piece].infear = infear_array[piece]
-#                    self.board.pieces[piece].trapped = trapped_array[piece]
-            
-        return [current_source, current_dest]
+    def AI_decide_self(self, recurse = 2):
+        if recurse == 0:
+            return  self.board.board_evaluation()
+             
+
+
+        else:            
+            current_best_source = [0,0]
+            current_best_dest   = [0,0]
+            current_best_score   = -100000000000
+            for piece in self.board.current_pieces():
+                for source_row, source_col, dest_row, dest_col in piece.valid_moves():
+                    self.board.update([source_row, source_col], [dest_row, dest_col])
+                    board_state = self.AI_decide_self(  recurse-1)
+                    self.board.update( [dest_row, dest_col],[source_row, source_col])
+                    if board_state>current_best_score:
+                        current_best_source = [source_row, source_col]
+                        current_best_dest = [dest_row, dest_col ]
+                        current_best_score=board_state
+
+
+            if recurse ==2:
+                return [current_best_source, current_best_dest]
+            else:
+                return current_best_score
 
     def execute(self):
         if (not self.board.victory()):
@@ -348,7 +341,7 @@ class Backend:
 #########################################
     
 if __name__ == "__main__":
-    i  = time.time()
+    j  = time.time()
     backend = Backend()
     backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
                                                                    ['BLACK', 'ELEPHANT', 9, 5, False, False],
@@ -363,7 +356,9 @@ if __name__ == "__main__":
                                                                    ['WHITE', 'LION', 1, 3, False, False],
                                                                    ['WHITE', 'LION', 1, 6, False, False]])
 
-    
+    for i in backend.AI.board.board:
+        print(i)
+    print()
     output = backend.send_updated_data()
     backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
                          ['WHITE', 'ELEPHANT', 0, 5, False, False],
@@ -377,7 +372,9 @@ if __name__ == "__main__":
                          ['BLACK', 'MOUSE', 8, 5, False, False],
                          ['BLACK', 'ELEPHANT', 9, 4, False, False],
                          ['BLACK', 'ELEPHANT', 9, 5, False, False]])
-    
+    for i in backend.AI.board.board:
+        print(i)
+    print()
     output = backend.send_updated_data()
     backend.receive_data(True,
                                                                      [['BLACK', 'ELEPHANT', 9, 5, False, False],
@@ -393,5 +390,8 @@ if __name__ == "__main__":
                                                                    ['WHITE', 'LION', 1, 6, False, False]])
 
 
+    for i in backend.AI.board.board:
+        print(i)
+    print()
     output = backend.send_updated_data()
-    print(time.time() -i)
+    print(time.time() -j)
