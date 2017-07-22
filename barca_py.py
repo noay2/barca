@@ -1,8 +1,28 @@
-
 import time
 ##########################################
 class Piece:
-    def __init__(self, piece_arr, board, pieces, scared_of_pieces):
+    colors = ["BLACK", "WHITE"]
+    types  = ["ELEPHANT", "MOUSE", "LION"]
+    rows = 10                                  
+    cols = 10
+    init_piece_position =\
+            {
+                                (int(rows -1),int(cols/2 -1)), (int(rows -1),int(cols/2)),(int(rows -2),int(cols/2 -1)),
+                                (int(rows -2),int(cols/2)),   (int(rows -2),int(cols/2 -2)),(int(rows -2),int(cols/2 +1)),
+           
+                                (int(0),int(cols/2 -1)),(int(0),int(cols/2)), (int(1),int(cols/2 -1)),
+                                (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
+             }
+    watering_holes      =\
+            {
+                              (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
+                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))
+                            
+            }
+    piece_color_val = {"BLACK": 0, "WHITE": 1}
+    piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
+    
+    def __init__(self, piece_arr, board, team_pieces,piece_type,scared_of_pieces):
         self.color   = piece_arr[0]
         self.type    = piece_arr[1]
         self.row     = piece_arr[2]
@@ -11,7 +31,10 @@ class Piece:
         self.trapped = piece_arr[5]
         self.board = board
         self.board[self.row][self.col]  = self
-        self.pieces = pieces
+        self.team_pieces = team_pieces
+        self.team_pieces.append(self)
+        self.piece_type = piece_type
+        self.piece_type.add(self)
         self.scared_of_pieces = scared_of_pieces
 
     def __repr__(self):
@@ -46,7 +69,7 @@ class Piece:
     
     def valid_moves(self):
         if not(self.infear):
-            for piece in self.pieces:
+            for piece in self.team_pieces:
                 if piece.infear and (not piece.trapped) and (piece.color ==self.color):
                     return
         rowt = self.row
@@ -59,8 +82,8 @@ class Piece:
                    or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
                     colt += cold
                     rowt += rowd
-                    while (rowt >=0) and (rowt < len(self.board)) and\
-                          (colt >=0) and    (colt<len(self.board[0])) and self.board[rowt][colt] == None:
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
                         if (not self.potential_infear_of(rowt,colt)) or self.trapped:
                             yield [self.row, self.col, rowt , colt]
                         rowt+=rowd
@@ -83,8 +106,8 @@ class Piece:
                    or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
                     colt += cold
                     rowt += rowd
-                    while (rowt >=0) and (rowt < len(self.board)) and\
-                          (colt >=0) and    (colt<len(self.board[0])) and self.board[rowt][colt] == None:
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
                         if (not self.potential_infear_of(rowt,colt)):
                             self.infear = True
                             self.trapped = False
@@ -96,8 +119,11 @@ class Piece:
         self.infear = True
         self.trapped= True
         return
+
         
-        
+    def send_updated_data(self):
+
+        return ([self.color, self.type, self.row, self.col, self.infear, self.trapped])
         
 #)#########################################              
 class Board:
@@ -127,15 +153,33 @@ class Board:
         piece_array = [[set() for j in range(3)]for i in range(2)]
         self.board = [[None for j in range(10)] for i in range(10) ]
         self.whitetomove = whitetomove
-        self.pieces = []
+        self.black_pieces = []
+        self.white_pieces = []
         for piece in pieces:
-                piece_instance = Piece(piece, self.board, self.pieces,
+                piece_instance = Piece(piece, self.board,self.black_pieces if piece[0] == "BLACK" else self.white_pieces,
+                piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]],
                 piece_array[(Board.piece_color_val[piece[0]] + 1)%2][(Board.piece_type_val[piece[1]] + 1)%3])
-                self.pieces.append(piece_instance)
-                piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]].add(piece_instance)
-                
+                                                
+    def current_pieces(self):
+        if self.whitetomove:
+            for piece in self.white_pieces:           
+                yield piece
+        else:
+            for piece in self.black_pieces:
+                yield piece
 
-                                
+    def other_pieces(self):
+        if not self.whitetomove:
+            for piece in self.white_pieces:           
+                yield piece
+        else:
+            for piece in self.black_pieces:
+                yield piece
+                
+    def all_pieces(self):
+        for piece in (self.white_pieces + self.black_pieces):
+            yield piece
+
     def watering_hole_counter(self):
         white_counter = 0
         black_counter = 0
@@ -146,17 +190,7 @@ class Board:
                 else:
                     white_counter +=1
         return [white_counter, black_counter]
-
-    def current_pieces(self):
-        for piece in self.pieces:
-            if (piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove):
-                yield piece
-
-    def other_pieces(self):
-        for piece in self.pieces:
-            if not((piece.color == "WHITE" and self.whitetomove) or (piece.color == "BLACK" and not self.whitetomove)):
-                yield piece
-        
+    
     def board_evaluation(self):
         score=0
 
@@ -202,7 +236,7 @@ class Board:
 
     
     def fear_update(self,moving_piece):
-        for piece in self.pieces:
+        for piece in self.all_pieces():
             if (piece.infear) or (piece.infear_of(moving_piece)) :
                 piece.modify_fear()
                 
@@ -236,7 +270,9 @@ class Board:
         self.fear_update(piece)
         self.switch_turn()
 
-    	
+    def send_updated_data(self):
+        return [self.whitetomove ]+ [ piece.send_updated_data() for piece in self.all_pieces()]
+            
         
 ##########################################       
 class AI:
@@ -273,7 +309,8 @@ class AI:
             self.board.update(ai_source, ai_dest)
             
 
-
+    def send_updated_data(self):
+        return self.board.send_updated_data()
 
 ##########################################
 class Backend:
@@ -287,12 +324,8 @@ class Backend:
 
 
     def send_updated_data(self):
-        pieces = []
-        for row in self.AI.board.board:
-            for piece in row:
-                if piece != None:
-                    pieces.append([piece.color, piece.type, piece.row, piece.col, piece.infear, piece.trapped])
-        return [self.AI.board.whitetomove, pieces]
+        updated_data = self.AI.send_updated_data()
+        return updated_data
 ##########################################
 
 
@@ -315,5 +348,50 @@ class Backend:
 #########################################
     
 if __name__ == "__main__":
-    pass
- 
+    i  = time.time()
+    backend = Backend()
+    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
+                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]])
+
+    
+    output = backend.send_updated_data()
+    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
+                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                         ['WHITE', 'LION', 1, 3, False, False],
+                         ['WHITE', 'MOUSE', 1, 5, False, False],
+                         ['WHITE', 'LION', 1, 6, False, False],
+                         ['WHITE', 'MOUSE', 1, 4, True, False],
+                         ['BLACK', 'LION', 5, 3, False, False],
+                         ['BLACK', 'LION', 7, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 5, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 5, False, False]])
+    
+    output = backend.send_updated_data()
+    backend.receive_data(True,
+                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]])
+
+
+    output = backend.send_updated_data()
+    print(time.time() -i)
