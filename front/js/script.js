@@ -104,6 +104,8 @@ function placeWateringHoles() {
 	wateringHoleCounter = 4;
 }
 
+
+
 function placeImageForWateringHolesIfEmpty(){
 //'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 //'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
@@ -597,12 +599,16 @@ function checkVictory(){
 		barca_array[3][6][0] == barca_array[6][3][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
+// bhuvnesh added this. wasnt there originally, can be removed if not needed , though i think it is
+		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
+		placeCrownOnWinninPieces()
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
+		placeCrownOnWinninPieces()
 		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
@@ -610,6 +616,7 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
+		placeCrownOnWinninPieces()
 		return true;
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
@@ -617,10 +624,33 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
+		placeCrownOnWinninPieces()
 		return true;
 	}
 	return false;
 }
+
+function placeCrownOnWinninPieces() {
+
+	if(who_won == "BLACK"){
+			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" />';
+	}
+	else if(who_won == "WHITE"){
+		
+			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WL1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WL2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WR1")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WR2")).innerHTML += '<img src = "./images/crown.gif" />';
+	}
+}
+
 
 /*Function that computes the pieces a certain user can move*/
 function recomputeValidClicks(turn){
@@ -720,6 +750,7 @@ function clickMade(row,col,id,val){
 
 	if(victory){
 		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
+		placeCrownOnWinninPieces();
 	}
 	else if(mode === "PLAYER V. AI" && player_TURN === "BLACK"){
 		getAIMove();
