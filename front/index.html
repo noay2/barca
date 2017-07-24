@@ -12,9 +12,12 @@ https://serene-everglades-79780.herokuapp.com/api
 <head>
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/script.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
 
 </head>
 <body>
@@ -28,10 +31,34 @@ https://serene-everglades-79780.herokuapp.com/api
 		Click on start game button to start the game
 		and also choose which side you want to play on!
 	</div>
-	<br>
-		<div id="turnDiv" class=" text-center turnDivClass"></div>
+  <br>
+  <div id="turnDiv" class=" text-center turnDivClass"></div>
+</div>
+<br>
 
-
+<div class = "row" id = "buttons">
+    <div class = "col-xs-12 text-center">
+      <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
+        <optgroup label = "Type">
+          <option>AI</option>
+          <option>Human</option>
+        </optgroup>
+      </select>
+      &nbsp;&nbsp;&nbsp;
+      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
+        <optgroup label = "Side">
+          <option>White</option>
+          <option>Black</option>
+        </optgroup>
+      </select>
+      &nbsp;&nbsp;&nbsp;
+      <button class = "btn btn-primary" id = "startGame" onclick = "startGame()">Start Game!</button>
+      &nbsp;&nbsp;&nbsp;
+      <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
+        <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
+        </span>
+      </button>
+    </div>
 </div>
 
 <div id="barca_board" class = "mainBox "></div>
