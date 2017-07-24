@@ -242,11 +242,9 @@ class Board:
                 else:
                     white_counter +=1
         if black_counter >= 3:
-            self.victory = "WHITE"
-            return "WHITE"
-        elif white_counter >=3:
-            self.victory = "BLACK"
             return "BLACK"
+        elif white_counter >=3:
+            return "WHITE"
         else:
             return None
 
