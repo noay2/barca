@@ -333,7 +333,7 @@ class AI:
 
     def execute(self):
         if (not self.board.victory()):
-            self.ai_move= self.AI_alpha_beta(self.recurse)
+            self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
             
 
@@ -345,7 +345,7 @@ class Backend:
     def __init__(self):
         pass
 
-    def receive_data(self, whitetomove, pieces,human_move = [None,None]):
+    def receive_data(self, whitetomove, pieces,human_move):
         self.AI = AI(whitetomove, pieces, human_move)
         self.AI.execute()
 
