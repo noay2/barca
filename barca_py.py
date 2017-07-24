@@ -196,8 +196,9 @@ class Board:
                     black_counter +=1
                 else:
                     white_counter +=1
-        holes = white_counter if self.whitetomove else black_counter
+        holes,bad_holes = white_counter,black_counter if self.whitetomove else black_counter,white_counter
         score += [0,20,50,1000000,1000000][holes]
+        score -=[0,20,50,1000000,1000000][bad_holes]
 
         for piece in self.current_pieces():
             #Are you next to a watering hole:
