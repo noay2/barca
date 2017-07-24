@@ -1,4 +1,5 @@
 import time
+import random
 ##########################################
 class Piece:
     colors = ["BLACK", "WHITE"]
@@ -198,22 +199,28 @@ class Board:
         holes = white_counter if self.whitetomove else black_counter
         score += [0,20,50,1000000,1000000][holes]
 
-        #Are you next to a watering hole:
         for piece in self.current_pieces():
+            #Are you next to a watering hole:
             for watering_hole_row, watering_hole_col in Board.watering_holes:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
                     score=score+5
-
+            #How close are you to the center 
+            score += .4 * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5)
+            
         #How many pieces do you fear the current turn
         for piece in self.other_pieces():
             if piece.infear:
-                score +=4
+                score +=5
+
                 
 
         #Are your pieces Afraid?
         for piece in self.current_pieces():
             if  piece.infear:
                 score-=5
+
+        #Random element
+        score += random.randint(0,5)
 
         return score
 
@@ -264,54 +271,82 @@ class Board:
         return [self.whitetomove ]+ [ piece.send_updated_data() for piece in self.all_pieces()]
             
         
+##########################################       
 class AI:
 
-    def __init__(self,whitetomove, pieces):
+    def __init__(self,whitetomove, pieces,human_move):
         self.board = Board(whitetomove, pieces)
         self.original_turn = whitetomove
-        self.recurse = 2
+        self.human_move = human_move
+        self.ai_move = [None, None]
+        self.recurse = 3
                                   
-    def AI_decide_self(self, recurse):
+    def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
         if recurse == 0:
             return  [None, None,self.board.board_evaluation()]
 
         else:
-            current_best_source = None
-            current_best_dest   = None
-            current_best_score   = (-10000000000.0 if (self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or
-                                   (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove) else 10000000000.0)
-            current_function     = (float.__gt__ if (self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or
-                                   (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove) else float.__lt__)
-            
-            for piece in self.board.current_pieces():
-                for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                    self.board.update([source_row, source_col], [dest_row, dest_col])
-                    board_state = self.AI_decide_self(  recurse-1)
-                    self.board.update( [dest_row, dest_col],[source_row, source_col])
-                    if current_function(board_state[2], current_best_score):
-                        current_best_source = [source_row, source_col]
-                        current_best_dest = [dest_row, dest_col ]
-                        current_best_score=board_state[2]
+   
+  
+            if ((self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove)):
+                current_best_source   = None
+                current_best_dest   = None
+                current_best_score = -1000000000.0
+                for piece in self.board.current_pieces():
+                    for source_row, source_col, dest_row, dest_col in piece.valid_moves():
+                        self.board.update([source_row, source_col], [dest_row, dest_col])
+                        childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
+                        self.board.update( [dest_row, dest_col],[source_row, source_col])
+                        if  childs_worst_score> current_best_score:
+                            current_best_source = [source_row, source_col]
+                            current_best_dest = [dest_row, dest_col ]
+                            current_best_score=childs_worst_score
+                            alpha = max(alpha, childs_worst_score)
+                            if (alpha>beta):
+                                return [current_best_source, current_best_dest, current_best_score]
+
+                            
+                return [current_best_source, current_best_dest, current_best_score]
 
 
-            return [current_best_source, current_best_dest, current_best_score]
+
+            else:
+                current_worst_source   = None
+                current_worst_dest   = None
+                current_worst_score = 1000000000.0
+                for piece in self.board.current_pieces():
+                    for source_row, source_col, dest_row, dest_col in piece.valid_moves():
+                        self.board.update([source_row, source_col], [dest_row, dest_col])
+                        childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
+                        self.board.update( [dest_row, dest_col],[source_row, source_col])
+                        if  childs_best_score< current_worst_score:
+                            current_worst_source = [source_row, source_col]
+                            current_worst_dest = [dest_row, dest_col ]
+                            current_worst_score=childs_best_score
+                            beta = min(beta, childs_best_score)
+                            if (alpha>beta):
+                                return [current_worst_source, current_worst_dest, current_worst_score]
+
+                            
+                return [current_worst_source, current_worst_dest, current_worst_score]
+
 
     def execute(self):
         if (not self.board.victory()):
-            ai_source, ai_dest = self.AI_decide_self(self.recurse)
-            self.board.update(ai_source, ai_dest)
+            self.ai_move= self.AI_alpha_beta(self.recurse)
+            self.board.update(self.ai_move[0], self.ai_move[1])
             
 
     def send_updated_data(self):
-        return self.board.send_updated_data()
+        return self.board.send_updated_data() + [self.ai_move[0], self.ai_move[1]]
 
 ##########################################
 class Backend:
     def __init__(self):
         pass
 
-    def receive_data(self, whitetomove, pieces):
-        self.AI = AI(whitetomove, pieces)
+    def receive_data(self, whitetomove, pieces,human_move = [None,None]):
+        self.AI = AI(whitetomove, pieces, human_move)
         self.AI.execute()
 
 
