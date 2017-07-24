@@ -338,7 +338,7 @@ class AI:
             
 
     def send_updated_data(self):
-        return self.board.send_updated_data() + [self.ai_move[0], self.ai_move[1]]
+        return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
 
 ##########################################
 class Backend:
