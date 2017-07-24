@@ -20,7 +20,7 @@ Some tests:
  possibilities but it must move the black elephant at
  0,4 to one of those valid positions.
  
-2) backend.receive_data([False,[["BLACK","ELEPHANT",0,4,False,False]
+2) backend.receive_data([False,[["BLACK","ELEPHANT",0,4,False,False],
 ["BLACK","LION",1,0,False,False],
 ["BLACK","LION",1,3,False,False],
 ["BLACK","MOUSE",1,4,False,False],
