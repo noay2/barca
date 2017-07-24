@@ -213,7 +213,7 @@ function switchTurn(){
 
 function printTurn(){
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
-		document.getElementById('turnDiv').innerHTML = "TURN :" + player_TURN;
+		document.getElementById('turnDiv').innerHTML = "TURN: " + player_TURN;
 	}
 	else if(AIsmove){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
@@ -651,7 +651,7 @@ function checkVictory(){
 
 function placeCrownOnWinningPieces() {
 
-	if(who_won == "BLACK"){
+	if(who_won === "BLACK"){
 			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" />';
@@ -659,7 +659,7 @@ function placeCrownOnWinningPieces() {
 			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" />';
 	}
-	else if(who_won == "WHITE"){
+	else if(who_won === "WHITE"){
 
 			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" />';
@@ -842,10 +842,11 @@ function clickMade(row,col,id,val){
 				return;
 			}
 			/* IF MODE IS PLAYER V. AI*/
-			else if(mode == "PLAYER V. AI"){
+			else if(mode === "PLAYER V. AI"){
 				printTurn();
 				getAIMove();
 				AIsmove = false;
+				printTurn();
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
@@ -873,6 +874,7 @@ function checkIfItIsAIsMove(){
 			printTurn();
 			getAIMove();
 			AIsmove = false;
+			printTurn();
 	}
 }
 

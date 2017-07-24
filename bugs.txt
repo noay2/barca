@@ -1,0 +1,55 @@
+						---BUGS WITH AI----
+
+1) Not moving its scared pieces sometimes when it is supposed to move its scared pieces
+
+Some tests:
+1) backend.receive_data(False,[["WHITE","MOUSE",0,3,False,False],
+ ["BLACK","ELEPHANT",0,4,True,False],
+ ["BLACK","ELEPHANT",0,5,False,False],
+ ["BLACK","MOUSE",1,4,False,False],
+ ["BLACK","MOUSE",3,6,False,False],
+ ["BLACK","LION",4,0,False,False],
+ ["BLACK","LION",4,3,False,False],
+ ["WHITE","LION",8,3,False,False],
+ ["WHITE","MOUSE",8,5,False,False],
+ ["WHITE","LION",8,6,False,False],
+ ["WHITE","ELEPHANT",9,4,False,False],
+ ["WHITE","ELEPHANT",9,5,False,False]],
+ [[0,0],[0,4]]) --> Check the move and make sure that it 
+ moves BLACK ELEPHANT at 0,4. There are many 
+ possibilities but it must move the black elephant at
+ 0,4 to one of those valid positions.
+ 
+2) backend.receive_data([False,[["BLACK","ELEPHANT",0,4,False,False]
+["BLACK","LION",1,0,False,False],
+["BLACK","LION",1,3,False,False],
+["BLACK","MOUSE",1,4,False,False],
+["BLACK","MOUSE",3,6,False,False],
+["BLACK","ELEPHANT",6,5,True,False],
+["WHITE","MOUSE",6,4,False,False],
+["WHITE","LION",8,3,False,False],
+["WHITE","MOUSE",8,5,False,False],
+["WHITE","LION",8,6,False,False],
+["WHITE","ELEHANT",9,4,False,False],
+["WHITE","ELEHANT",9,5,False,False]],
+[[0,0],[0,4]]) --> Check the move and make sure that it 
+ moves BLACK ELEPHANT at 6,5. There are many 
+ possibilities but it must move the black elephant at
+ 6,5 to one of those valid positions.
+
+3) backend.receive_data([False,[["BLACK","ELEPHANT",0,2,False,False],
+["BLACK","ELEPHANT",0,8,False,False],
+["BLACK","MOUSE",1,4,False,False],
+["BLACK","LION",2,2,False,False],
+["BLACK","MOUSE",4,3,False,False],
+["WHITE","ELEPHANT",5,1,False,False],
+["BLACK","LION",5,2,True,False],
+["WHITE","MOUSE",6,5,False,False],
+["WHITE","LION",8,3,False,False],
+["WHITE","MOUSE",8,5,False,False],
+["WHITE","LION",8,6,False,False],
+["WHITE","ELEPHANT",9,5,False,False]],
+[[0,0],[0,4]]) --> Check the move and make sure that it 
+ moves BLACK LION at 5,2. There are many 
+ possibilities but it must move the black elephant at
+ 5,2 to one of those valid positions.
