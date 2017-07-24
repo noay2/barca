@@ -268,7 +268,7 @@ class Board:
         self.switch_turn()
 
     def send_updated_data(self):
-        return [self.whitetomove ]+ [ piece.send_updated_data() for piece in self.all_pieces()]
+        return [self.whitetomove ]+ [[ piece.send_updated_data() for piece in self.all_pieces()]]
             
         
 ##########################################       
