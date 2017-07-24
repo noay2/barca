@@ -49,10 +49,11 @@ var scared_pieces = new Set();
 var trapped_pieces = [];
 var victory = false;
 var who_won = "";
-var mode = "PLAYER V. PLAYER";
+var mode = "PLAYER V. AI";
 var singleMoveExists = {};
 var fear_counter = 0;
 var wateringHoleCounter = 0;
+var AIsmove = false;
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -151,8 +152,8 @@ function initValidClicks(){
 		valid_clicks.push(94);
 		valid_clicks.push(95);
 	}
-	else if(mode == "PLAYER V. AI"){
-		getAIMove();
+	else if(mode === "PLAYER V. AI"){
+		checkIfItIsAIsMove();
 	}
 	else{
 		barca_array[0][4] = "WE1";
@@ -211,12 +212,12 @@ function switchTurn(){
 }
 
 function printTurn(){
-	if(mode == "PLAYER V. PLAYER"){
+	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
 		document.getElementById('turnDiv').innerHTML = "TURN :" + player_TURN;
 	}
-	else{
+	else if(AIsmove){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-		document.getElementById('turnDiv').innerHTML = "TURN: " +turn;
+		document.getElementById('turnDiv').innerHTML = "TURN: " +turn + ". AI is thinking...";
 	}
 }
 
@@ -262,21 +263,29 @@ function getCol(piece){
 	return piece_locations[piece]%10;
 }
 
+/*Checks if a piece has a single valid move if so sets that to true*/
+function setIfSingleMoveExists(value,row,col){
+	if(barca_array[row][col] === "."){
+		singleMoveExists[value] = true;
+	}
+}
+
 /*Checks if a valid move exists for elephant*/
 function checkIfASingleValidMoveExistsForElephant(value){
 	var obstacles = [false,false,false,false,false,false,false,false];
 	var move_adv = 0;
 	var location_piece = piece_locations[value];
-	var row = Math.floor(location_piece/10);
-	var col = location_piece%10;
+	var row = getRow(value);
+	var col = getCol(value);
+	singleMoveExists[value] = false;
 
 	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3] &&
 		obstacles[4] && obstacles[5] && obstacles[6] && obstacles[7]))
 	{
-//		console.log("Checking valid moves for elephant");
 		move_adv++;
 		/*Check a move in up direction*/
 		if(!obstacles[0] && (row - move_adv) >= 0){
+			setIfSingleMoveExists(value,row-move_adv,col);
 			if(barca_array[row-move_adv][col] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col) == false)
 			{
@@ -286,6 +295,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check one move in diagonal upper right*/
 		if(!obstacles[1] && (row - move_adv) >= 0 && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row-move_adv,col+move_adv);
 			if(barca_array[row-move_adv][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
 			{
@@ -295,6 +305,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check a move in right direction*/
 		if(!obstacles[2] && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row,col+move_adv);
 			if(barca_array[row][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row,col+move_adv) == false)
 			{
@@ -304,6 +315,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check one move in diagonal bottom right*/
 		if(!obstacles[3] && (row + move_adv) < 10 && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row+move_adv,col+move_adv);
 			if(barca_array[row+move_adv][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col+move_adv) == false)
 			{
@@ -313,6 +325,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check a move in down direction*/
 		if(!obstacles[4] && (row + move_adv) < 10){
+			setIfSingleMoveExists(value,row+move_adv,col);
 			if(barca_array[row+move_adv][col] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col) == false)
 			{
@@ -322,6 +335,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check one move in diagonal bottom left*/
 		if(!obstacles[5] && (row + move_adv) < 10 && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row+move_adv,col-move_adv);
 			if(barca_array[row+move_adv][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col-move_adv) == false)
 			{
@@ -331,6 +345,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check a move in left direction*/
 		if(!obstacles[6] && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row,col-move_adv);
 			if(barca_array[row][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row,col-move_adv) == false)
 			{
@@ -340,6 +355,7 @@ function checkIfASingleValidMoveExistsForElephant(value){
 		}
 		/*Check one move in diagonal upper left*/
 		if(!obstacles[7] && (row - move_adv) >= 0 && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row-move_adv,col-move_adv);
 			if(barca_array[row-move_adv][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
 			{
@@ -359,12 +375,15 @@ function checkIfASingleValidMoveExistsForLion(value){
 	var location_piece = piece_locations[value];
 	var row = Math.floor(location_piece/10);
 	var col = location_piece%10;
+	singleMoveExists[value] = false;
+
 //	console.log("Checking valid moves for lion");
 	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
 	{
 		move_adv++;
 		/*Check one move in diagonal upper left*/
 		if(!obstacles[0] && (row - move_adv) >= 0 && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row-move_adv,col-move_adv);
 			if(barca_array[row-move_adv][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
 			{
@@ -374,6 +393,7 @@ function checkIfASingleValidMoveExistsForLion(value){
 		}
 		/*Check one move in diagonal upper right*/
 		if(!obstacles[1] && (row - move_adv) >= 0 && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row-move_adv,col+move_adv);
 			if(barca_array[row-move_adv][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col+move_adv) == false)
 			{
@@ -383,6 +403,7 @@ function checkIfASingleValidMoveExistsForLion(value){
 		}
 		/*Check one move in diagonal bottom right*/
 		if(!obstacles[2] && (row + move_adv) < 10 && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row+move_adv,col+move_adv);
 			if(barca_array[row+move_adv][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col+move_adv) == false)
 			{
@@ -392,6 +413,7 @@ function checkIfASingleValidMoveExistsForLion(value){
 		}
 		/*Check one move in diagonal bottom left*/
 		if(!obstacles[3] && (row + move_adv) < 10 && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row+move_adv,col=move_adv);
 			if(barca_array[row+move_adv][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col-move_adv) == false)
 			{
@@ -400,22 +422,26 @@ function checkIfASingleValidMoveExistsForLion(value){
 			obstacles[3] = (barca_array[row+move_adv][col-move_adv] != ".") ? true : obstacles[3];
 		}
 	}
+	return false;
 }
 
 /*Checks if a valid move exists for mouse*/
 function checkIfASingleValidMoveExistsForMouse(value){
+//	console.log("Checking valid moves for mouse");
 //	console.log("Checking valid moves for mouse");
 	var obstacles = [false,false,false,false];
 	var move_adv = 0;
 	var location_piece = piece_locations[value];
 	var row = Math.floor(location_piece/10);
 	var col = location_piece%10;
+	singleMoveExists[value] = false;
 
 	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
 	{
 		move_adv++;
 		/*Check a move in up direction*/
 		if(!obstacles[0] && (row - move_adv) >= 0){
+			setIfSingleMoveExists(value,row-move_adv);
 			if(barca_array[row-move_adv][col] === "." &&
 				checkIfPieceIsScared(value,row-move_adv,col) == false)
 			{
@@ -425,6 +451,7 @@ function checkIfASingleValidMoveExistsForMouse(value){
 		}
 		/*Check a move in right direction*/
 		if(!obstacles[1] && (col + move_adv) < 10){
+			setIfSingleMoveExists(value,row,col+move_adv);
 			if(barca_array[row][col+move_adv] === "." &&
 				checkIfPieceIsScared(value,row,col+move_adv) == false)
 			{
@@ -434,6 +461,7 @@ function checkIfASingleValidMoveExistsForMouse(value){
 		}
 		/*Check a move in down direction*/
 		if(!obstacles[2] && (row + move_adv) < 10){
+			setIfSingleMoveExists(value,row+move_adv,col);
 			if(barca_array[row+move_adv][col] === "." &&
 				checkIfPieceIsScared(value,row+move_adv,col) == false)
 			{
@@ -443,6 +471,7 @@ function checkIfASingleValidMoveExistsForMouse(value){
 		}
 		/*Check a move in left direction*/
 		if(!obstacles[3] && (col - move_adv) >= 0){
+			setIfSingleMoveExists(value,row,col-move_adv);
 			if(barca_array[row][col-move_adv] === "." &&
 				checkIfPieceIsScared(value,row,col-move_adv) == false)
 			{
@@ -475,36 +504,26 @@ list. Goal: just find one possible valid move for the piece,
 if you find it, it is not trapped*/
 function calculateTrappedPieces(){
 //	console.log("Calculating trapped pieces...");
+//	console.log("Calculating trapped pieces...");
 	var trapped_piece_array = scared_pieces;
+	trapped_pieces = [];
 	for(let item of trapped_piece_array){
 		if(item[1] == 'E'){
 			if(!checkIfASingleValidMoveExistsForElephant(item)){
-				singleMoveExists[item] = true;
 				trapped_pieces.push(item);
 				scared_pieces.delete(item);
-			}
-			else{
-				singleMoveExists[item] = false;
 			}
 		}
 		if(item[1] == 'L'){
 			if(!checkIfASingleValidMoveExistsForLion(item)){
-				singleMoveExists[item] = true;
 				trapped_pieces.push(item);
 				scared_pieces.delete(item);
-			}
-			else{
-				singleMoveExists[item] = false;
 			}
 		}
 		if(item[1] == 'R'){
 			if(!checkIfASingleValidMoveExistsForMouse(item)){
-				singleMoveExists[item] = true;
 				trapped_pieces.push(item);
 				scared_pieces.delete(item);
-			}
-			else{
-				singleMoveExists[item] = false;
 			}
 		}
 	}
@@ -599,15 +618,16 @@ function checkVictory(){
 		barca_array[3][6][0] == barca_array[6][3][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
-// bhuvnesh added this. wasnt there originally, can be removed if not needed , though i think it is
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
+		placeCrownOnWinningPieces();
+		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
-		placeCrownOnWinningPieces()
+		placeCrownOnWinningPieces();
 		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
@@ -615,7 +635,7 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
-		placeCrownOnWinningPieces()
+		placeCrownOnWinningPieces();
 		return true;
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
@@ -623,7 +643,7 @@ function checkVictory(){
 		victory = true;
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
-		placeCrownOnWinningPieces()
+		placeCrownOnWinningPieces();
 		return true;
 	}
 	return false;
@@ -640,7 +660,7 @@ function placeCrownOnWinningPieces() {
 			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" />';
 	}
 	else if(who_won == "WHITE"){
-		
+
 			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" />';
 			document.getElementById(getDiv("WL1")).innerHTML += '<img src = "./images/crown.gif" />';
@@ -650,15 +670,51 @@ function placeCrownOnWinningPieces() {
 	}
 }
 
+function resetBoardScaredAndTrappedPieces(data){
+	var pieces = data["pieces"];
+	var ai_move = data["move"];
+	var src = ai_move[0];
+	var dest = ai_move[1];
+	var piece_info = barca_array[src[0]][src[1]];
+	document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
+	movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
+	barca_array[dest[0]][dest[1]] = barca_array[src[0]][src[1]];
+	barca_array[src[0]][src[1]] = ".";
+	piece_locations[barca_array[dest[0]][dest[1]]] = dest[0] * 10 + dest[1];
+	scared_pieces = new Set();
+	trapped_pieces = [];
+
+	for(var i = 0; i < pieces.length; i++){
+		if(pieces[i][5]){
+			trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
+		}
+		if(pieces[i][4]){
+			scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
+		}
+	}
+
+	for(var i = 0; i < trapped_pieces.length; i++){
+		if(trapped_pieces[i][0] === player_TURN[0]){
+			if(trapped_pieces[i][1] === 'L'){
+				checkIfASingleValidMoveExistsForLion(trapped_pieces[i]);
+			}
+			else if(trapped_pieces[i][1] === 'R'){
+				checkIfASingleValidMoveExistsForMouse(trapped_pieces[i]);
+			}
+			else{
+				checkIfASingleValidMoveExistsForElephant(trapped_pieces[i]);
+			}
+		}
+	}
+}
+
 
 /*Function that computes the pieces a certain user can move*/
 function recomputeValidClicks(turn){
 	valid_clicks = [];
 	console.log("Scared pieces size: " + scared_pieces.size);
 	scared_pieces.forEach(function(value){
-//		console.log("in function");
 		if(value[0] === turn[0]){
-//			console.log("value is true ");
 			valid_clicks.push(piece_locations[value]);
 		}
 	});
@@ -707,21 +763,22 @@ function movePiece(side,type,row,col){
 
 function getAIMove(){
 	var API_request = {};
-	var API_response = {};
 
-	API_request["pieces"] = [];
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
+	pieces = [];
 
 	for(var piece in piece_locations){
 		var info = [[null,null,null,null,null,null]];
-		info[0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
-		info[1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
-		info[2] = getRow(piece);
-		info[3] = getCol(piece);
-		info[4] = checkIfInTrappedPieces(piece) || checkIfPieceIsScared(piece);
-		info[5] = checkIfInTrappedPieces(piece);
-		API_request["pieces"].push(info);
+		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
+		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
+		info[0][2] = getRow(piece);
+		info[0][3] = getCol(piece);
+		info[0][4] = checkIfInTrappedPieces(piece) || checkIfPieceIsScared(piece);
+		info[0][5] = checkIfInTrappedPieces(piece);
+		pieces = pieces.concat(info);
 	}
+	API_request["human_move"] = [[0,0],[0,5]];
+	API_request["pieces"] = pieces;
 
 	$.ajax({
 			type: "POST",
@@ -730,10 +787,14 @@ function getAIMove(){
 			dataType: "json",
 			contentType: 'application/json',
 			success: function(data){
-				alert(data["whitetomove"]);
+				removeImageForScaredAndTrappedPieces();
+				removeImageForWateringHoles();
+				resetBoardScaredAndTrappedPieces(data);
+				recomputeValidClicks(player_TURN);
+				placeImageForScaredAndTrappedPieces();
+				placeImageForWateringHolesIfEmpty();
 			},
 			error: function(data){
-				console.log(API_request);
 				alert("fail");
 			}
 		});
@@ -749,10 +810,6 @@ function clickMade(row,col,id,val){
 
 	if(victory){
 		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
-		placeCrownOnWinninPieces();
-	}
-	else if(mode === "PLAYER V. AI" && player_TURN === "BLACK"){
-		getAIMove();
 	}
 	else if(verifyValidClick(num)){
 		clicks_made = [];
@@ -760,7 +817,6 @@ function clickMade(row,col,id,val){
 		document.getElementById("message").innerHTML = "Choose where you want to move the piece to or select another piece to move...";
 	}
 	else if(clicks_made.length == 1){
-		//console.log("In clicks_made");
 		var r1 = Math.floor(clicks_made[0]/10);
 		var c1 = clicks_made[0]%10;
 		var value = verifyValidMove(r1,c1,row,col);
@@ -780,10 +836,8 @@ function clickMade(row,col,id,val){
 			calculateTrappedPieces();
 			placeImageForScaredAndTrappedPieces();
 			placeImageForWateringHolesIfEmpty();
-/*			for(var i = 0; i < trapped_pieces.length; i++){
-				console.log("Trapped: " + trapped_pieces[i]);
-			}
-*/
+			AIsmove = true;
+
 			if(checkVictory()){
 				return;
 			}
@@ -791,15 +845,7 @@ function clickMade(row,col,id,val){
 			else if(mode == "PLAYER V. AI"){
 				printTurn();
 				getAIMove();
-				recomputeValidClicks(player_TURN);
-				removeImageForScaredAndTrappedPieces();
-				removeImageForWateringHoles();
-//				setBoardPieces();
-//				setScaredPieces();
-//        setTrappedPieces();
-//				setPieceLocations();
-				placeImageForScaredAndTrappedPieces();
-				placeImageForWateringHolesIfEmpty();
+				AIsmove = false;
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
@@ -816,8 +862,17 @@ function clickMade(row,col,id,val){
 		}
 	}
 	else{
-//		console.log("IN INVALID MOVE");
 		document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
+	}
+}
+
+/*Initially does the move checking if it is AIs turn*/
+function checkIfItIsAIsMove(){
+	if(player_TURN === "BLACK"){
+			AIsmove = true;
+			printTurn();
+			getAIMove();
+			AIsmove = false;
 	}
 }
 
