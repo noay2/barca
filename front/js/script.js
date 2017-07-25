@@ -258,10 +258,12 @@ function switchTurn(){
 function printTurn(){
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
 		document.getElementById('turnDiv').innerHTML = "<b>TURN: " + player_TURN +"</b>";
+		//console.log(document.getElementById('turnDiv').innerHTML);
 	}
 	else if(AIsmove === true){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
 		document.getElementById('turnDiv').innerHTML = "<b>TURN: " +turn + ". AI is thinking...</b>";
+	//	console.log(document.getElementById('turnDiv').innerHTML);
 	}
 }
 
@@ -539,7 +541,7 @@ function calculateScaredPieces(){
 			scared_pieces.add(key);
 		}
 	}
-	console.log("In calculating scared pieces: " + scared_pieces.size);
+//	console.log("In calculating scared pieces: " + scared_pieces.size);
 }
 
 /*Calculate new trapped pieces because of the move made and
@@ -673,19 +675,10 @@ function clearBarcaBoard(){
 	}
 }
 
-function checkThreePiecesAreScaredOrTrapped(piece1,piece2,piece3){
-	return (checkIfInTrappedPieces(piece1) || checkIfInScaredPieces(piece1) || checkInTrappedPieces(piece2) ||
-		checkIfInScaredPieces(piece2) || checkIfInTrappedPieces(piece3) || checKIfInScaredPieces(piece3));
-}
-
 /*Function that checks for victory*/
 function checkVictory(){
 	if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[3][6][0] &&
 		barca_array[3][6][0] == barca_array[6][6][0]){
-		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[3][6],barca_array[6][6]))
-		{
-			return;
-		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -693,10 +686,6 @@ function checkVictory(){
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
-		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[6][3],barca_array[6][6]))
-		{
-			return;
-		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -704,10 +693,6 @@ function checkVictory(){
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[3][6][0]){
-		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[6][3],barca_array[3][6]))
-		{
-			return;
-		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -715,10 +700,6 @@ function checkVictory(){
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
-		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][6],barca_array[6][3],barca_array[6][6]))
-		{
-			return;
-		}
 		victory = true;
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -873,10 +854,12 @@ function getAIMove(){
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
 				checkVictory();
-				console.log("victory: " + victory);
+				AIsmove = false;
+//				console.log("AFTER AI MADE MOVE");
+				printTurn();
 			},
 			error: function(data){
-				alert("fail");
+				alert(data);
 			}
 		});
 	/*Send API request*/
@@ -892,8 +875,6 @@ function clickMade(row,col,id,val){
 	if(!gameStarted){
 		return;
 	}
-
-	printTurn();
 
 	if(victory){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -911,6 +892,7 @@ function clickMade(row,col,id,val){
 		if(value)
 		{
 			AIsmove = true;
+			console.log("BEFORE AI MADE MOVE");
 			printTurn();
 			removeImageForScaredAndTrappedPieces();
 			removeImageForWateringHoles();
@@ -932,8 +914,6 @@ function clickMade(row,col,id,val){
 			/* IF MODE IS PLAYER V. AI*/
 			else if(mode === "PLAYER V. AI"){
 				getAIMove();
-				AIsmove = false;
-				printTurn();
 				if(victory){
 					return;
 				}
