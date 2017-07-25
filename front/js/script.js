@@ -941,7 +941,7 @@ $(document).ready(function(){
 	$("#playeroption").click(function(){
 		console.log("IN OPTIONS");
 		if(!gameStarted){
-			player_TURN = $("#playeroption").value;
+			player_TURN = $("#playeroption").val();
 			placeInitImage();
 		}
 	});
@@ -953,7 +953,7 @@ function startGame(){
 		var value = confirm("Are you sure you want to start another game?");
 		if(value){
 			document.getElementById("barca_board").innerHTML = "";
-			mode = $("#gametype").value;
+			mode = $("#gametype").val();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
@@ -962,8 +962,8 @@ function startGame(){
 		}
 	}
 	else{
-		player_TURN = $("#playeroption").value;
-		mode = $("#gametype").value;
+		player_TURN = $("#playeroption").val();
+		mode = $("#gametype").val();
 		gameStarted = true;
 		initValidClicks();
 	}
@@ -974,7 +974,7 @@ function resetGame(){
 		var value = confirm("Are you sure you want to reset the game back to its original state?");
 		if(value){
 			document.getElementById("barca_board").innerHTML = "";
-			mode = $("#gametype").value;
+			mode = $("#gametype").val();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
