@@ -70,7 +70,7 @@ function checkForValue(i,j){
 
 /*Function that initializes the board*/
 function newBoard(){
-		document.getElementById('turnDiv').innerHTML = "Player :" + player_TURN;
+	printTurn();
 
 	var output = "";
 	for(var i = 0; i < 10; i++){
@@ -257,11 +257,11 @@ function switchTurn(){
 
 function printTurn(){
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
-		document.getElementById('turnDiv').innerHTML = "TURN: " + player_TURN;
+		document.getElementById('turnDiv').innerHTML = "<b>TURN: " + player_TURN +"</b>";
 	}
-	else if(AIsmove){
+	else if(AIsmove === true){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-		document.getElementById('turnDiv').innerHTML = "TURN: " +turn + ". AI is thinking...";
+		document.getElementById('turnDiv').innerHTML = "<b>TURN: " +turn + ". AI is thinking...</b>";
 	}
 }
 
@@ -673,34 +673,55 @@ function clearBarcaBoard(){
 	}
 }
 
+function checkThreePiecesAreScaredOrTrapped(piece1,piece2,piece3){
+	return (checkIfInTrappedPieces(piece1) || checkIfInScaredPieces(piece1) || checkInTrappedPieces(piece2) ||
+		checkIfInScaredPieces(piece2) || checkIfInTrappedPieces(piece3) || checKIfInScaredPieces(piece3));
+}
+
 /*Function that checks for victory*/
 function checkVictory(){
 	if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[3][6][0] &&
 		barca_array[3][6][0] == barca_array[6][6][0]){
+		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[3][6],barca_array[6][6]))
+		{
+			return;
+		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
+		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[6][3],barca_array[6][6]))
+		{
+			return;
+		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[3][6][0]){
+		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][3],barca_array[6][3],barca_array[3][6]))
+		{
+			return;
+		}
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
+		if(checkThreePiecesAreScaredOrTrapped(barca_array[3][6],barca_array[6][3],barca_array[6][6]))
+		{
+			return;
+		}
 		victory = true;
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
-		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
 	}
 }
@@ -872,13 +893,15 @@ function clickMade(row,col,id,val){
 		return;
 	}
 
+	printTurn();
+
 	if(victory){
-		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 	}
 	else if(verifyValidClick(num)){
 		clicks_made = [];
 		clicks_made.push(num);
-		document.getElementById("message").innerHTML = "Choose where you want to move the piece to or select another piece to move...";
+		document.getElementById("message").innerHTML = "<b>Choose where you want to move the piece to or select another piece to move...</b>";
 	}
 	else if(clicks_made.length == 1){
 		var r1 = Math.floor(clicks_made[0]/10);
@@ -887,6 +910,8 @@ function clickMade(row,col,id,val){
 
 		if(value)
 		{
+			AIsmove = true;
+			printTurn();
 			removeImageForScaredAndTrappedPieces();
 			removeImageForWateringHoles();
 			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
@@ -900,14 +925,12 @@ function clickMade(row,col,id,val){
 			calculateTrappedPieces();
 			placeImageForScaredAndTrappedPieces();
 			placeImageForWateringHolesIfEmpty();
-			AIsmove = true;
 
 			if(victory){
 				return;
 			}
 			/* IF MODE IS PLAYER V. AI*/
 			else if(mode === "PLAYER V. AI"){
-				printTurn();
 				getAIMove();
 				AIsmove = false;
 				printTurn();
@@ -917,22 +940,26 @@ function clickMade(row,col,id,val){
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
+				checkVictory();
+				if(victory){
+					return;
+				}
 				switchTurn();
 				recomputeValidClicks(player_TURN);
 			}
 		}
 		else{
-			document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
+			document.getElementById("message").innerHTML = "<b>Invalid Move. Please select a valid move for the piece you selected...</b>";
 		}
 	}
 	else{
-		document.getElementById("message").innerHTML = "Invalid Move. Please select a valid move...";
+		document.getElementById("message").innerHTML = "<b>Invalid Move. The piece you selected is not allowed to move or has no valid moves...</b>";
 	}
 }
 
 /*Initially does the move checking if it is AIs turn*/
 function checkIfItIsAIsMove(){
-	if(player_TURN === "BLACK"){
+	if(player_TURN === "BLACK" && mode === "PLAYER V. AI"){
 			AIsmove = true;
 			printTurn();
 			getAIMove();
