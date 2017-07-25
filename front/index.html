@@ -17,7 +17,7 @@ https://serene-everglades-79780.herokuapp.com/api
   <script type="text/javascript" src="js/script.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
-
+  <script src="https://use.fontawesome.com/a59013ea0b.js"></script>
 
 </head>
 <body>
@@ -40,15 +40,15 @@ https://serene-everglades-79780.herokuapp.com/api
     <div class = "col-xs-12 text-center">
       <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
         <optgroup label = "Type">
-          <option>AI</option>
-          <option>Human</option>
+          <option value = "PLAYER V. AI" data-icon = "fa fa-android" selected = "selected">AI</option>
+          <option value = "PLAYER V. PLAYER" data-icon = "glyphicon-user">Human</option>
         </optgroup>
       </select>
       &nbsp;&nbsp;&nbsp;
       <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
         <optgroup label = "Side">
-          <option>White</option>
-          <option>Black</option>
+          <option value = "WHITE" selected = "selected">White</option>
+          <option value = "BLACK">Black</option>
         </optgroup>
       </select>
       &nbsp;&nbsp;&nbsp;
@@ -61,11 +61,10 @@ https://serene-everglades-79780.herokuapp.com/api
     </div>
 </div>
 
-<div id="barca_board" class = "mainBox "></div>
+<div id="barca_board" class = "mainBox"></div>
 <script>newBoard();</script>
 <script>placeWateringHoles();</script>
 <script>placeInitImage();</script>
-<script>initValidClicks();</script>
 
 </body>
 </html>

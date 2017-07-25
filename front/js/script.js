@@ -54,6 +54,8 @@ var singleMoveExists = {};
 var fear_counter = 0;
 var wateringHoleCounter = 0;
 var AIsmove = false;
+var gameStarted = false;
+var resetState = {};
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -82,18 +84,34 @@ function newBoard(){
 
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
-	document.getElementById('tile_0,4').innerHTML += '<img src = "./images/BElephant.gif"/>';
-	document.getElementById('tile_0,5').innerHTML += '<img src = "./images/BElephant.gif"/>';
-	document.getElementById('tile_9,4').innerHTML += '<img src = "./images/elephantW.gif"/>';
-	document.getElementById('tile_9,5').innerHTML += '<img src = "./images/elephantW.gif"/>';
-	document.getElementById('tile_1,3').innerHTML += '<img src = "./images/BLion.gif"/>';
-	document.getElementById('tile_1,4').innerHTML += '<img src = "./images/BMouse.gif"/>';
-	document.getElementById('tile_1,5').innerHTML += '<img src = "./images/BMouse.gif"/>';
-	document.getElementById('tile_1,6').innerHTML += '<img src = "./images/BLion.gif"/>';
-	document.getElementById('tile_8,3').innerHTML += '<img src = "./images/lionW.gif"/>';
-	document.getElementById('tile_8,4').innerHTML += '<img src = "./images/mouseW.gif"/>';
-	document.getElementById('tile_8,5').innerHTML += '<img src = "./images/mouseW.gif"/>';
-	document.getElementById('tile_8,6').innerHTML += '<img src = "./images/lionW.gif"/>';
+	if(player_TURN === "WHITE"){
+		document.getElementById('tile_0,4').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+		document.getElementById('tile_0,5').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+		document.getElementById('tile_9,4').innerHTML = '<img src = "./images/elephantW.gif"/>';
+		document.getElementById('tile_9,5').innerHTML = '<img src = "./images/elephantW.gif"/>';
+		document.getElementById('tile_1,3').innerHTML = '<img src = "./images/BlackLion.gif"/>';
+		document.getElementById('tile_1,4').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+		document.getElementById('tile_1,5').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+		document.getElementById('tile_1,6').innerHTML = '<img src = "./images/BlackLion.gif"/>';
+		document.getElementById('tile_8,3').innerHTML = '<img src = "./images/lionW.gif"/>';
+		document.getElementById('tile_8,4').innerHTML = '<img src = "./images/mouseW.gif"/>';
+		document.getElementById('tile_8,5').innerHTML = '<img src = "./images/mouseW.gif"/>';
+		document.getElementById('tile_8,6').innerHTML = '<img src = "./images/lionW.gif"/>';
+	}
+	else{
+		document.getElementById('tile_0,4').innerHTML = '<img src = "./images/elephantW.gif"/>';
+		document.getElementById('tile_0,5').innerHTML = '<img src = "./images/elephantW.gif"/>';
+		document.getElementById('tile_9,4').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+		document.getElementById('tile_9,5').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+		document.getElementById('tile_1,3').innerHTML = '<img src = "./images/lionW.gif"/>';
+		document.getElementById('tile_1,4').innerHTML = '<img src = "./images/mouseW.gif"/>';
+		document.getElementById('tile_1,5').innerHTML = '<img src = "./images/mouseW.gif"/>';
+		document.getElementById('tile_1,6').innerHTML = '<img src = "./images/lionW.gif"/>';
+		document.getElementById('tile_8,3').innerHTML = '<img src = "./images/BlackLion.gif"/>';
+		document.getElementById('tile_8,4').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+		document.getElementById('tile_8,5').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+		document.getElementById('tile_8,6').innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	}
 }
 
 function placeWateringHoles() {
@@ -144,18 +162,14 @@ function removeImageForWateringHoles(){
 
 /*Initializes the initial valid clicks on the board*/
 function initValidClicks(){
-	if(player_TURN == "WHITE"){
 		valid_clicks.push(83);
 		valid_clicks.push(84);
 		valid_clicks.push(85);
 		valid_clicks.push(86);
 		valid_clicks.push(94);
 		valid_clicks.push(95);
-	}
-	else if(mode === "PLAYER V. AI"){
-		checkIfItIsAIsMove();
-	}
-	else{
+
+	if(player_TURN === "BLACK"){
 		barca_array[0][4] = "WE1";
 		barca_array[0][5] = "WE2";
 		barca_array[1][3] = "WL1";
@@ -183,6 +197,36 @@ function initValidClicks(){
 		piece_locations["BE1"] = 94;
 		piece_locations["BE2"] = 95;
 	}
+	else{
+		barca_array[0][4] = "BE1";
+		barca_array[0][5] = "BE2";
+		barca_array[1][3] = "BL1";
+		barca_array[1][4] = "BR1";
+		barca_array[1][5] = "BR2";
+		barca_array[1][6] = "BL2";
+		barca_array[8][3] = "WL1";
+		barca_array[8][4] = "WR1";
+		barca_array[8][5] = "WR2";
+		barca_array[8][6] = "WL2";
+		barca_array[9][4] = "WE1";
+		barca_array[9][5] = "WE2";
+
+		/*Set where pieces are located on the board*/
+		piece_locations["BE1"] = 4;
+		piece_locations["BE2"] = 5;
+		piece_locations["BL1"] = 13;
+		piece_locations["BR1"] = 14;
+		piece_locations["BR2"] = 15;
+		piece_locations["BL2"] = 16;
+		piece_locations["WL1"] = 83;
+		piece_locations["WR1"] = 84;
+		piece_locations["WR2"] = 85;
+		piece_locations["WL2"] = 86;
+		piece_locations["WE1"] = 94;
+		piece_locations["WE2"] = 95;
+	}
+
+	checkIfItIsAIsMove();
 }
 
 /*Returns the direction of movement*/
@@ -542,9 +586,9 @@ function placeImageForScaredAndTrappedPieces(){
 	//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 	//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 	//'<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
-	for(var i in trapped_pieces){
+	for(var i = 0; i < trapped_pieces.length; i++){
 		var id = "fear_"+fear_counter;
-		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
+		document.getElementById(getDiv(trapped_pieces[i])).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
 	for(let i of scared_pieces){
@@ -750,9 +794,9 @@ function recomputeValidClicks(turn){
 /*Function that returns right image extension for the piece*/
 function findImgName(side,type){
 	switch(type){
-		case 'E': return (side == 'W') ? "elephantW.gif" : "BElephant.gif";
-		case 'L': return (side == 'W') ? "lionW.gif" : "BLion.gif";
-		default: return (side == 'W') ? "mouseW.gif" : "BMouse.gif";
+		case 'E': return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
+		case 'L': return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
+		default: return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
 	}
 }
 
@@ -762,6 +806,9 @@ function movePiece(side,type,row,col){
 }
 
 function getAIMove(){
+	if(!gameStarted){
+		return;
+	}
 	var API_request = {};
 
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
@@ -773,7 +820,7 @@ function getAIMove(){
 		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
 		info[0][2] = getRow(piece);
 		info[0][3] = getCol(piece);
-		info[0][4] = checkIfInTrappedPieces(piece) || checkIfPieceIsScared(piece);
+		info[0][4] = checkIfPieceIsScared(piece);
 		info[0][5] = checkIfInTrappedPieces(piece);
 		pieces = pieces.concat(info);
 	}
@@ -807,6 +854,10 @@ function clickMade(row,col,id,val){
 	row = parseInt(row);
 	col = parseInt(col);
 	var num = row*10 + col;
+
+	if(!gameStarted){
+		return;
+	}
 
 	if(victory){
 		document.getElementById("message").innerHTML = "Game is over.."+who_won+" won.";
@@ -884,4 +935,51 @@ function getDiv(piece){
 	var row = Math.floor(location_piece/10);
 	var col = location_piece%10;
 	return "tile_" + row + "," + col;
+}
+
+$(document).ready(function(){
+	$("#playeroption").click(function(){
+		console.log("IN OPTIONS");
+		if(!gameStarted){
+			player_TURN = $("#playeroption").value;
+			placeInitImage();
+		}
+	});
+});
+
+
+function startGame(){
+	if(gameStarted){
+		var value = confirm("Are you sure you want to start another game?");
+		if(value){
+			document.getElementById("barca_board").innerHTML = "";
+			mode = $("#gametype").value;
+			newBoard();
+			placeInitImage();
+			placeWateringHoles();
+			gameStarted = true;
+			initValidClicks();
+		}
+	}
+	else{
+		player_TURN = $("#playeroption").value;
+		mode = $("#gametype").value;
+		gameStarted = true;
+		initValidClicks();
+	}
+}
+
+function resetGame(){
+	if(gameStarted){
+		var value = confirm("Are you sure you want to reset the game back to its original state?");
+		if(value){
+			document.getElementById("barca_board").innerHTML = "";
+			mode = $("#gametype").value;
+			newBoard();
+			placeInitImage();
+			placeWateringHoles();
+			gameStarted = true;
+			initValidClicks();
+		}
+	}
 }

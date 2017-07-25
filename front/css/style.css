@@ -15,20 +15,20 @@ h1 {
 
 .smallBox1{
 	width: 45px;
-    height: 45px;
-    outline: 1px solid;
-    float: left;
-	background-color: #66ff99;
+  height: 45px;
+  outline: 1px solid;
+  background-image: url("../images/White.jpg");
+  float: left;
 	display: flex;
   position: relative;
 }
 
 .smallBox2{
 	width: 45px;
-    height: 45px;
-    outline: 1px solid;
-    float: left;
-	background-color: #ccccff;
+  height: 45px;
+  outline: 1px solid;
+  float: left;
+  background-image: url("../images/Bluishshade.jpg");
 	display: flex;
   position: relative;
 }
