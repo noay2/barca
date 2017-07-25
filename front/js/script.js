@@ -539,7 +539,7 @@ function calculateScaredPieces(){
 			scared_pieces.add(key);
 		}
 	}
-	//console.log(scared_pieces.size);
+	console.log("In calculating scared pieces: " + scared_pieces.size);
 }
 
 /*Calculate new trapped pieces because of the move made and
@@ -571,6 +571,15 @@ function calculateTrappedPieces(){
 			}
 		}
 	}
+}
+
+function checkIfInScaredPieces(piece){
+	for(let item of scared_pieces){
+		if(piece === item){
+			return true;
+		}
+	}
+	return false;
 }
 
 function checkIfInTrappedPieces(piece){
@@ -756,7 +765,6 @@ function resetBoardScaredAndTrappedPieces(data){
 /*Function that computes the pieces a certain user can move*/
 function recomputeValidClicks(turn){
 	valid_clicks = [];
-	console.log("Scared pieces size: " + scared_pieces.size);
 	scared_pieces.forEach(function(value){
 		if(value[0] === turn[0]){
 			valid_clicks.push(piece_locations[value]);
@@ -820,7 +828,7 @@ function getAIMove(){
 		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
 		info[0][2] = getRow(piece);
 		info[0][3] = getCol(piece);
-		info[0][4] = checkIfPieceIsScared(piece);
+		info[0][4] = checkIfInScaredPieces(piece);
 		info[0][5] = checkIfInTrappedPieces(piece);
 		pieces = pieces.concat(info);
 	}
