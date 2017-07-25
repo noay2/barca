@@ -249,9 +249,8 @@ class Board:
             return None
 
         
-    def switch_turn(self):
-        if not self.victory():
-            self.whitetomove = not self.whitetomove
+    def switch_turn(self): 
+        self.whitetomove = not self.whitetomove
     
 
                 
@@ -281,7 +280,7 @@ class AI:
         self.recurse = 3
                                   
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
-        if recurse == 0:
+        if recurse == 0 or self.board.victory():
             return  [None, None,self.board.board_evaluation()]
 
         else:
