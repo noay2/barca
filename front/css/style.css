@@ -7,15 +7,15 @@ h1 {
 
 
 .mainBox{
-	width: 500px;
+	width: 470px;
 	z-index: 1;
 	margin: 0 auto;
 	padding: 10px;
 }
 
 .smallBox1{
-	width: 45px;
-  height: 45px;
+	width: 42px;
+  height: 42px;
   outline: 1px solid;
   background-image: url("../images/White.jpg");
   float: left;
@@ -24,8 +24,8 @@ h1 {
 }
 
 .smallBox2{
-	width: 45px;
-  height: 45px;
+	width: 42px;
+  height: 42px;
   outline: 1px solid;
   float: left;
   background-image: url("../images/Bluishshade.jpg");

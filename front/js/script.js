@@ -665,6 +665,14 @@ function verifyValidClick(str){
 	return false;
 }
 
+function clearBarcaBoard(){
+	for(var key in piece_locations){
+		var row = getRow(key);
+		var col = getCol(key);
+		barca_array[row][col] = ".";
+	}
+}
+
 /*Function that checks for victory*/
 function checkVictory(){
 	if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[3][6][0] &&
@@ -673,7 +681,6 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
 		placeCrownOnWinningPieces();
-		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
@@ -681,7 +688,6 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
 		placeCrownOnWinningPieces();
-		return true;
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[3][6][0]){
@@ -689,7 +695,6 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
 		placeCrownOnWinningPieces();
-		return true;
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
@@ -697,9 +702,7 @@ function checkVictory(){
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over..." + who_won + " won!";
 		placeCrownOnWinningPieces();
-		return true;
 	}
-	return false;
 }
 
 function placeCrownOnWinningPieces() {
@@ -848,6 +851,8 @@ function getAIMove(){
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
+				checkVictory();
+				console.log("victory: " + victory);
 			},
 			error: function(data){
 				alert("fail");
@@ -897,7 +902,7 @@ function clickMade(row,col,id,val){
 			placeImageForWateringHolesIfEmpty();
 			AIsmove = true;
 
-			if(checkVictory()){
+			if(victory){
 				return;
 			}
 			/* IF MODE IS PLAYER V. AI*/
@@ -906,15 +911,14 @@ function clickMade(row,col,id,val){
 				getAIMove();
 				AIsmove = false;
 				printTurn();
+				if(victory){
+					return;
+				}
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
 				switchTurn();
 				recomputeValidClicks(player_TURN);
-			}
-
-			if(checkVictory()){
-				return;
 			}
 		}
 		else{
@@ -945,16 +949,6 @@ function getDiv(piece){
 	return "tile_" + row + "," + col;
 }
 
-$(document).ready(function(){
-	$("#playeroption").click(function(){
-		if(!gameStarted){
-			player_TURN = $("#playeroption").val();
-			placeInitImage();
-		}
-	});
-});
-
-
 function startGame(){
 	if(gameStarted){
 		var value = confirm("Are you sure you want to start another game?");
@@ -962,18 +956,33 @@ function startGame(){
 			document.getElementById("barca_board").innerHTML = "";
 			player_TURN = $("#playeroption").val();
 			mode = $("#gametype").val();
+			victory = false;
+			resetState["player_TURN"] = player_TURN;
+			resetState["mode"] = mode;
+			fear_counter = 0;
+			wateringHoleCounter = 0;
+			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
-			gameStarted = true;
 			initValidClicks();
+			gameStarted = true;
 		}
 	}
 	else{
+		document.getElementById("barca_board").innerHTML = "";
+		gameStarted = false;
 		player_TURN = $("#playeroption").val();
 		mode = $("#gametype").val();
-		gameStarted = true;
+		resetState["player_TURN"] = player_TURN;
+		resetState["mode"] = mode;
+		fear_counter = 0;
+		wateringHoleCounter = 0;
+		clearBarcaBoard();
+		newBoard();
 		placeInitImage();
+		placeWateringHoles();
+		gameStarted = true;
 		initValidClicks();
 	}
 }
@@ -983,7 +992,13 @@ function resetGame(){
 		var value = confirm("Are you sure you want to reset the game back to its original state?");
 		if(value){
 			document.getElementById("barca_board").innerHTML = "";
-			mode = $("#gametype").val();
+			gameStarted = false;
+			victory = false;
+			player_TURN = resetState["player_TURN"];
+			mode = resetState["mode"];
+			fear_counter = 0;
+			wateringHoleCounter = 0;
+			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
