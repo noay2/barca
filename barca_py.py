@@ -76,21 +76,26 @@ class Piece:
     def valid_moves(self):
         if not(self.infear):
             for piece in self.team_pieces:
-                if piece.infear and (not piece.trapped):
+                if piece.infear and (not piece.trapped) and (piece.color ==self.color):
                     return
         rowt = self.row
         colt = self.col
-        for rowd, cold in self.piece_type_directions:
-            colt += cold
-            rowt += rowd
-            while (rowt >=0) and (rowt < Piece.rows) and\
-                  (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
-                if (not self.potential_infear_of(rowt,colt)) or self.trapped:
-                    yield [self.row, self.col, rowt , colt]
-                rowt+=rowd
-                colt+=cold
-            rowt = self.row
-            colt = self.col
+        for rowd in range(-1,2,1):
+            for cold in range(-1,2,1):
+                if (rowd ==0) and (cold==0):
+                    pass
+                elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
+                   or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
+                    colt += cold
+                    rowt += rowd
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
+                        if (not self.potential_infear_of(rowt,colt)) or self.trapped:
+                            yield [self.row, self.col, rowt , colt]
+                        rowt+=rowd
+                        colt+=cold
+                rowt = self.row
+                colt = self.col
 
     def modify_fear(self):
         if (not self.potential_infear_of(self.row, self.col)):
@@ -99,19 +104,24 @@ class Piece:
             return
         rowt = self.row
         colt = self.col
-        for rowd, cold in self.piece_type_directions:
-            colt += cold
-            rowt += rowd
-            while (rowt >=0) and (rowt < Piece.rows) and\
-                  (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
-                if (not self.potential_infear_of(rowt,colt)):
-                    self.infear = True
-                    self.trapped = False
-                    return
-                rowt+=rowd
-                colt+=cold
-            rowt = self.row
-            colt = self.col
+        for rowd in range(-1,2,1):
+            for cold in range(-1,2,1):
+                if (rowd ==0) and (cold==0):
+                    pass
+                elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
+                   or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
+                    colt += cold
+                    rowt += rowd
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board[rowt][colt] == None:
+                        if (not self.potential_infear_of(rowt,colt)):
+                            self.infear = True
+                            self.trapped = False
+                            return
+                        rowt+=rowd
+                        colt+=cold
+                rowt = self.row
+                colt = self.col
         self.infear = True
         self.trapped= True
         return
