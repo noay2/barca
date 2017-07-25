@@ -659,7 +659,7 @@ function verifyValidClick(str){
 /*Function that checks for victory*/
 function checkVictory(){
 	if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[3][6][0] &&
-		barca_array[3][6][0] == barca_array[6][3][0]){
+		barca_array[3][6][0] == barca_array[6][6][0]){
 		victory = true;
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "Game is over.." + who_won + " won!";
@@ -939,7 +939,6 @@ function getDiv(piece){
 
 $(document).ready(function(){
 	$("#playeroption").click(function(){
-		console.log("IN OPTIONS");
 		if(!gameStarted){
 			player_TURN = $("#playeroption").val();
 			placeInitImage();
@@ -953,6 +952,7 @@ function startGame(){
 		var value = confirm("Are you sure you want to start another game?");
 		if(value){
 			document.getElementById("barca_board").innerHTML = "";
+			player_TURN = $("#playeroption").val();
 			mode = $("#gametype").val();
 			newBoard();
 			placeInitImage();
