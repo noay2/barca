@@ -973,6 +973,7 @@ function startGame(){
 		player_TURN = $("#playeroption").val();
 		mode = $("#gametype").val();
 		gameStarted = true;
+		placeInitImage();
 		initValidClicks();
 	}
 }

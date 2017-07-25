@@ -53,3 +53,5 @@ Some tests:
  moves BLACK LION at 5,2. There are many 
  possibilities but it must move the black elephant at
  5,2 to one of those valid positions.
+ 
+ ----RESOLVED----
