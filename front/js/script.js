@@ -160,14 +160,19 @@ function removeImageForWateringHoles(){
 	wateringHoleCounter = 0;
 }
 
+function initializeGame(){
+	AIsmove = (player_TURN === "BLACK" && mode === "PLAYER V. AI") ? true : false;
+	initValidClicks();
+}
+
 /*Initializes the initial valid clicks on the board*/
 function initValidClicks(){
-		valid_clicks.push(83);
-		valid_clicks.push(84);
-		valid_clicks.push(85);
-		valid_clicks.push(86);
-		valid_clicks.push(94);
-		valid_clicks.push(95);
+	valid_clicks.push(83);
+	valid_clicks.push(84);
+	valid_clicks.push(85);
+	valid_clicks.push(86);
+	valid_clicks.push(94);
+	valid_clicks.push(95);
 
 	if(player_TURN === "BLACK"){
 		barca_array[0][4] = "WE1";
@@ -847,6 +852,7 @@ function getAIMove(){
 			dataType: "json",
 			contentType: 'application/json',
 			success: function(data){
+				document.getElementById("message").innerHTML = "<b>AI is done making its move... now it is your turn...</b>";				
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
@@ -855,7 +861,6 @@ function getAIMove(){
 				placeImageForWateringHolesIfEmpty();
 				checkVictory();
 				AIsmove = false;
-//				console.log("AFTER AI MADE MOVE");
 				printTurn();
 			},
 			error: function(data){
@@ -875,6 +880,10 @@ function clickMade(row,col,id,val){
 	if(!gameStarted){
 		return;
 	}
+	if(AIsmove){
+		document.getElementById("message").innerHTML = "<b>Invalid move... It is AI's turn to move. Please wait until it is done making its move...</b>";
+		return;
+	}
 
 	if(victory){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
@@ -892,7 +901,6 @@ function clickMade(row,col,id,val){
 		if(value)
 		{
 			AIsmove = true;
-			console.log("BEFORE AI MADE MOVE");
 			printTurn();
 			removeImageForScaredAndTrappedPieces();
 			removeImageForWateringHoles();
@@ -908,11 +916,17 @@ function clickMade(row,col,id,val){
 			placeImageForScaredAndTrappedPieces();
 			placeImageForWateringHolesIfEmpty();
 
+			if(mode === "PLAYER V. PLAYER"){
+				var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
+				document.getElementById("message").innerHTML = "<b> " + player_TURN + " has made the move.. Now it is " + turn + "'s move...</b>";
+			}
+
 			if(victory){
 				return;
 			}
 			/* IF MODE IS PLAYER V. AI*/
 			else if(mode === "PLAYER V. AI"){
+				document.getElementById("message").innerHTML = "<b>You have made your move.. Now it is " + "AI's turn</b>";
 				getAIMove();
 				if(victory){
 					return;
@@ -939,12 +953,9 @@ function clickMade(row,col,id,val){
 
 /*Initially does the move checking if it is AIs turn*/
 function checkIfItIsAIsMove(){
-	if(player_TURN === "BLACK" && mode === "PLAYER V. AI"){
-			AIsmove = true;
+	if(AIsmove){
 			printTurn();
 			getAIMove();
-			AIsmove = false;
-			printTurn();
 	}
 }
 
@@ -972,8 +983,8 @@ function startGame(){
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
-			initValidClicks();
 			gameStarted = true;
+			initializeGame();
 		}
 	}
 	else{
@@ -990,7 +1001,7 @@ function startGame(){
 		placeInitImage();
 		placeWateringHoles();
 		gameStarted = true;
-		initValidClicks();
+		initializeGame();
 	}
 }
 
@@ -1010,7 +1021,7 @@ function resetGame(){
 			placeInitImage();
 			placeWateringHoles();
 			gameStarted = true;
-			initValidClicks();
+			initializeGame();
 		}
 	}
 }
