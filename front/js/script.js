@@ -256,8 +256,14 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 
 /*Switches turn of players in two-player mode*/
 function switchTurn(){
-	player_TURN = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-	printTurn();
+	checkVictory();
+	if(victory){
+		return;
+	}
+	else{
+		player_TURN = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
+		printTurn();
+	}
 }
 
 function printTurn(){
@@ -829,6 +835,10 @@ function getAIMove(){
 	}
 	var API_request = {};
 
+	checkVictory();
+	if(victory){
+		return;
+	}
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
 	pieces = [];
 
@@ -934,10 +944,6 @@ function clickMade(row,col,id,val){
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
-				checkVictory();
-				if(victory){
-					return;
-				}
 				switchTurn();
 				recomputeValidClicks(player_TURN);
 			}
