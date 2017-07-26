@@ -852,7 +852,7 @@ function getAIMove(){
 			dataType: "json",
 			contentType: 'application/json',
 			success: function(data){
-				document.getElementById("message").innerHTML = "<b>AI is done making its move... now it is your turn...</b>";				
+				document.getElementById("message").innerHTML = "<b>AI is done making its move... now it is your turn...</b>";
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
@@ -900,7 +900,7 @@ function clickMade(row,col,id,val){
 
 		if(value)
 		{
-			AIsmove = true;
+			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
 			removeImageForScaredAndTrappedPieces();
 			removeImageForWateringHoles();
