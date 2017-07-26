@@ -22,9 +22,9 @@ class Piece:
             }
     piece_color_val = {"BLACK": 0, "WHITE": 1}
     piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
-    piece_type_direction = {"MOUSE": [ [i,j] for j in range(-1,2,1) for i in range(-1,2,1) if (abs(i) ==abs(j) )       and not(i==0 and j==0)   ],
-                            "LION":  [ [i,j] for j in range(-1,2,1) for i in range(-1,2,1) if (i==0 or j==0 )and not(i==0 and j==0)   ],
-                            "ELEPHANT":[[i,j]for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   ]
+    piece_type_direction = {"MOUSE": { (i,j) for j in range(-1,2,1) for i in range(-1,2,1) if (abs(i) ==abs(j) )       and not(i==0 and j==0)   },
+                            "LION":  { (i,j) for j in range(-1,2,1) for i in range(-1,2,1) if (i==0 or j==0 )and not(i==0 and j==0)   },
+                            "ELEPHANT":{(i,j)for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   }
                             }
     
     def __init__(self, piece_arr, board, team_pieces,piece_type,scared_of_pieces):
@@ -72,7 +72,7 @@ class Piece:
             if piece.adjacent_to(row, col):
                 return True
         return False      
-    
+
     def valid_moves(self):
         if not(self.infear):
             for piece in self.team_pieces:
@@ -274,6 +274,20 @@ class Board:
         self.fear_update(piece)
         self.switch_turn()
 
+    def undo_update(self, source, dest, old_infear_trapped):
+        piece = self.board[dest[0]][dest[1]]
+        piece.row = source[0]
+        piece.col = source[1]
+        self.board[dest[0]][dest[1]] = None
+        self.board[source[0]][source[1]] = piece
+
+        counter = 0
+        for piece in self.all_pieces():
+            piece.infear = old_infear_trapped[counter][0]
+            piece.trapped = old_infear_trapped[counter][1]
+            counter +=1
+        self.switch_turn()
+
     def send_updated_data(self):
         return [self.whitetomove ]+ [[ piece.send_updated_data() for piece in self.all_pieces()]]
             
@@ -296,24 +310,15 @@ class AI:
    
   
             if ((self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove)):
-                current_best_source   = None
-                current_best_dest   = None
-                current_best_score = -1000000000.0
+                current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_info= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
+                        old_infear_trapped= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.update( [dest_row, dest_col],[source_row, source_col])
-                        counter = 0
-                        for piece in self.board.all_pieces():
-                            piece.infear = old_info[counter][0]
-                            piece.trapped = old_info[counter][1]
-                            counter +=1
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
                         if  childs_worst_score> current_best_score:
-                            current_best_source = [source_row, source_col]
-                            current_best_dest = [dest_row, dest_col ]
-                            current_best_score=childs_worst_score
+                            current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
                             alpha = max(alpha, childs_worst_score)
                             if (alpha>beta):
                                 return [current_best_source, current_best_dest, current_best_score]
@@ -324,24 +329,15 @@ class AI:
 
 
             else:
-                current_worst_source   = None
-                current_worst_dest   = None
-                current_worst_score = 1000000000.0
+                current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_info = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
+                        old_infear_trapped = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.update( [dest_row, dest_col],[source_row, source_col])
-                        counter = 0
-                        for piece in self.board.all_pieces():
-                            piece.infear = old_info[counter][0]
-                            piece.trapped = old_info[counter][1]
-                            counter +=1
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
                         if  childs_best_score< current_worst_score:
-                            current_worst_source = [source_row, source_col]
-                            current_worst_dest = [dest_row, dest_col ]
-                            current_worst_score=childs_best_score
+                            current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
                             beta = min(beta, childs_best_score)
                             if (alpha>beta):
                                 return [current_worst_source, current_worst_dest, current_worst_score]
@@ -373,27 +369,6 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
-##########################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#########################################
-    
 if __name__ == "__main__":
     pass
 ##
