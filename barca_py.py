@@ -160,11 +160,12 @@ class Board:
 
     
     def __init__(self,whitetomove, pieces):
-        piece_array = [[set() for j in range(3)]for i in range(2)]
         self.board = [[None for j in range(10)] for i in range(10) ]
         self.whitetomove = whitetomove
         self.black_pieces = []
         self.white_pieces = []
+        piece_array = [[set() for j in range(3)]for i in range(2)]
+
         for piece in pieces:
                 piece_instance = Piece(piece, self.board,self.black_pieces if piece[0] == "BLACK" else self.white_pieces,
                 piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]],
