@@ -414,9 +414,15 @@ class Backend:
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
 
+        self.positions={}
+
     def receive_data(self, whitetomove, pieces,human_move):
         self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
-        print(self.AI.board.stringify())
+        if self.AI.board.stringify() in self.positions:
+            self.positions[self.AI.board.stringify()]+=1
+        else:
+            self.positions[self.AI.board.stringify()]=1
+        print(self.positions)
         self.AI.execute()
 
 
@@ -619,4 +625,8 @@ z
 
 
 
-                    
+
+
+
+
+  
