@@ -238,8 +238,11 @@ class Board:
             yield piece
 
     
-    def board_evaluation(self):
+    def board_evaluation(self, positions):
         score=0
+        if self.stringify() in positions:
+            if positions[self.stringify()]==2:
+                return 0
 
 
 
@@ -342,16 +345,17 @@ class Board:
 ##########################################       
 class AI:
 
-    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
+    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value, positions):
         self.board = Board(whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value)
         self.original_turn = whitetomove
         self.human_move = human_move
         self.ai_move = [None, None]
         self.recurse = 3
+        self.positions=positions
                                   
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
         if recurse == 0 or self.board.victory():
-            return  [None, None,self.board.board_evaluation()]
+            return  [None, None,self.board.board_evaluation(self.positions)]
 
         else:
    
@@ -417,7 +421,7 @@ class Backend:
         self.positions={}
 
     def receive_data(self, whitetomove, pieces,human_move):
-        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
+        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value, self.positions)
         if self.AI.board.stringify() in self.positions:
             self.positions[self.AI.board.stringify()]+=1
         else:
@@ -559,7 +563,7 @@ if __name__ == "__main__":
 ##    print(time.time() -j)
    
 
-    eval_vector=[20, 50, 5, 5, 0,1]
+    eval_vector=[20, 100, 5, 5, 0,1]
     backend = Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
     backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
      ["BLACK","ELEPHANT",9,4,True,False],
@@ -575,17 +579,12 @@ if __name__ == "__main__":
      ["WHITE","ELEPHANT",0,5,False,False]],
      [[9,3],[9,4]])
     
-    eval_vector[1]=100
+    eval_vector[1]=50
     backend1= Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
     while(True):
         temp=backend.send_updated_data()
         backend1.receive_data(temp[0], temp[1], temp[2])
         printboard(backend.AI.board.board)
-        """
-        for i in range(len(backend.AI.board.board)):
-            print(backend.AI.board.board[9-i])
-        print("\n\n")
-        """
         temp=backend1.send_updated_data()
         backend.receive_data(temp[0], temp[1], temp[2])
         printboard(backend1.AI.board.board)
