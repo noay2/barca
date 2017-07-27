@@ -159,11 +159,15 @@ class Board:
                             }
 
     
-    def __init__(self,whitetomove, pieces):
+    def __init__(self,whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
         self.board = [[None for j in range(10)] for i in range(10) ]
         self.whitetomove = whitetomove
         self.black_pieces = []
         self.white_pieces = []
+        self.watering_holes_value = watering_holes_value
+        self.adjacent_watering_holes_value = adjacent_watering_holes_value
+        self.scared_pieces_value = scared_pieces_value
+        self.center_encouragement_value = center_encouragement_value
         piece_array = [[set() for j in range(3)]for i in range(2)]
 
         for piece in pieces:
@@ -207,28 +211,28 @@ class Board:
                 else:
                     white_counter +=1
         holes,bad_holes = [white_counter,black_counter] if self.whitetomove else [black_counter,white_counter]
-        score += [0,20,50,1000000,1000000][holes]
-        score -=[0,20,50,1000000,1000000][bad_holes]
+        score += self.watering_holes_value[holes]
+        score -= self.watering_holes_value[bad_holes]
 
         for piece in self.current_pieces():
             #Are you next to a watering hole:
             for watering_hole_row, watering_hole_col in Board.watering_holes:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
-                    score=score+5
+                    score=score+ self.adjacent_watering_holes_value 
             #How close are you to the center 
-            score += .4 * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5)
+            score += self.center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5)
             
         #How many pieces do you fear the current turn
         for piece in self.other_pieces():
             if piece.infear:
-                score +=5
+                score +=self.scared_pieces_value
 
                 
 
         #Are your pieces Afraid?
         for piece in self.current_pieces():
             if  piece.infear:
-                score-=5
+                score-=self.scared_pieces_value
 
         #Random element
         score += random.randint(0,5)
@@ -296,8 +300,8 @@ class Board:
 ##########################################       
 class AI:
 
-    def __init__(self,whitetomove, pieces,human_move):
-        self.board = Board(whitetomove, pieces)
+    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
+        self.board = Board(whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value)
         self.original_turn = whitetomove
         self.human_move = human_move
         self.ai_move = [None, None]
@@ -358,11 +362,14 @@ class AI:
 
 ##########################################
 class Backend:
-    def __init__(self):
-        pass
+    def __init__(self, watering_holes_value = [0,20,50,1000000], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
+        self.watering_holes_value = watering_holes_value
+        self.adjacent_watering_holes_value = adjacent_watering_holes_value
+        self.scared_pieces_value = scared_pieces_value
+        self.center_encouragement_value = center_encouragement_value
 
     def receive_data(self, whitetomove, pieces,human_move):
-        self.AI = AI(whitetomove, pieces, human_move)
+        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
         self.AI.execute()
 
 
