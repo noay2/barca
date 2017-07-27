@@ -174,7 +174,49 @@ class Board:
                 piece_instance = Piece(piece, self.board,self.black_pieces if piece[0] == "BLACK" else self.white_pieces,
                 piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]],
                 piece_array[(Board.piece_color_val[piece[0]] + 1)%2][(Board.piece_type_val[piece[1]] + 1)%3])
-                                                
+    
+    def stringify(self):
+        strng=''
+        black_elephants=[]
+        black_lions=[]
+        black_mice=[]
+        for piece in self.black_pieces:
+            if piece.type=="ELEPHANT":
+                black_elephants.append((piece.row, piece.col))
+            if piece.type=="LION":
+                black_lions.append((piece.row, piece.col))
+            if piece.type=="MOUSE":
+                black_mice.append((piece.row, piece.col))
+            black_elephants.sort()
+            black_lions.sort()
+            black_mice.sort()
+        for collection in (black_elephants, black_lions,black_mice):
+            for i in range(0,2):
+                for j in range(0,2):
+                    strng+=str(collection[i][j])
+        white_elephants=[]
+        white_lions=[]
+        white_mice=[]
+        for piece in self.white_pieces:
+            if piece.type=="ELEPHANT":
+                white_elephants.append((piece.row, piece.col))
+            if piece.type=="LION":
+                white_lions.append((piece.row, piece.col))
+            if piece.type=="MOUSE":
+                white_mice.append((piece.row, piece.col))
+            white_elephants.sort()
+            white_lions.sort()
+            white_mice.sort()
+        for collection in (white_elephants, white_lions,white_mice):
+            for i in range(0,2):
+                for j in range(0,2):
+                    strng+=str(collection[i][j])
+        if(self.whitetomove):
+            strng+="1"
+        else:
+            strng+="0"
+        return strng
+                                            
     def current_pieces(self):
         if self.whitetomove:
             for piece in self.white_pieces:           
@@ -355,21 +397,26 @@ class AI:
         if (not self.board.victory()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
-            
+        else:
+            print("victory")
+            input()
 
     def send_updated_data(self):
         return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [0,20,50,1000000], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
+    def __init__(self, watering_holes_value = [20,50], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
         self.watering_holes_value = watering_holes_value
+        self.watering_holes_value.append(100000)
+        self.watering_holes_value.insert(0, 0)
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
 
     def receive_data(self, whitetomove, pieces,human_move):
         self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
+        print(self.AI.board.stringify())
         self.AI.execute()
 
 
@@ -377,8 +424,76 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+
+def printboard(board):
+    for col in range(0,10):
+        for i in range(0,4):
+            print()
+            for row in range(0,10):
+                if(board[col][row]==None):
+                    if (col+row)%2==0:
+                        print('------', end='')
+                    else:
+                        print('      ', end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+
 if __name__ == "__main__":
     pass
+
+
 ##
 ##    j  = time.time()
 ##    backend = Backend()
@@ -436,81 +551,70 @@ if __name__ == "__main__":
 ##    print()
 ##    output = backend.send_updated_data()
 ##    print(time.time() -j)
+   
 
-
-    backend = Backend()
-    backend.receive_data(False,[["WHITE","MOUSE",0,3,False,False],
-     ["BLACK","ELEPHANT",0,4,True,False],
-     ["BLACK","ELEPHANT",0,5,False,False],
-     ["BLACK","MOUSE",1,4,False,False],
-     ["BLACK","MOUSE",3,6,False,False],
-     ["BLACK","LION",4,0,False,False],
-     ["BLACK","LION",4,3,False,False],
-     ["WHITE","LION",8,3,False,False],
-     ["WHITE","MOUSE",8,5,False,False],
-     ["WHITE","LION",8,6,False,False],
-     ["WHITE","ELEPHANT",9,4,False,False],
-     ["WHITE","ELEPHANT",9,5,False,False]],
-     [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
+    eval_vector=[20, 50, 5, 5, 0,1]
+    backend = Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
+    backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
+     ["BLACK","ELEPHANT",9,4,True,False],
+     ["BLACK","ELEPHANT",9,5,False,False],
+     ["BLACK","MOUSE",8,4,False,False],
+     ["BLACK","MOUSE",8,5,False,False],
+     ["BLACK","LION",8,6,False,False],
+     ["BLACK","LION",8,3,False,False],
+     ["WHITE","LION",1,6,False,False],
+     ["WHITE","MOUSE",1,5,False,False],
+     ["WHITE","LION",1,3,False,False],
+     ["WHITE","ELEPHANT",0,4,False,False],
+     ["WHITE","ELEPHANT",0,5,False,False]],
+     [[9,3],[9,4]])
+    
+    eval_vector[1]=100
+    backend1= Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
+    while(True):
+        temp=backend.send_updated_data()
+        backend1.receive_data(temp[0], temp[1], temp[2])
+        printboard(backend.AI.board.board)
+        """
+        for i in range(len(backend.AI.board.board)):
+            print(backend.AI.board.board[9-i])
+        print("\n\n")
+        """
+        temp=backend1.send_updated_data()
+        backend.receive_data(temp[0], temp[1], temp[2])
+        printboard(backend1.AI.board.board)
+        print("\n\n")
 
 
     for i in range(len(backend.AI.board.board)):
         print(backend.AI.board.board[9-i])
     print()
 
+"""
+Elephants
 
+/()()\
+/ || \
+WHITE
 
+/()()\
+/ || \
+BLACK
 
+ MICE
+ 
+ ^.^
+WHITE
+   
+ ^.^
+BLACK
 
+LION
 
+z
 
+"""
 
-
-    
-    backend.receive_data(False,[["BLACK","ELEPHANT",0,4,False,False],
-    ["BLACK","LION",1,0,False,False],
-    ["BLACK","LION",1,3,False,False],
-    ["BLACK","MOUSE",1,4,False,False],
-    ["BLACK","MOUSE",3,6,False,False],
-    ["WHITE","MOUSE",6,4,False,False],
-    ["WHITE","LION",8,3,False,False],
-    ["WHITE","MOUSE",8,5,False,False],
-    ["WHITE","LION",8,6,False,False],
-    ["BLACK","ELEPHANT",6,5,True,False],
-    ["WHITE","ELEPHANT",9,4,False,False],
-    ["WHITE","ELEPHANT",9,5,False,False]],
-    [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
-
-    for i in backend.AI.board.board:
-        print(i)
-    print()
-
-
-
-
-    backend.receive_data(False,[["BLACK","ELEPHANT",0,2,False,False],
-    ["BLACK","ELEPHANT",0,8,False,False],
-    ["BLACK","MOUSE",1,4,False,False],
-    ["BLACK","LION",2,2,False,False],
-    ["BLACK","MOUSE",4,3,False,False],
-    ["WHITE","ELEPHANT",5,1,False,False],
-    ["WHITE","MOUSE",6,5,False,False],
-    ["WHITE","LION",8,3,False,False],
-    ["WHITE","MOUSE",8,5,False,False],
-    ["WHITE","LION",8,6,False,False],
-    ["BLACK","LION",5,2,True,False],
-    ["WHITE","ELEPHANT",9,5,False,False]],
-    [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
-
-    for i in backend.AI.board.board:
-        print(i)
-    print()
 
 
 
