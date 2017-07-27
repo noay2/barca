@@ -1,5 +1,6 @@
 import time
 import random
+import copy
 ##########################################
 class Piece:
     colors = ["BLACK", "WHITE"]
@@ -401,9 +402,9 @@ class AI:
         if (not self.board.victory()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
+            return None
         else:
-            print("victory")
-            input()
+            return self.board.victory()
 
     def send_updated_data(self):
         return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
@@ -427,7 +428,9 @@ class Backend:
         else:
             self.positions[self.AI.board.stringify()]=1
         print(self.positions)
-        self.AI.execute()
+        return self.AI.execute()
+
+
 
 
 
@@ -500,8 +503,7 @@ def printboard(board):
                     elif(i==3):
                         print("WHITE ", end='')
 
-if __name__ == "__main__":
-    pass
+
 
 
 ##
@@ -561,10 +563,51 @@ if __name__ == "__main__":
 ##    print()
 ##    output = backend.send_updated_data()
 ##    print(time.time() -j)
-   
-
-    eval_vector=[20, 100, 5, 5, 0,1]
+ 
+def match(eval_vector, eval_vector2):
+    vector1score=0
+    vector2score=0
     backend = Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
+    backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
+     ["BLACK","ELEPHANT",9,4,True,False],
+     ["BLACK","ELEPHANT",9,5,False,False],
+     ["BLACK","MOUSE",8,4,False,False],
+     ["BLACK","MOUSE",8,5,False,False],
+     ["BLACK","LION",8,6,False,False],
+     ["BLACK","LION",8,3,False,False],
+     ["WHITE","LION",1,6,False,False],
+     ["WHITE","MOUSE",1,5,False,False],
+     ["WHITE","LION",1,3,False,False],
+     ["WHITE","ELEPHANT",0,4,False,False],
+     ["WHITE","ELEPHANT",0,5,False,False]],
+     [[9,3],[9,4]])
+    
+    eval_vector[1]=50
+    backend1= Backend(eval_vector2[0:2], eval_vector2[2], eval_vector2[3], eval_vector2[4])
+    while(True):
+        temp=backend.send_updated_data()
+        color=backend1.receive_data(temp[0], temp[1], temp[2])
+        printboard(backend.AI.board.board)
+        if color=="WHITE":
+            vector1score+=1
+            break
+        elif color=="BLACK":
+            vector2score+=1
+            break
+        temp=backend1.send_updated_data()
+        color=backend.receive_data(temp[0], temp[1], temp[2])
+        if color=="WHITE":
+            vector1score+=1
+            break
+        elif color=="BLACK":
+            vector2score+=1
+            break
+        printboard(backend1.AI.board.board)
+        print("\n\n")
+    printboard(backend.AI.board.board)
+    printboard(backend1.AI.board.board)
+
+    backend = Backend(eval_vector2[0:2], eval_vector2[2], eval_vector2[3], eval_vector2[4])
     backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
      ["BLACK","ELEPHANT",9,4,True,False],
      ["BLACK","ELEPHANT",9,5,False,False],
@@ -583,18 +626,36 @@ if __name__ == "__main__":
     backend1= Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
     while(True):
         temp=backend.send_updated_data()
-        backend1.receive_data(temp[0], temp[1], temp[2])
+        color=backend1.receive_data(temp[0], temp[1], temp[2])
         printboard(backend.AI.board.board)
+        if color=="WHITE":
+            vector2score+=1
+            break
+        elif color=="BLACK":
+            vector1score+=1
+            break
         temp=backend1.send_updated_data()
-        backend.receive_data(temp[0], temp[1], temp[2])
+        color=backend.receive_data(temp[0], temp[1], temp[2])
+        if color=="WHITE":
+            vector2score+=1
+            break
+        elif color=="BLACK":
+            vector1score+=1
+            break
         printboard(backend1.AI.board.board)
         print("\n\n")
+    printboard(backend.AI.board.board)
+    printboard(backend1.AI.board.board)
+    return(vector1score, vector2score)
 
 
-    for i in range(len(backend.AI.board.board)):
-        print(backend.AI.board.board[9-i])
-    print()
 
+if __name__ == "__main__":
+    eval_vector=[20, 100, 5, 5, 0,1]
+    eval_vector1=copy.deepcopy(eval_vector)
+    eval_vector1[1]=50
+    print(match(eval_vector, eval_vector1))
+    pass
 """
 Elephants
 
