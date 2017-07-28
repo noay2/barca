@@ -242,7 +242,7 @@ class Board:
     def board_evaluation(self, positions):
         score=0
         if self.stringify() in positions:
-            if positions[self.stringify()]==2:
+            if positions[self.stringify()]>=2:
                 return 0
 
 
@@ -425,9 +425,12 @@ class Backend:
         self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value, self.positions)
         if self.AI.board.stringify() in self.positions:
             self.positions[self.AI.board.stringify()]+=1
+            if self.positions[self.AI.board.stringify()]==10:
+                return "DRAW"
         else:
             self.positions[self.AI.board.stringify()]=1
-        print(self.positions)
+        #print(self.positions)
+
         return self.AI.execute()
 
 
@@ -564,7 +567,8 @@ def printboard(board):
 ##    output = backend.send_updated_data()
 ##    print(time.time() -j)
  
-def match(eval_vector, eval_vector2):
+def match(eval_vector2):
+    eval_vector=[20, 100, 5, 5, 0 ,1]
     vector1score=0
     vector2score=0
     backend = Backend(eval_vector[0:2], eval_vector[2], eval_vector[3], eval_vector[4])
@@ -582,17 +586,20 @@ def match(eval_vector, eval_vector2):
      ["WHITE","ELEPHANT",0,5,False,False]],
      [[9,3],[9,4]])
     
-    eval_vector[1]=50
     backend1= Backend(eval_vector2[0:2], eval_vector2[2], eval_vector2[3], eval_vector2[4])
     while(True):
         temp=backend.send_updated_data()
         color=backend1.receive_data(temp[0], temp[1], temp[2])
-        printboard(backend.AI.board.board)
+        #printboard(backend.AI.board.board)
         if color=="WHITE":
             vector1score+=1
             break
         elif color=="BLACK":
             vector2score+=1
+            break
+        elif color=="DRAW":
+            vector1score+=0.5
+            vector2score+=0.5
             break
         temp=backend1.send_updated_data()
         color=backend.receive_data(temp[0], temp[1], temp[2])
@@ -602,9 +609,14 @@ def match(eval_vector, eval_vector2):
         elif color=="BLACK":
             vector2score+=1
             break
-        printboard(backend1.AI.board.board)
-        print("\n\n")
+        elif color=="DRAW":
+            vector1score+=0.5
+            vector2score+=0.5
+            break
+        #printboard(backend1.AI.board.board)
+        #print("\n\n")
     printboard(backend.AI.board.board)
+    print("\n\n")
     printboard(backend1.AI.board.board)
 
     backend = Backend(eval_vector2[0:2], eval_vector2[2], eval_vector2[3], eval_vector2[4])
@@ -627,12 +639,16 @@ def match(eval_vector, eval_vector2):
     while(True):
         temp=backend.send_updated_data()
         color=backend1.receive_data(temp[0], temp[1], temp[2])
-        printboard(backend.AI.board.board)
+        #printboard(backend.AI.board.board)
         if color=="WHITE":
             vector2score+=1
             break
         elif color=="BLACK":
             vector1score+=1
+            break
+        elif color=="DRAW":
+            vector1score+=0.5
+            vector2score+=0.5
             break
         temp=backend1.send_updated_data()
         color=backend.receive_data(temp[0], temp[1], temp[2])
@@ -642,20 +658,52 @@ def match(eval_vector, eval_vector2):
         elif color=="BLACK":
             vector1score+=1
             break
-        printboard(backend1.AI.board.board)
-        print("\n\n")
+        elif color=="DRAW":
+            vector1score+=0.5
+            vector2score+=0.5
+            break
+        #printboard(backend1.AI.board.board)
+        #print("\n\n")
     printboard(backend.AI.board.board)
     printboard(backend1.AI.board.board)
-    return(vector1score, vector2score)
+    print("\n\n" + str(eval_vector) + "\nVS\n"+ str(eval_vector2))
+    print(vector2score - vector1score)
+    return vector2score - vector1score
 
+def partial_derivative(func, dimension, delta, point):
+    #Func take an n-dimensional vector as arugument, 0<=dimension<n, delta is a number, and point is an n-dimensional vector
+    point2=copy.deepcopy(point)
+    point2[dimension]*=delta
+    return (func(point2)-func(point))/(point2[dimension]-point[dimension])
+
+def gradient(func, delta, point):
+    grad=[]
+    for i in range(0,len(point)):
+        grad.append(partial_derivative(func, i, delta, point))
+    return grad
+
+def descent(func, delta, rate, point):
+    for j in range (0, 2):
+        point1=[]
+        grad=gradient(func, delta, point)
+        #print("Function value: "+ str(func(point)))
+        for i in range(0, len(point)):
+            point1.append(point[i]+rate*grad[i])
+        point=list(point1)
+    print("\n\n")
+    print(point)
+    return point
 
 
 if __name__ == "__main__":
-    eval_vector=[20, 100, 5, 5, 0,1]
+    eval_vector=[20, 100, 5, 5, 0 ,1]
     eval_vector1=copy.deepcopy(eval_vector)
     eval_vector1[1]=50
-    print(match(eval_vector, eval_vector1))
+    descent(match, 1.5, 0.1, eval_vector1)
+    #print(match(eval_vector, eval_vector1))
     pass
+
+
 """
 Elephants
 
