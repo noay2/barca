@@ -881,6 +881,44 @@ function getAIMove(){
 	/*Get the move from AI*/
 }
 
+/*Function that prints the board position to the backend upon a button click from user*/
+function printBoardPosition(){
+	if(!gameStarted){
+		return;
+	}
+	var API_request = {};
+
+	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
+	pieces = [];
+
+	for(var piece in piece_locations){
+		var info = [[null,null,null,null,null,null]];
+		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
+		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
+		info[0][2] = getRow(piece);
+		info[0][3] = getCol(piece);
+		info[0][4] = checkIfInScaredPieces(piece);
+		info[0][5] = checkIfInTrappedPieces(piece);
+		pieces = pieces.concat(info);
+	}
+	API_request["pieces"] = pieces;
+
+	$.ajax({
+			type: "PUT",
+			url: "https://serene-everglades-79780.herokuapp.com/print-board",
+			data: JSON.stringify(API_request),
+			dataType: "json",
+			contentType: 'application/json',
+			success: function(data){
+			},
+			error: function(data){
+				alert(data);
+			}
+		});
+	/*Send API request*/
+	/*Print the board position to the endpoint*/
+}
+
 /*Function that detects clicks and displays interactive user messages*/
 function clickMade(row,col,id,val){
 	row = parseInt(row);
