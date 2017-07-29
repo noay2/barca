@@ -65,46 +65,13 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#94ba4e', end
 .turnDivClass{
 	  position: relative;
 
-   color: blacl;
+   color: black;
    font-size: 18px;
    font-family: Georgia, Serif;
    text-decoration: none;
    vertical-align: middle;
 
-
 }
-
-.button1 {
-   border-top: 1px solid #c0c7cc;
-   background: #486a80;
-   background: -webkit-gradient(linear, left top, left bottom, from(#339ee6), to(#486a80));
-   background: -webkit-linear-gradient(top, #339ee6, #486a80);
-   background: -moz-linear-gradient(top, #339ee6, #486a80);
-   background: -ms-linear-gradient(top, #339ee6, #486a80);
-   background: -o-linear-gradient(top, #339ee6, #486a80);
-   padding: 8px 16px;
-   -webkit-border-radius: 7px;
-   -moz-border-radius: 7px;
-   border-radius: 7px;
-   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
-   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
-   box-shadow: rgba(0,0,0,1) 0 1px 0;
-   text-shadow: rgba(0,0,0,.4) 0 1px 0;
-   color: white;
-   font-size: 16px;
-   font-family: Georgia, Serif;
-   text-decoration: none;
-   vertical-align: middle;
-   }
-.button1:hover {
-   border-top-color: #4f88ad;
-   background: #4f88ad;
-   color: #edf2ff;
-   }
-.button1:active {
-   border-top-color: #2c6a94;
-   background: #2c6a94;
-   }
 
 
 .button2 {
@@ -138,3 +105,39 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#94ba4e', end
    border-top-color: #2c6a94;
    background: #2c6a94;
    }
+
+  
+.area {
+  text-align: center;
+  font-size: 6.5em;
+  color: #fff;
+  letter-spacing: -7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: blur .75s ease-out infinite;
+  text-shadow: 0px 0px 5px #fff, 0px 0px 7px #fff;
+}
+
+@keyframes blur {
+  from {
+    text-shadow:0px 0px 10px #fff,
+      0px 0px 10px #fff, 
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 50px #fff,
+      0px 0px 50px #fff,
+      0px 0px 50px #7B96B8,
+      0px 0px 150px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px -10px 100px #7B96B8,
+      0px -10px 100px #7B96B8;
+  }
+}
+
