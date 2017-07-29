@@ -268,12 +268,12 @@ function switchTurn(){
 
 function printTurn(){
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
-		document.getElementById('turnDiv').innerHTML = "<b>TURN: " + player_TURN +"</b>";
+		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " + player_TURN +"</b>";
 		//console.log(document.getElementById('turnDiv').innerHTML);
 	}
 	else if(AIsmove === true){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-		document.getElementById('turnDiv').innerHTML = "<b>TURN: " +turn + ". AI is thinking...</b>";
+		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " +turn + ". AI is thinking...</b>";
 	//	console.log(document.getElementById('turnDiv').innerHTML);
 	}
 }

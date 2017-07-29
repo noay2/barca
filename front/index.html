@@ -33,9 +33,9 @@ https://serene-everglades-79780.herokuapp.com/api
     <br> Note: For human mode, black or white will be allowed to move first.
     For AI mode, white player will be moving first always.</b>
 	</div>
-  <br>
-  <div id="turnDiv" class=" text-center turnDivClass"></div>
 </div>
+<br>
+        <div id="turnDiv" class=" text-center turnDivClass"></div>
 <br>
 
 <div class = "row" id = "buttons">
@@ -54,16 +54,18 @@ https://serene-everglades-79780.herokuapp.com/api
         </optgroup>
       </select>
       &nbsp;&nbsp;&nbsp;
-      <button class = "btn btn-primary" id = "startGame" onclick = "startGame()">Start Game!</button>
+      <button class = "button2" id = "startGame" onclick = "startGame()">Start Game!</button>
       &nbsp;&nbsp;&nbsp;
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
         <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
         </span>
       </button>
+
     </div>
 </div>
 
 <div id="barca_board" class = "mainBox"></div>
+
 <script>newBoard();</script>
 <script>placeWateringHoles();</script>
 <script>placeInitImage();</script>
