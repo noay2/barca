@@ -1,7 +1,9 @@
 import time
 import random
 import copy
+
 ##########################################
+
 class Piece:
     colors = ["BLACK", "WHITE"]
     types  = ["ELEPHANT", "MOUSE", "LION"]
@@ -72,7 +74,8 @@ class Piece:
         for piece in self.scared_of_pieces:
             if piece.adjacent_to(row, col):
                 return True
-        return False      
+        return False
+
 
     def valid_moves(self):
         if not(self.infear):
@@ -97,6 +100,7 @@ class Piece:
                         colt+=cold
                 rowt = self.row
                 colt = self.col
+
 
     def modify_fear(self):
         if (not self.potential_infear_of(self.row, self.col)):
@@ -161,63 +165,184 @@ class Board:
 
     
     def __init__(self,whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
-        self.board = [[None for j in range(10)] for i in range(10) ]
+        piece_array = [[set() for j in range(3)]for i in range(2)]
         self.whitetomove = whitetomove
+        self.board = [[None for j in range(10)] for i in range(10) ]
         self.black_pieces = []
         self.white_pieces = []
-        self.watering_holes_value = watering_holes_value
-        self.adjacent_watering_holes_value = adjacent_watering_holes_value
-        self.scared_pieces_value = scared_pieces_value
-        self.center_encouragement_value = center_encouragement_value
-        piece_array = [[set() for j in range(3)]for i in range(2)]
-
         for piece in pieces:
                 piece_instance = Piece(piece, self.board,self.black_pieces if piece[0] == "BLACK" else self.white_pieces,
                 piece_array[Board.piece_color_val[piece[0]] ][Board.piece_type_val[piece[1]]],
                 piece_array[(Board.piece_color_val[piece[0]] + 1)%2][(Board.piece_type_val[piece[1]] + 1)%3])
-    
-    def stringify(self):
-        strng=''
-        black_elephants=[]
-        black_lions=[]
-        black_mice=[]
-        for piece in self.black_pieces:
-            if piece.type=="ELEPHANT":
-                black_elephants.append((piece.row, piece.col))
-            if piece.type=="LION":
-                black_lions.append((piece.row, piece.col))
-            if piece.type=="MOUSE":
-                black_mice.append((piece.row, piece.col))
-            black_elephants.sort()
-            black_lions.sort()
-            black_mice.sort()
-        for collection in (black_elephants, black_lions,black_mice):
-            for i in range(0,2):
-                for j in range(0,2):
-                    strng+=str(collection[i][j])
-        white_elephants=[]
-        white_lions=[]
-        white_mice=[]
-        for piece in self.white_pieces:
-            if piece.type=="ELEPHANT":
-                white_elephants.append((piece.row, piece.col))
-            if piece.type=="LION":
-                white_lions.append((piece.row, piece.col))
-            if piece.type=="MOUSE":
-                white_mice.append((piece.row, piece.col))
-            white_elephants.sort()
-            white_lions.sort()
-            white_mice.sort()
-        for collection in (white_elephants, white_lions,white_mice):
-            for i in range(0,2):
-                for j in range(0,2):
-                    strng+=str(collection[i][j])
-        if(self.whitetomove):
-            strng+="1"
+        self.white_pieces_on_watering_holes = 0
+        self.black_pieces_on_watering_holes = 0
+
+
+        self.score = 0
+        self.watering_holes_value = watering_holes_value
+        self.adjacent_watering_holes_value = adjacent_watering_holes_value
+        self.scared_pieces_value = scared_pieces_value
+        self.center_encouragement_value = center_encouragement_value
+
+
+        self.hash_number = self.initial_hash()
+        self.positions_counter = {}
+        self.positions = {}
+
+        
+        self.initial_board_evaluation()
+        self.add_position()
+
+
+    def initial_hash(self):
+        number = 0
+        for piece in self.all_pieces():
+            number   +=  ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        return number
+
+    def undo_hash(self, color, ptype,row,col,number):
+        return  number- ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[ptype] +1   ) *  (8  **  (row * 10 + col))
+
+    def update_hash(self, color, ptype,row,col,number):
+        return number + ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[ptype] +1   ) *  (8  **  (row * 10 + col))
+         
+    def add_position(self):
+        if self.hash_number in self.positions_counter:
+            self.positions_counter[self.hash_number] +=1
+
         else:
-            strng+="0"
-        return strng
-                                            
+            self.positions_counter[self.hash_number] = 1
+            self.positions[self.hash_number] =  [self.score ,
+                                                [self.white_pieces_on_watering_holes, self.black_pieces_on_watering_holes],
+                                                [ (piece.infear, piece.trapped) for piece in self.all_pieces()]]
+
+    def remove_position(self):
+        self.positions_counter[self.hash_number]  -= 1
+
+
+    def recover_fear(self):
+        self.fear_information = self.positions[self.hash_number][2]
+        for index, piece in enumerate(self.all_pieces()):
+            piece.infear = self.fear_information[index][0]
+            piece.trapped = self.fear_information[index][1]
+
+    def recover_score(self):
+        stuff = self.positions[self.hash_number]
+        self.score = stuff[0]
+        self.white_pieces_on_watering_holes =  stuff[1][0]
+        self.black_pieces_on_watering_holes =  stuff[1][1]
+
+        
+        
+    def initial_board_evaluation(self):
+
+##        #Is this already a tied game??
+##        if self.hash_number in self.positions_counter.keys():
+##            if self.positions_counter[self.hash_number] >= 5:
+##                self.score = 0
+##                return
+            
+
+        for piece in self.all_pieces():
+                
+            #How many watering holes you have
+            if (piece.row, piece.col) in Board.watering_holes:
+                if piece.color == "WHITE":
+                    self.score -= self.watering_holes_value[self.white_pieces_on_watering_holes]
+                    self.white_pieces_on_watering_holes += 1
+                    self.score += self.watering_holes_value[self.white_pieces_on_watering_holes]
+                    
+                elif piece.color == "BLACK":
+                    self.score += self.watering_holes_value[self.black_pieces_on_watering_holes]
+                    self.black_pieces_on_watering_holes += 1
+                    self.score -= self.watering_holes_value[self.black_pieces_on_watering_holes]
+                        
+            #Are you next to a watering hole:
+            for watering_hole_row, watering_hole_col in Board.watering_holes:
+                if piece.adjacent_to(watering_hole_row, watering_hole_col):
+                    self.score += self.adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
+                    
+            #How close are you to the center 
+            self.score += self.center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
+        
+            #How many pieces do you have in fear
+            if piece.infear:
+                self.score -=self.scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
+            
+
+        
+    def remove_piece_board_evaluation(self,piece):
+
+        #How many watering holes you have
+        if (piece.row, piece.col)  in Board.watering_holes:
+                if piece.color == "WHITE":
+                    self.score -= self.watering_holes_value[self.white_pieces_on_watering_holes]
+                    self.white_pieces_on_watering_holes -= 1
+                    self.score += self.watering_holes_value[self.white_pieces_on_watering_holes]
+                    
+                elif piece.color == "BLACK":
+                    self.score += self.watering_holes_value[self.black_pieces_on_watering_holes]
+                    self.black_pieces_on_watering_holes -= 1
+                    self.score -= self.watering_holes_value[self.black_pieces_on_watering_holes]
+
+
+        #Are you next to a watering hole:
+        for watering_hole_row, watering_hole_col in Board.watering_holes:                           
+            if piece.adjacent_to(watering_hole_row, watering_hole_col):
+                self.score -= self.adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
+
+                
+        #How close are you to the center 
+        self.score -= self.center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
+    
+        #How many pieces do you have in fear
+        for piece in self.all_pieces():
+            if piece.infear:
+                self.score +=self.scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
+        
+
+        
+
+                
+    def update_board_evaluation(self,piece):
+
+
+        #Is this already a tied game??
+        if self.hash_number in self.positions_counter.keys():
+            if self.positions_counter[self.hash_number] >= 5:
+                self.score = 0
+                return
+
+
+        #How many watering holes you have:
+        if (piece.row, piece.col) in Board.watering_holes:
+            if piece.color == 'WHITE':
+                self.score -= self.watering_holes_value[self.white_pieces_on_watering_holes]
+                self.white_pieces_on_watering_holes += 1
+                self.score += self.watering_holes_value[self.white_pieces_on_watering_holes]
+
+            elif piece.color == "BLACK":
+                self.score += self.watering_holes_value[self.black_pieces_on_watering_holes]
+                self.black_pieces_on_watering_holes += 1
+                self.score -= self.watering_holes_value[self.black_pieces_on_watering_holes]
+
+        #Are you next to a watering hole:               
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if piece.adjacent_to(watering_hole_row, watering_hole_col):
+                self.score += self.adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
+                
+        #How close are you to the center 
+        self.score += self.center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
+
+        #How many pieces do you have in fear
+        for piece in self.all_pieces():
+            if piece.infear:
+                self.score -=self.scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
+               
+
+
+    
+                                                
     def current_pieces(self):
         if self.whitetomove:
             for piece in self.white_pieces:           
@@ -238,75 +363,12 @@ class Board:
         for piece in (self.white_pieces + self.black_pieces):
             yield piece
 
-    
-    def board_evaluation(self, positions):
-        score=0
-        if self.stringify() in positions:
-            if positions[self.stringify()]>=2:
-                return 0
-
-
-
-        #How many watering holes you have:
-        white_counter = 0
-        black_counter = 0
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
-        holes,bad_holes = [white_counter,black_counter] if self.whitetomove else [black_counter,white_counter]
-        score += self.watering_holes_value[holes]
-        score -= self.watering_holes_value[bad_holes]
-
-        for piece in self.current_pieces():
-            #Are you next to a watering hole:
-            for watering_hole_row, watering_hole_col in Board.watering_holes:
-                if piece.adjacent_to(watering_hole_row, watering_hole_col):
-                    score=score+ self.adjacent_watering_holes_value 
-            #How close are you to the center 
-            score += self.center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5)
-            
-        #How many pieces do you fear the current turn
-        for piece in self.other_pieces():
-            if piece.infear:
-                score +=self.scared_pieces_value
-
                 
-
-        #Are your pieces Afraid?
-        for piece in self.current_pieces():
-            if  piece.infear:
-                score-=self.scared_pieces_value
-
-        #Random element
-        score += random.randint(0,5)
-
-        return score
-
-    
+                
     def fear_update(self,moving_piece):
         for piece in self.all_pieces():
             if (piece.infear) or (piece.infear_of(moving_piece)) :
                 piece.modify_fear()
-                
-                
-    def victory(self):
-        white_counter = 0
-        black_counter = 0
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
-        if black_counter >= 3:
-            return "BLACK"
-        elif white_counter >=3:
-            return "WHITE"
-        else:
-            return None
 
         
     def switch_turn(self): 
@@ -316,28 +378,101 @@ class Board:
                 
     def update(self, source, dest):
         piece = self.board[source[0]][source[1]]
-        piece.row = dest[0]
-        piece.col = dest[1]
-        self.board[source[0]][source[1]] = None
-        self.board[dest[0]][dest[1]] = piece
+        temp_undo_hash = self.undo_hash(piece.color,piece.type,source[0],source[1],self.hash_number)
+        temp_redo_hash = self.update_hash(piece.color,piece.type,dest[0],dest[1],temp_undo_hash)
+
+
 
         
-        self.fear_update(piece)
+        if temp_redo_hash in self.positions:
+            self.reoccuring_update(temp_undo_hash,temp_redo_hash, source, dest)
+
+        else:
+            self.new_update(temp_undo_hash,temp_redo_hash, source, dest)
+
+
+
+    def new_update(self,temp_undo_hash,temp_redo_hash, source, dest):
+        piece = self.board[source[0]][source[1]]
+
+
+        self.remove_piece_board_evaluation(piece)
+        self.hash_number = temp_undo_hash
+        self.board[source[0]][source[1]] = None
+        piece.row = None
+        piece.col = None
+
+        piece.row = dest[0]
+        piece.col = dest[1]
+        self.board[dest[0]][dest[1]] = piece
+        self.hash_number = temp_redo_hash
+
+
+        self.fear_update(piece)        
+        self.update_board_evaluation(piece)
         self.switch_turn()
 
-    def undo_update(self, source, dest, old_infear_trapped):
+
+
+        self.add_position()
+
+
+    def reoccuring_update(self, temp_undo_hash  ,temp_redo_hash, source, dest):
+        piece = self.board[source[0]][source[1]]
+
+
+
+        self.hash_number = temp_undo_hash
+        self.board[source[0]][source[1]] =None
+        piece.row = None
+        piece.col = None
+
+        
+        piece.row = dest[0]
+        piece.col = dest[1]
+        self.board[dest[0]][dest[1]] = piece
+        self.hash_number = temp_redo_hash
+
+        
+        self.recover_fear()
+        self.recover_score()
+        self.switch_turn()
+
+
+        self.add_position()
+
+
+        
+    def undo_update(self, source, dest):
         piece = self.board[dest[0]][dest[1]]
+
+
+        self.remove_position()
+
+        
+        self.hash_number = self.undo_hash(piece.color, piece.type, piece.row, piece.col,self.hash_number)
+        self.board[dest[0]][dest[1]] = None
+        piece.row = None
+        piece.col = None
+
+        
         piece.row = source[0]
         piece.col = source[1]
-        self.board[dest[0]][dest[1]] = None
         self.board[source[0]][source[1]] = piece
+        self.hash_number = self.update_hash(piece.color, piece.type, piece.row, piece.col,self.hash_number)
 
-        counter = 0
-        for piece in self.all_pieces():
-            piece.infear = old_infear_trapped[counter][0]
-            piece.trapped = old_infear_trapped[counter][1]
-            counter +=1
+        
+        self.recover_fear()
+        self.recover_score()
         self.switch_turn()
+
+
+    def check_victory(self):
+        return (self.white_pieces_on_watering_holes >= 3 )or (self.black_pieces_on_watering_holes >= 3)
+    
+    def check_draw(self):
+        return self.positions_counter[self.hash_number] >= 5
+        
 
     def send_updated_data(self):
         return [self.whitetomove ]+ [[ piece.send_updated_data() for piece in self.all_pieces()]]
@@ -346,29 +481,24 @@ class Board:
 ##########################################       
 class AI:
 
-    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value, positions):
+    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
         self.board = Board(whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value)
-        self.original_turn = whitetomove
         self.human_move = human_move
         self.ai_move = [None, None]
         self.recurse = 3
-        self.positions=positions
                                   
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
-        if recurse == 0 or self.board.victory():
-            return  [None, None,self.board.board_evaluation(self.positions)]
+        if recurse == 0 or self.board.check_victory() or self.board.check_draw() :
+            return  [None, None,self.board.score]
 
         else:
-   
-  
-            if ((self.recurse%2 ==0 and self.original_turn == self.board.whitetomove) or (self.recurse%2 ==1 and self.original_turn != self.board.whitetomove)):
+            if (self.board.whitetomove):
                 current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_infear_trapped= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
                         if  childs_worst_score> current_best_score:
                             current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
                             alpha = max(alpha, childs_worst_score)
@@ -384,10 +514,9 @@ class AI:
                 current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_infear_trapped = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
                         if  childs_best_score< current_worst_score:
                             current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
                             beta = min(beta, childs_best_score)
@@ -399,12 +528,11 @@ class AI:
 
 
     def execute(self):
-        if (not self.board.victory()):
+        if (not self.board.check_victory()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
-            return None
-        else:
-            return self.board.victory()
+            
+            
 
     def send_updated_data(self):
         return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
@@ -412,34 +540,21 @@ class AI:
 ##########################################
 class Backend:
     def __init__(self, watering_holes_value = [20,50], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
-        self.watering_holes_value = watering_holes_value
-        self.watering_holes_value.append(100000)
-        self.watering_holes_value.insert(0, 0)
+        self.watering_holes_value = [0] + watering_holes_value + [1000000]
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
 
-        self.positions={}
-
     def receive_data(self, whitetomove, pieces,human_move):
-        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value, self.positions)
-        if self.AI.board.stringify() in self.positions:
-            self.positions[self.AI.board.stringify()]+=1
-            if self.positions[self.AI.board.stringify()]==10:
-                return "DRAW"
-        else:
-            self.positions[self.AI.board.stringify()]=1
-        #print(self.positions)
-
-        return self.AI.execute()
-
-
+        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
+        self.AI.execute()
 
 
 
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+##########################################
 
 def printboard(board):
     for col in range(0,10):
@@ -706,15 +821,12 @@ if __name__ == "__main__":
 
 """
 Elephants
-
 /()()\
 / || \
 WHITE
-
 /()()\
 / || \
 BLACK
-
  MICE
  
  ^.^
@@ -722,11 +834,8 @@ WHITE
    
  ^.^
 BLACK
-
 LION
-
 z
-
 """
 
 
@@ -737,4 +846,5 @@ z
 
 
 
-  
+
+                    
