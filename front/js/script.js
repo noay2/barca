@@ -56,6 +56,7 @@ var wateringHoleCounter = 0;
 var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
+var newgameStarted = false;
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -529,6 +530,9 @@ function placeImageForScaredAndTrappedPieces(){
 	//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 	//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 	//'<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+//	console.log("BEFORE PUTTING: " + fear_counter);
+//	console.log("TRAPPED PIECES: " + trapped_pieces.length);
+//	console.log("SCARED PIECES: " + scared_pieces.size);
 	for(var i = 0; i < trapped_pieces.length; i++){
 		var id = "fear_"+fear_counter;
 		document.getElementById(getDiv(trapped_pieces[i])).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
@@ -539,9 +543,11 @@ function placeImageForScaredAndTrappedPieces(){
 		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
+//	console.log(fear_counter);
 }
 
 function removeImageForScaredAndTrappedPieces(){
+//	console.log(fear_counter);
 	for(var i = fear_counter-1; i >= 0; i--){
 		if(document.getElementById("fear_"+i)){
 			var element = document.getElementById("fear_"+i);
@@ -600,10 +606,10 @@ function verifyValidClick(str){
 }
 
 function clearBarcaBoard(){
-	for(var key in piece_locations){
-		var row = getRow(key);
-		var col = getCol(key);
-		barca_array[row][col] = ".";
+	for(var i = 0; i < 10; i++){
+		for(var j = 0; j < 10; j++){
+			barca_array[i][j] = ".";
+		}
 	}
 }
 
@@ -678,7 +684,7 @@ function resetBoardScaredAndTrappedPieces(data){
 		if(pieces[i][5]){
 			trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
 		}
-		if(pieces[i][4]){
+		else if(pieces[i][4]){
 			scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
 		}
 	}
@@ -924,16 +930,15 @@ function checkIfItIsAIsMove(){
 
 /* Returns the div of the piece*/
 function getDiv(piece){
-	var location_piece = piece_locations[piece];
-	var row = Math.floor(location_piece/10);
-	var col = location_piece%10;
+	var row = getRow(piece);
+	var col = getCol(piece);
 	return "tile_" + row + "," + col;
 }
 
 function startGame(){
 	if(gameStarted){
-		var value = confirm("Are you sure you want to start another game?");
-		if(value){
+		newgameStarted = confirm("Are you sure you want to start another game?");
+		if(newgameStarted){
 			document.getElementById("barca_board").innerHTML = "";
 			player_TURN = $("#playeroption").val();
 			mode = $("#gametype").val();
@@ -942,11 +947,13 @@ function startGame(){
 			resetState["mode"] = mode;
 			fear_counter = 0;
 			wateringHoleCounter = 0;
+			valid_clicks = [];
 			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
 			gameStarted = true;
+			newgameStarted = false;
 			initializeGame();
 		}
 	}
@@ -959,6 +966,7 @@ function startGame(){
 		resetState["mode"] = mode;
 		fear_counter = 0;
 		wateringHoleCounter = 0;
+		valid_clicks = [];
 		clearBarcaBoard();
 		newBoard();
 		placeInitImage();
@@ -970,8 +978,8 @@ function startGame(){
 
 function resetGame(){
 	if(gameStarted){
-		var value = confirm("Are you sure you want to reset the game back to its original state?");
-		if(value){
+		newgameStarted = confirm("Are you sure you want to reset the game back to its original state?");
+		if(newgameStarted){
 			document.getElementById("barca_board").innerHTML = "";
 			gameStarted = false;
 			victory = false;
@@ -979,11 +987,13 @@ function resetGame(){
 			mode = resetState["mode"];
 			fear_counter = 0;
 			wateringHoleCounter = 0;
+			valid_clicks = [];
 			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
 			placeWateringHoles();
 			gameStarted = true;
+			newgameStarted = false;
 			initializeGame();
 		}
 	}
