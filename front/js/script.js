@@ -360,7 +360,6 @@ function checkIfASingleValidMoveExistsForElephant(value){
 	var obstacles = [false,false,false,false,false,false,false,false];
 	var directions = ["UP","UR","R","BR","D","BL","L","UL"];
 	var move_adv = 0;
-	var location_piece = piece_locations[value];
 	var row = getRow(value);
 	var col = getCol(value);
 	singleMoveExists[value] = false;
@@ -398,9 +397,8 @@ function checkIfASingleValidMoveExistsForLion(value){
 	var obstacles = [false,false,false,false];
 	var directions = ["UL","UR","BR","BL"];
 	var move_adv = 0;
-	var location_piece = piece_locations[value];
-	var row = Math.floor(location_piece/10);
-	var col = location_piece%10;
+	var row = getRow(value);
+	var col = getCol(value);
 	singleMoveExists[value] = false;
 
 	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
@@ -435,9 +433,8 @@ function checkIfASingleValidMoveExistsForMouse(value){
 	var obstacles = [false,false,false,false];
 	var directions = ["UP","R","D","L"];
 	var move_adv = 0;
-	var location_piece = piece_locations[value];
-	var row = Math.floor(location_piece/10);
-	var col = location_piece%10;
+	var row = getRow(value);
+	var col = getCol(value);
 	singleMoveExists[value] = false;
 
 	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
