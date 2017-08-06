@@ -103,7 +103,11 @@ class Piece:
                 rowt = self.row
                 colt = self.col
 
-    def modify_fear(self):
+    def modify_fear(self, infear = None, trapped = None):
+        if infear != None and trapped != None:
+            self.infear = infear
+            self.trapped = trapped
+            return
         if (not self.potential_infear_of(self.row, self.col)):
             self.infear = False
             self.trapped = False
@@ -132,15 +136,13 @@ class Piece:
         self.trapped= True
         return
     
-    def modify_fear(self, infear, trapped):
-        self.infear = infear
-        self.trapped = trapped
+
 
     def move_piece(self, source, dest):
-        self.row = source[0]
-        self.col = source[1]
-        self.board_coord[dest[0]][dest[1]] = None
-        self.board_coord[source[0]][source[1]] = self
+        self.board_coord[source[0]][source[1]] = None
+        self.board_coord[dest[0]][dest[1]] = self
+        self.row = dest[0]
+        self.col = dest[1]
         
     def send_updated_data(self):
 
@@ -186,7 +188,7 @@ class Board:
         self.current_hash =  self.initial_hash()
         self.position_counter = defaultdict(int)
         self.position_score   = defaultdict(int)
-        self.position_fear    = defaultdict([int])
+        self.position_fear    = defaultdict(list)
 
 
 
@@ -301,7 +303,7 @@ class Board:
         self.fear_update(piece)
         self.switch_turn()
 
-    def undo_update(self, source, dest, old_infear_trapped):
+    def undo_update(self, source, dest):
         piece = self.board_coord[dest[0]][dest[1]]
 
         self.position_counter[self.current_hash] -=1
@@ -322,7 +324,7 @@ class Board:
 class AI:
 
     def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
-        self.board = Board(whitetomove, pieces,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value)
+        self.board = Board(whitetomove, pieces)
         self.watering_holes_value = watering_holes_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
@@ -356,7 +358,7 @@ class AI:
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
                         if  childs_worst_score> current_best_score:
                             current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
                             alpha = max(alpha, childs_worst_score)
@@ -374,7 +376,7 @@ class AI:
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
                         if  childs_best_score< current_worst_score:
                             current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
                             beta = min(beta, childs_best_score)
@@ -411,3 +413,4 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+
