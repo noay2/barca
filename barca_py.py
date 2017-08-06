@@ -2,6 +2,8 @@ import time
 import random
 import copy
 from collections import defaultdict
+
+
 ##########################################
 class Piece:
     colors = ["BLACK", "WHITE"]
@@ -219,11 +221,7 @@ class Board:
         #Draw
         if self.position_counter[self.current_hash] >=3:
             return 0
-
-
-
         
-
         #How many watering holes you have:
         white_counter = 0
         black_counter = 0
@@ -237,25 +235,18 @@ class Board:
         score += watering_holes_value[white_counter]
         score -= watering_holes_value[black_counter]
 
-
-
-
-
         for piece in self.all_pieces():
             #Are you next to a watering hole:
             for watering_hole_row, watering_hole_col in Board.watering_holes:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
                     score+=  adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
+            
             #How close are you to the center 
             score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
             
             #How many pieces do you fear the current turn
             if piece.infear:
                 score -=scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
-
-
-
-            
 
         return score
 
@@ -318,11 +309,9 @@ class Board:
         self.current_hash  = self.update_hash(piece)
 
 
-        counter = 0
-        for piece in self.all_pieces():
-            piece.infear = old_infear_trapped[counter][0]
-            piece.trapped = old_infear_trapped[counter][1]
-            counter +=1
+        
+        for index , piece in enumerate(self.all_pieces()):
+            piece.infear, piece.trapped = old_infear_trapped[index]
         self.switch_turn()
 
     def send_updated_data(self):
