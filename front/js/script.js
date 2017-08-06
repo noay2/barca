@@ -57,6 +57,8 @@ var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
 var newgameStarted = false;
+var potential_draw_move_cache = {};
+var last_few_moves = [];
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -85,34 +87,18 @@ function newBoard(){
 
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
-	if(player_TURN === "WHITE"){
-		document.getElementById('tile_0,4').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-		document.getElementById('tile_0,5').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-		document.getElementById('tile_9,4').innerHTML = '<img src = "./images/elephantW.gif"/>';
-		document.getElementById('tile_9,5').innerHTML = '<img src = "./images/elephantW.gif"/>';
-		document.getElementById('tile_1,3').innerHTML = '<img src = "./images/BlackLion.gif"/>';
-		document.getElementById('tile_1,4').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-		document.getElementById('tile_1,5').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-		document.getElementById('tile_1,6').innerHTML = '<img src = "./images/BlackLion.gif"/>';
-		document.getElementById('tile_8,3').innerHTML = '<img src = "./images/lionW.gif"/>';
-		document.getElementById('tile_8,4').innerHTML = '<img src = "./images/mouseW.gif"/>';
-		document.getElementById('tile_8,5').innerHTML = '<img src = "./images/mouseW.gif"/>';
-		document.getElementById('tile_8,6').innerHTML = '<img src = "./images/lionW.gif"/>';
-	}
-	else{
-		document.getElementById('tile_0,4').innerHTML = '<img src = "./images/elephantW.gif"/>';
-		document.getElementById('tile_0,5').innerHTML = '<img src = "./images/elephantW.gif"/>';
-		document.getElementById('tile_9,4').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-		document.getElementById('tile_9,5').innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-		document.getElementById('tile_1,3').innerHTML = '<img src = "./images/lionW.gif"/>';
-		document.getElementById('tile_1,4').innerHTML = '<img src = "./images/mouseW.gif"/>';
-		document.getElementById('tile_1,5').innerHTML = '<img src = "./images/mouseW.gif"/>';
-		document.getElementById('tile_1,6').innerHTML = '<img src = "./images/lionW.gif"/>';
-		document.getElementById('tile_8,3').innerHTML = '<img src = "./images/BlackLion.gif"/>';
-		document.getElementById('tile_8,4').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-		document.getElementById('tile_8,5').innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-		document.getElementById('tile_8,6').innerHTML = '<img src = "./images/BlackLion.gif"/>';
-	}
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/lionW.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/lionW.gif"/>';
 }
 
 function placeWateringHoles() {
@@ -527,9 +513,9 @@ function placeImageForScaredAndTrappedPieces(){
 	//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 	//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 	//'<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
-//	console.log("BEFORE PUTTING: " + fear_counter);
-//	console.log("TRAPPED PIECES: " + trapped_pieces.length);
-//	console.log("SCARED PIECES: " + scared_pieces.size);
+	console.log("BEFORE PUTTING: " + fear_counter);
+	console.log("TRAPPED PIECES: " + trapped_pieces.length);
+	console.log("SCARED PIECES: " + scared_pieces.size);
 	for(var i = 0; i < trapped_pieces.length; i++){
 		var id = "fear_"+fear_counter;
 		document.getElementById(getDiv(trapped_pieces[i])).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
@@ -540,7 +526,7 @@ function placeImageForScaredAndTrappedPieces(){
 		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
-//	console.log(fear_counter);
+	console.log("AFTER PUTTING: " + fear_counter);
 }
 
 function removeImageForScaredAndTrappedPieces(){
@@ -737,6 +723,7 @@ function recomputeValidClicks(turn){
 				valid_clicks.push(piece_locations[turn[0]+"R2"]);
 		 	}
 	}
+	console.log(valid_clicks.size);
 }
 
 /*Function that returns right image extension for the piece*/
