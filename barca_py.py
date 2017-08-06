@@ -330,8 +330,7 @@ class Board:
 ##########################################       
 class AI:
 
-    def __init__(self,whitetomove, pieces,human_move,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
-        self.board = Board(whitetomove, pieces)
+    def __init__(self,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
         self.watering_holes_value = watering_holes_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
@@ -340,13 +339,16 @@ class AI:
         self.ai_move = [None, None]
 
 
+    def take_board(self, whitetomove, pieces, human_move):
+        self.board = Board(whitetomove, pieces, human_move)
 
-    def evaluate_other_board(self, board):
-        return board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value) * 1 if board.whitetomove else -1
-
-
-
-                                  
+        
+        
+    def evaluate_board_abs_value(self):
+        return self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value) * 1 if board.whitetomove else -1
+           
+            
+            
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
         if self.board.current_hash in self.board.position_score:
             return [None, None, self.board.position_score[self.board.current_hash]]
@@ -393,26 +395,28 @@ class AI:
                 self.board.position_score[self.board.current_hash] = current_worst_score 
                 return [current_worst_source, current_worst_dest, current_worst_score]
 
-
+                                  
     def execute(self):
         if (not self.board.victory() and not self.board.draw()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
             
-
+            
     def send_updated_data(self):
         return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
 
 ##########################################
 class Backend:
     def __init__(self, watering_holes_value = [20,50], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
+        
         self.watering_holes_value = [0] + watering_holes_value + [1000000]
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
+        self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
 
     def receive_data(self, whitetomove, pieces,human_move):
-        self.AI = AI(whitetomove, pieces, human_move, self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
+        self.AI.take_board(whitetomove, pieces, human_move)
         self.AI.execute()
 
 
