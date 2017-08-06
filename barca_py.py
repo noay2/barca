@@ -268,9 +268,15 @@ class Board:
 
     
     def fear_update(self,moving_piece):
-        for piece in self.all_pieces():
-            if (piece.infear) or (piece.infear_of(moving_piece)) :
-                piece.modify_fear()
+        if self.current_hash in self.position_fear:
+            old_infear_trapped = self.position_fear[self.current_hash]
+            for index , piece in enumerate(self.all_pieces()):
+                piece.modify_fear(old_infear_trapped[index][0],old_infear_trapped[index][1])
+            
+        else:
+            for piece in self.all_pieces():
+                if (piece.infear) or (piece.infear_of(moving_piece)) :
+                    piece.modify_fear()
 
                 
                 
@@ -310,10 +316,9 @@ class Board:
         self.undo_hash(piece)
         piece.move_piece(dest, source)
         self.update_hash(piece)
-        old_infear_trapped = self.position_fear[self.current_hash]
         
-        for index , piece in enumerate(self.all_pieces()):
-            piece.modify_fear(old_infear_trapped[index][0],old_infear_trapped[index][1])
+        
+        self.fear_update(piece)
         self.switch_turn()
 
     def send_updated_data(self):
