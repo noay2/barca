@@ -31,6 +31,8 @@ class Piece:
                             "ELEPHANT":{(i,j)for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   }
                             }
     
+    
+    
     def __init__(self, piece_arr, board_coord, pieces):
         self.color   = piece_arr[0]
         self.type    = piece_arr[1]
@@ -178,6 +180,8 @@ class Board:
                             }
 
     
+    
+    
     def __init__(self,whitetomove, pieces):
         self.whitetomove = whitetomove
         self.board_coord = [[None for j in range(10)] for i in range(10) ]
@@ -301,8 +305,8 @@ class Board:
                 
     def update(self, source, dest):
         piece = self.board_coord[source[0]][source[1]]
-
         self.position_fear[self.current_hash] = [[piece.infear, piece.trapped] for piece in (self.all_pieces())]
+        
         self.undo_hash(piece)
         piece.move_piece(source, dest)
         self.update_hash(piece)
