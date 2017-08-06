@@ -382,7 +382,7 @@ class AI:
 
 
     def execute(self):
-        if (not self.board.victory()):
+        if (not self.board.victory() and not self.board.draw()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
             
