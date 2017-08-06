@@ -132,6 +132,11 @@ class Piece:
         self.trapped= True
         return
 
+    def move_piece(self, source, dest):
+        self.row = source[0]
+        self.col = source[1]
+        self.board_coord[dest[0]][dest[1]] = None
+        self.board_coord[source[0]][source[1]] = self
         
     def send_updated_data(self):
 
@@ -287,10 +292,7 @@ class Board:
 
 
         self.current_hash = self.undo_hash(piece)
-        piece.row = dest[0]
-        piece.col = dest[1]
-        self.board_coord[source[0]][source[1]] = None
-        self.board_coord[dest[0]][dest[1]] = piece
+        piece.move_piece(source, dest)
         self.current_hash  = self.update_hash(piece)
         self.position_counter[self.current_hash] +=1
         
@@ -302,13 +304,8 @@ class Board:
 
         self.position_counter[self.current_hash] -=1
         self.current_hash = self.undo_hash(piece)
-        piece.row = source[0]
-        piece.col = source[1]
-        self.board_coord[dest[0]][dest[1]] = None
-        self.board_coord[source[0]][source[1]] = piece
+        piece.move_piece(dest, source)
         self.current_hash  = self.update_hash(piece)
-
-
         
         for index , piece in enumerate(self.all_pieces()):
             piece.infear, piece.trapped = old_infear_trapped[index]
