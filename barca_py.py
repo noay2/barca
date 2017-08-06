@@ -239,7 +239,7 @@ class Board:
             return 0
         
         #How many watering holes you have:
-        black_counter, white_counter= self.watering_hole_counter
+        black_counter, white_counter= self.watering_hole_counter()
                     
         score += watering_holes_value[white_counter]
         score -= watering_holes_value[black_counter]
@@ -268,7 +268,7 @@ class Board:
                 
                 
     def victory(self):
-        black_counter, white_counter = watering_hole_counter()
+        black_counter, white_counter = self.watering_hole_counter()
         if black_counter >= 3:
             return "BLACK"
         elif white_counter >=3:
