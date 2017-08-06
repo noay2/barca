@@ -104,10 +104,10 @@ class Piece:
                     rowt = self.row
                     colt = self.col
 
-    def modify_fear(self, infear = None, trapped = None):
-        if infear != None and trapped != None:
-            self.infear = infear
-            self.trapped = trapped
+    def modify_fear(self, hashed_infear = None, hashed_trapped = None):
+        if hashed_infear != None and hashed_trapped != None:
+            self.infear = hashed_infear
+            self.trapped = hashed_trapped
             return
         elif (not self.potential_infear_of(self.row, self.col)):
             self.infear = False
@@ -271,9 +271,9 @@ class Board:
     
     def fear_update(self,moving_piece):
         if self.current_hash in self.position_fear:
-            old_infear_trapped = self.position_fear[self.current_hash]
+            hashed_infear_trapped = self.position_fear[self.current_hash]
             for index , piece in enumerate(self.all_pieces()):
-                piece.modify_fear(old_infear_trapped[index][0],old_infear_trapped[index][1])
+                piece.modify_fear(hashed_infear_trapped[index][0],hashed_infear_trapped[index][1])
             
         else:
             for piece in self.all_pieces():
