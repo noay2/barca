@@ -336,11 +336,12 @@ class AI:
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
         self.recurse = 3
-        self.ai_move = [None, None]
 
 
     def take_board(self, whitetomove, pieces, human_move):
         self.board = Board(whitetomove, pieces, human_move)
+        self.ai_move = [None, None]
+
 
         
         
