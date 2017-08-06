@@ -132,8 +132,9 @@ class Piece:
         self.trapped= True
         return
     
-    def modify_fear(self, bool):
-        self.fear = bool
+    def modify_fear(self, infear, trapped):
+        self.infear = infear
+        self.trapped = trapped
 
     def move_piece(self, source, dest):
         self.row = source[0]
@@ -310,7 +311,7 @@ class Board:
         old_infear_trapped = self.position_fear[self.current_hash]
         
         for index , piece in enumerate(self.all_pieces()):
-            piece.infear, piece.trapped = old_infear_trapped[index]
+            piece.modify_fear(old_infear_trapped[index][0],old_infear_trapped[index][1])
         self.switch_turn()
 
     def send_updated_data(self):
