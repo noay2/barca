@@ -195,11 +195,11 @@ class Board:
 
 
     def undo_hash(self, piece):
-        return  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash -= ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
 
 
     def update_hash(self,piece):
-        return  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash += ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
         
                                                 
     def current_pieces(self):
@@ -288,9 +288,9 @@ class Board:
         piece = self.board_coord[source[0]][source[1]]
 
 
-        self.current_hash = self.undo_hash(piece)
+        self.undo_hash(piece)
         piece.move_piece(source, dest)
-        self.current_hash  = self.update_hash(piece)
+        self.update_hash(piece)
         self.position_counter[self.current_hash] +=1
         
         self.fear_update(piece)
@@ -300,9 +300,9 @@ class Board:
         piece = self.board_coord[dest[0]][dest[1]]
 
         self.position_counter[self.current_hash] -=1
-        self.current_hash = self.undo_hash(piece)
+        self.undo_hash(piece)
         piece.move_piece(dest, source)
-        self.current_hash  = self.update_hash(piece)
+        self.update_hash(piece)
         
         for index , piece in enumerate(self.all_pieces()):
             piece.infear, piece.trapped = old_infear_trapped[index]
