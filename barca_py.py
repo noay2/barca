@@ -219,6 +219,17 @@ class Board:
                 for piece in piece_type:
                     yield piece
 
+    def watering_hole_counter(self):
+        white_counter = 0
+        black_counter = 0
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
+                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
+        return (black_counter, white_counter)
+        
     
     def board_evaluation(self, watering_holes_value, adjacent_watering_holes_value,center_encouragement_value, scared_pieces_value):
         score=0
@@ -228,14 +239,7 @@ class Board:
             return 0
         
         #How many watering holes you have:
-        white_counter = 0
-        black_counter = 0
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
+        black_counter, white_counter= self.watering_hole_counter
                     
         score += watering_holes_value[white_counter]
         score -= watering_holes_value[black_counter]
@@ -264,14 +268,7 @@ class Board:
                 
                 
     def victory(self):
-        white_counter = 0
-        black_counter = 0
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
+        black_counter, white_counter = watering_hole_counter()
         if black_counter >= 3:
             return "BLACK"
         elif white_counter >=3:
