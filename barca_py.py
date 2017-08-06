@@ -340,7 +340,6 @@ class AI:
 
     def take_board(self, whitetomove, pieces, human_move):
         self.board = Board(whitetomove, pieces, human_move)
-        self.ai_move = [None, None]
 
 
         
@@ -398,6 +397,7 @@ class AI:
 
                                   
     def execute(self):
+        self.ai_move = [None, None]
         if (not self.board.victory() and not self.board.draw()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
