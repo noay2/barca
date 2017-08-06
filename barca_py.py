@@ -342,6 +342,12 @@ class AI:
         self.ai_move = [None, None]
 
 
+
+    def evaluate_other_board(self, board):
+        return board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value) * 1 if board.whitetomove else -1
+
+
+
                                   
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
         if self.board.current_hash in self.board.position_score:
