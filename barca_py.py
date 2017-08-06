@@ -131,6 +131,9 @@ class Piece:
         self.infear = True
         self.trapped= True
         return
+    
+    def modify_fear(self, bool):
+        self.fear = bool
 
     def move_piece(self, source, dest):
         self.row = source[0]
@@ -182,6 +185,7 @@ class Board:
         self.current_hash =  self.initial_hash()
         self.position_counter = defaultdict(int)
         self.position_score   = defaultdict(int)
+        self.position_fear    = defaultdict([int])
 
 
 
@@ -287,7 +291,7 @@ class Board:
     def update(self, source, dest):
         piece = self.board_coord[source[0]][source[1]]
 
-
+        self.position_fear[self.current_hash] = [[piece.infear, piece.trapped] for piece in (self.all_pieces())]
         self.undo_hash(piece)
         piece.move_piece(source, dest)
         self.update_hash(piece)
@@ -303,6 +307,7 @@ class Board:
         self.undo_hash(piece)
         piece.move_piece(dest, source)
         self.update_hash(piece)
+        old_infear_trapped = self.position_fear[self.current_hash]
         
         for index , piece in enumerate(self.all_pieces()):
             piece.infear, piece.trapped = old_infear_trapped[index]
@@ -348,7 +353,6 @@ class AI:
                 current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_infear_trapped= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
                         self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
@@ -367,7 +371,6 @@ class AI:
                 current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
                 for piece in self.board.current_pieces():
                     for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        old_infear_trapped = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                         self.board.update([source_row, source_col], [dest_row, dest_col])
                         childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
                         self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
