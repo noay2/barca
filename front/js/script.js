@@ -57,8 +57,9 @@ var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
 var newgameStarted = false;
-var potential_draw_move_cache = {};
-var last_few_moves = [];
+var draw_move_cache = {};
+var fifo_for_draw_moves = [];
+var all_previous_moves = [];
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -110,7 +111,32 @@ function placeWateringHoles() {
 	wateringHoleCounter = 4;
 }
 
+function addCurrentBoardPosition(){
+	var string = "";
+	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return list[a]-list[b]})
 
+	for(var keyLen = 0; keyLen < keysSorted; keyLen++){
+		string += keysSorted[keyLen][0] + keysSorted[keyLen][1] + piece_locations[keysSorted[keyLen]];
+	}
+
+	fifo_for_draw_moves.push(string);
+
+	if(fifo_for_draw_moves.length === 21){
+		var poppedPos = fifo_for_draw_moves.shift();
+		draw_move_cache[poppedPos]--;
+		if(draw_move_cache[poppedPos] <= 0){
+			delete draw_move_cache[poppedPos];
+		}
+	}
+
+	if(string in draw_move_cache){
+		draw_move_cache[string]++;
+	}
+	else{
+		draw_move_cache[string] = 1;
+	}
+
+}
 
 function placeImageForWateringHolesIfEmpty(){
 //'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
@@ -752,6 +778,7 @@ function getAIMove(){
 		return;
 	}
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
+	API_request["draw_moves"] = fifo_for_draw_moves;
 	pieces = [];
 
 	for(var piece in piece_locations){
@@ -778,6 +805,7 @@ function getAIMove(){
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
+				addCurrentBoardPosition();
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
@@ -856,6 +884,7 @@ function clickMade(row,col,id,val){
 
 		if(value)
 		{
+			all_previous_moves.push([r1*10+c1,row*10+col]);
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
 			removeImageForScaredAndTrappedPieces();
@@ -867,6 +896,7 @@ function clickMade(row,col,id,val){
 			piece_locations[barca_array[row][col]] = row * 10 + col;
 			clicks_made = [];
 			singleMoveExists = {};
+			addCurrentBoardPosition();
 			calculateScaredPieces();
 			calculateTrappedPieces();
 			placeImageForScaredAndTrappedPieces();
@@ -932,6 +962,8 @@ function startGame(){
 			fear_counter = 0;
 			wateringHoleCounter = 0;
 			valid_clicks = [];
+			draw_move_counter = {};
+			last_few_moves = [];
 			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
@@ -951,6 +983,8 @@ function startGame(){
 		fear_counter = 0;
 		wateringHoleCounter = 0;
 		valid_clicks = [];
+		draw_move_counter = {};
+		last_few_moves = [];
 		clearBarcaBoard();
 		newBoard();
 		placeInitImage();
@@ -972,6 +1006,8 @@ function resetGame(){
 			fear_counter = 0;
 			wateringHoleCounter = 0;
 			valid_clicks = [];
+			draw_move_counter = {};
+			last_few_moves = [];
 			clearBarcaBoard();
 			newBoard();
 			placeInitImage();
