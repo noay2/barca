@@ -84,27 +84,26 @@ class Piece:
         if not(self.infear):
             for piece_type in self.team_pieces:
                 for piece in piece_type:
-                    if piece.infear and (not piece.trapped) and (piece.color ==self.color):
+                    if piece.infear and (not piece.trapped):
                         return
-        else:
-            rowt = self.row
-            colt = self.col
-            for rowd in range(-1,2,1):
-                for cold in range(-1,2,1):
-                    if (rowd ==0) and (cold==0):
-                        pass
-                    elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
-                       or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
-                        colt += cold
-                        rowt += rowd
-                        while (rowt >=0) and (rowt < Piece.rows) and\
-                              (colt >=0) and    (colt<Piece.cols) and self.board_coord[rowt][colt] == None:
-                            if (not self.potential_infear_of(rowt,colt)) or self.trapped:
-                                yield [self.row, self.col, rowt , colt]
-                            rowt+=rowd
-                            colt+=cold
-                    rowt = self.row
-                    colt = self.col
+        rowt = self.row
+        colt = self.col
+        for rowd in range(-1,2,1):
+            for cold in range(-1,2,1):
+                if (rowd ==0) and (cold==0):
+                    pass
+                elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
+                   or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
+                    colt += cold
+                    rowt += rowd
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board_coord[rowt][colt] == None:
+                        if (not self.potential_infear_of(rowt,colt)) or self.trapped:
+                            yield [self.row, self.col, rowt , colt]
+                        rowt+=rowd
+                        colt+=cold
+                rowt = self.row
+                colt = self.col
 
     def modify_fear(self, hashed_infear = None, hashed_trapped = None):
         if hashed_infear != None and hashed_trapped != None:
@@ -140,7 +139,6 @@ class Piece:
             self.trapped= True
             return
     
-
 
     def move_piece(self, source, dest):
         self.board_coord[source[0]][source[1]] = None
@@ -182,7 +180,7 @@ class Board:
     
     
     
-    def __init__(self,whitetomove, pieces):
+    def __init__(self,whitetomove, pieces, human_move, previous_moves):
         self.whitetomove = whitetomove
         self.board_coord = [[None for j in range(10)] for i in range(10) ]
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
@@ -191,14 +189,33 @@ class Board:
 
 
 
-        self.current_hash =  self.initial_hash()
         self.position_counter = defaultdict(int)
         self.position_score   = defaultdict(int)
         self.position_fear    = defaultdict(list)
+        self.add_other_moves(previous_moves)
+        self.current_hash =  self.initial_hash()
+
+        
+        
+        
+    def add_other_moves(self, other_moves):
+        for board in other_moves:
+            self.position_counter[self.other_move_hash(board)] +=1
+            
 
 
-
+    def other_move_hash(board):
+        number = 0
+        for piece_index in range(12):
+            piece_color = 'WHITE' if board[4 * piece_index +0] == 'W' else 'BLACK'
+        piece_type  = 'MOUSE' if board[4 * piece_index +1] == 'M' else ('ELEPHANT' if board[4* piece_index +1] == 'E' else 'LION')
+        piece_row   = int(board[4* piece_index +2])
+        piece_col   = int(board[4*piece_index +3])
+        number     +=  ( Piece.piece_color_val[piece_color] * 3 + Piece.piece_type_val[piece_type] +1   ) \
+                                        *  (8  **  (piece_row * 10 + piece_col))
+        return number
                 
+        
 
     def initial_hash(self):
         number = 0
@@ -342,8 +359,8 @@ class AI:
         self.recurse = 3
 
 
-    def take_board(self, whitetomove, pieces, human_move):
-        self.board = Board(whitetomove, pieces, human_move)
+    def take_board(self, whitetomove, pieces, human_move, previous_moves):
+        self.board = Board(whitetomove, pieces, human_move, previous_moves)
 
 
         
@@ -404,6 +421,7 @@ class AI:
         self.ai_move = [None, None]
         if (not self.board.victory() and not self.board.draw()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
+            print(self.ai_move)
             self.board.update(self.ai_move[0], self.ai_move[1])
             
             
@@ -420,13 +438,61 @@ class Backend:
         self.center_encouragement_value = center_encouragement_value
         self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
 
-    def receive_data(self, whitetomove, pieces,human_move):
-        self.AI.take_board(whitetomove, pieces, human_move)
+    def receive_data(self, whitetomove, pieces,human_move, previous_moves = []):
+        self.AI.take_board(whitetomove, pieces, human_move, previous_moves)
         self.AI.execute()
-
-
 
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
 
+if __name__ == '__main__':
+    j  = time.time()
+    backend = Backend()
+    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
+                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 4, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 4, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]], [[1,3], [3,5]])
+
+    print(backend.send_updated_data())
+
+
+    for i in backend.AI.board.board_coord:
+        print(i)
+    print()
+    output = backend.send_updated_data()
+    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
+                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                         ['WHITE', 'LION', 1, 3, False, False],
+                         ['WHITE', 'MOUSE', 1, 5, False, False],
+                         ['WHITE', 'LION', 1, 6, False, False],
+                         ['WHITE', 'MOUSE', 1, 4, True, False],
+                         ['BLACK', 'LION', 5, 3, False, False],
+                         ['BLACK', 'LION', 7, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 4, False, False],
+                         ['BLACK', 'MOUSE', 8, 5, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
+                         ['BLACK', 'ELEPHANT', 9, 5, False, False]],[[1,3], [3,5]])
+
+    output = backend.send_updated_data()
+    print(output)
+    backend.receive_data(True,
+                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
+                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
+                                                                   ['BLACK', 'LION', 8, 3, False, False],
+                                                                   ['BLACK', 'LION', 8, 6, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+                                                                   ['WHITE', 'LION', 1, 3, False, False],
+                                                                   ['WHITE', 'LION', 1, 6, False, False]],[[1,3], [3,5]])
