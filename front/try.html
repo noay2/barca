@@ -52,21 +52,34 @@ https://serene-everglades-79780.herokuapp.com/api
           <option value = "PLAYER V. PLAYER" data-icon = "glyphicon-user">Human</option>
         </optgroup>
       </select>
-      &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;
       <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
         <optgroup label = "Side">
           <option value = "WHITE" selected = "selected">White</option>
           <option value = "BLACK">Black</option>
         </optgroup>
       </select>
-      &nbsp;&nbsp;&nbsp;
+      &nbsp;&nbsp;
       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
       &nbsp;&nbsp;&nbsp;
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
         <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
         </span>
       </button>
-
+      &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "undoMove" onclick="undoMove()">
+        <span class = "fa fa-undo" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "redoMove" onclick="redoMove()">
+        <span class = "fa fa-repeat" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "button2" id = "playFromHere" onclick="playFromHere()">
+        Play From Here
+      </button>
     </div>
 </div>
 

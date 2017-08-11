@@ -113,10 +113,16 @@ function placeWateringHoles() {
 
 function addCurrentBoardPosition(){
 	var string = "";
-	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return list[a]-list[b]})
+	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
 
-	for(var keyLen = 0; keyLen < keysSorted; keyLen++){
-		string += keysSorted[keyLen][0] + keysSorted[keyLen][1] + piece_locations[keysSorted[keyLen]];
+	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
+		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
+		if(piece_locations[keysSorted[keyLen]] < 10){
+			string += '0' + piece_locations[keysSorted[keyLen]];
+		}
+		else{
+			string += piece_locations[keysSorted[keyLen]];
+		}
 	}
 
 	fifo_for_draw_moves.push(string);
@@ -178,15 +184,7 @@ function initializeGame(){
 	initValidClicks();
 }
 
-/*Initializes the initial valid clicks on the board*/
-function initValidClicks(){
-	valid_clicks.push(83);
-	valid_clicks.push(84);
-	valid_clicks.push(85);
-	valid_clicks.push(86);
-	valid_clicks.push(94);
-	valid_clicks.push(95);
-
+function initBoardPieces(){
 	if(player_TURN === "BLACK"){
 		barca_array[0][4] = "WE1";
 		barca_array[0][5] = "WE2";
@@ -243,7 +241,18 @@ function initValidClicks(){
 		piece_locations["WE1"] = 94;
 		piece_locations["WE2"] = 95;
 	}
+}
 
+/*Initializes the initial valid clicks on the board*/
+function initValidClicks(){
+	valid_clicks.push(83);
+	valid_clicks.push(84);
+	valid_clicks.push(85);
+	valid_clicks.push(86);
+	valid_clicks.push(94);
+	valid_clicks.push(95);
+
+	initBoardPieces();
 	checkIfItIsAIsMove();
 }
 
@@ -810,6 +819,7 @@ function getAIMove(){
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
 				checkVictory();
+				console.log("Move made");
 				AIsmove = false;
 				printTurn();
 			},
@@ -963,9 +973,11 @@ function startGame(){
 			wateringHoleCounter = 0;
 			valid_clicks = [];
 			draw_move_counter = {};
-			last_few_moves = [];
+			fifo_for_draw_moves = [];
+			all_previous_moves = [];
 			clearBarcaBoard();
 			newBoard();
+			initBoardPieces();
 			placeInitImage();
 			placeWateringHoles();
 			gameStarted = true;
@@ -984,9 +996,11 @@ function startGame(){
 		wateringHoleCounter = 0;
 		valid_clicks = [];
 		draw_move_counter = {};
-		last_few_moves = [];
+		all_previous_moves = [];
+		fifo_for_draw_moves = [];
 		clearBarcaBoard();
 		newBoard();
+		initBoardPieces();
 		placeInitImage();
 		placeWateringHoles();
 		gameStarted = true;
@@ -1007,9 +1021,11 @@ function resetGame(){
 			wateringHoleCounter = 0;
 			valid_clicks = [];
 			draw_move_counter = {};
-			last_few_moves = [];
+			all_previous_moves = [];
+			fifo_for_draw_moves = [];
 			clearBarcaBoard();
 			newBoard();
+			initBoardPieces();
 			placeInitImage();
 			placeWateringHoles();
 			gameStarted = true;
@@ -1017,4 +1033,16 @@ function resetGame(){
 			initializeGame();
 		}
 	}
+}
+
+function undoMove(){
+
+}
+
+function redoMove(){
+
+}
+
+function playFromHere(){
+
 }
