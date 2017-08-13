@@ -2,8 +2,6 @@ import time
 import random
 import copy
 from collections import defaultdict
-
-
 ##########################################
 class Piece:
     colors = ["BLACK", "WHITE"]
@@ -30,8 +28,6 @@ class Piece:
                             "LION":  { (i,j) for j in range(-1,2,1) for i in range(-1,2,1) if (i==0 or j==0 )and not(i==0 and j==0)   },
                             "ELEPHANT":{(i,j)for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   }
                             }
-    
-    
     
     def __init__(self, piece_arr, board_coord, pieces):
         self.color   = piece_arr[0]
@@ -84,7 +80,7 @@ class Piece:
         if not(self.infear):
             for piece_type in self.team_pieces:
                 for piece in piece_type:
-                    if piece.infear and (not piece.trapped):
+                    if piece.infear and (not piece.trapped) and (piece.color ==self.color):
                         return
         rowt = self.row
         colt = self.col
@@ -105,46 +101,40 @@ class Piece:
                 rowt = self.row
                 colt = self.col
 
-    def modify_fear(self, hashed_infear = None, hashed_trapped = None):
-        if hashed_infear != None and hashed_trapped != None:
-            self.infear = hashed_infear
-            self.trapped = hashed_trapped
-            return
-        elif (not self.potential_infear_of(self.row, self.col)):
+    def modify_fear(self):
+        if (not self.potential_infear_of(self.row, self.col)):
             self.infear = False
             self.trapped = False
             return
-        else:
-            rowt = self.row
-            colt = self.col
-            for rowd in range(-1,2,1):
-                for cold in range(-1,2,1):
-                    if (rowd ==0) and (cold==0):
-                        pass
-                    elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
-                       or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
-                        colt += cold
-                        rowt += rowd
-                        while (rowt >=0) and (rowt < Piece.rows) and\
-                              (colt >=0) and    (colt<Piece.cols) and self.board_coord[rowt][colt] == None:
-                            if (not self.potential_infear_of(rowt,colt)):
-                                self.infear = True
-                                self.trapped = False
-                                return
-                            rowt+=rowd
-                            colt+=cold
-                    rowt = self.row
-                    colt = self.col
-            self.infear = True
-            self.trapped= True
-            return
-    
+        rowt = self.row
+        colt = self.col
+        for rowd in range(-1,2,1):
+            for cold in range(-1,2,1):
+                if (rowd ==0) and (cold==0):
+                    pass
+                elif ( (abs(cold) == abs(rowd)) and (self.type == "LION" or self.type == "ELEPHANT")) \
+                   or (( (cold ==0) or (rowd==0)) and (self.type == "MOUSE" or self.type == "ELEPHANT")):
+                    colt += cold
+                    rowt += rowd
+                    while (rowt >=0) and (rowt < Piece.rows) and\
+                          (colt >=0) and    (colt<Piece.cols) and self.board_coord[rowt][colt] == None:
+                        if (not self.potential_infear_of(rowt,colt)):
+                            self.infear = True
+                            self.trapped = False
+                            return
+                        rowt+=rowd
+                        colt+=cold
+                rowt = self.row
+                colt = self.col
+        self.infear = True
+        self.trapped= True
+        return
 
-    def move_piece(self, source, dest):
-        self.board_coord[source[0]][source[1]] = None
-        self.board_coord[dest[0]][dest[1]] = self
+    def update_piece(self, source, dest):
         self.row = dest[0]
         self.col = dest[1]
+        self.board_coord[source[0]][source[1]] = None
+        self.board_coord[dest[0]][dest[1]]     = self
         
     def send_updated_data(self):
 
@@ -178,9 +168,7 @@ class Board:
                             }
 
     
-    
-    
-    def __init__(self,whitetomove, pieces, human_move, previous_moves):
+    def __init__(self,whitetomove, pieces):
         self.whitetomove = whitetomove
         self.board_coord = [[None for j in range(10)] for i in range(10) ]
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
@@ -189,33 +177,12 @@ class Board:
 
 
 
-        self.position_counter = defaultdict(int)
-        self.position_score   = defaultdict(int)
-        self.position_fear    = defaultdict(list)
-        self.add_other_moves(previous_moves)
         self.current_hash =  self.initial_hash()
-
-        
-        
-        
-    def add_other_moves(self, other_moves):
-        for board in other_moves:
-            self.position_counter[self.other_move_hash(board)] +=1
-            
+        self.position_counter = defaultdict(int)
 
 
-    def other_move_hash(board):
-        number = 0
-        for piece_index in range(12):
-            piece_color = 'WHITE' if board[4 * piece_index +0] == 'W' else 'BLACK'
-        piece_type  = 'MOUSE' if board[4 * piece_index +1] == 'M' else ('ELEPHANT' if board[4* piece_index +1] == 'E' else 'LION')
-        piece_row   = int(board[4* piece_index +2])
-        piece_col   = int(board[4*piece_index +3])
-        number     +=  ( Piece.piece_color_val[piece_color] * 3 + Piece.piece_type_val[piece_type] +1   ) \
-                                        *  (8  **  (piece_row * 10 + piece_col))
-        return number
+
                 
-        
 
     def initial_hash(self):
         number = 0
@@ -225,11 +192,11 @@ class Board:
 
 
     def undo_hash(self, piece):
-        self.current_hash -= ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        return  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
 
 
     def update_hash(self,piece):
-        self.current_hash += ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        return  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
         
                                                 
     def current_pieces(self):
@@ -249,7 +216,13 @@ class Board:
                 for piece in piece_type:
                     yield piece
 
-    def watering_hole_counter(self):
+    
+    def board_evaluation(self, watering_holes_value, adjacent_watering_holes_value,\
+                               scared_pieces_value, center_encouragement_value):
+        score=0
+        
+
+        #How many watering holes you have:
         white_counter = 0
         black_counter = 0
         for watering_hole_row, watering_hole_col in Board.watering_holes:
@@ -258,28 +231,19 @@ class Board:
                     black_counter +=1
                 else:
                     white_counter +=1
-        return (black_counter, white_counter)
-        
-    
-    def board_evaluation(self, watering_holes_value, adjacent_watering_holes_value,center_encouragement_value, scared_pieces_value):
-        score=0
-
-        #Draw
-        if self.position_counter[self.current_hash] >=3:
-            return 0
-        
-        #How many watering holes you have:
-        black_counter, white_counter= self.watering_hole_counter()
                     
         score += watering_holes_value[white_counter]
         score -= watering_holes_value[black_counter]
+
+
+
+
 
         for piece in self.all_pieces():
             #Are you next to a watering hole:
             for watering_hole_row, watering_hole_col in Board.watering_holes:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
                     score+=  adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
-            
             #How close are you to the center 
             score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
             
@@ -287,30 +251,35 @@ class Board:
             if piece.infear:
                 score -=scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
 
+
+
+            
+
         return score
 
     
     def fear_update(self,moving_piece):
-        if self.current_hash in self.position_fear:
-            hashed_infear_trapped = self.position_fear[self.current_hash]
-            for index , piece in enumerate(self.all_pieces()):
-                piece.modify_fear(hashed_infear_trapped[index][0],hashed_infear_trapped[index][1])
-            
-        else:
-            for piece in self.all_pieces():
-                if (piece.infear) or (piece.infear_of(moving_piece)) :
-                    piece.modify_fear()
+        for piece in self.all_pieces():
+            if (piece.infear) or (piece.infear_of(moving_piece)) :
+                piece.modify_fear()
 
                 
                 
     def victory(self):
-        black_counter, white_counter = self.watering_hole_counter()
+        white_counter = 0
+        black_counter = 0
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
+                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
         if black_counter >= 3:
             return "BLACK"
         elif white_counter >=3:
             return "WHITE"
         else:
-            return None
+            return False
 
     def draw(self):
         return self.position_counter[self.current_hash] >=3
@@ -322,26 +291,30 @@ class Board:
                 
     def update(self, source, dest):
         piece = self.board_coord[source[0]][source[1]]
-        self.position_fear[self.current_hash] = [[piece.infear, piece.trapped] for piece in (self.all_pieces())]
-        
-        self.undo_hash(piece)
-        piece.move_piece(source, dest)
-        self.update_hash(piece)
+
+
+        self.current_hash = self.undo_hash(piece)
+        piece.update_piece(source,dest)
+        self.current_hash  = self.update_hash(piece)
         self.position_counter[self.current_hash] +=1
         
         self.fear_update(piece)
         self.switch_turn()
 
-    def undo_update(self, source, dest):
+    def undo_update(self, source, dest, old_infear_trapped):
         piece = self.board_coord[dest[0]][dest[1]]
 
         self.position_counter[self.current_hash] -=1
-        self.undo_hash(piece)
-        piece.move_piece(dest, source)
-        self.update_hash(piece)
-        
-        
-        self.fear_update(piece)
+        self.current_hash = self.undo_hash(piece)
+        piece.update_piece(dest, source)
+        self.current_hash  = self.update_hash(piece)
+
+
+        counter = 0
+        for piece in self.all_pieces():
+            piece.infear = old_infear_trapped[counter][0]
+            piece.trapped = old_infear_trapped[counter][1]
+            counter +=1
         self.switch_turn()
 
     def send_updated_data(self):
@@ -354,145 +327,257 @@ class AI:
     def __init__(self,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
         self.watering_holes_value = watering_holes_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
-        self.scared_pieces_value = scared_pieces_value
+        self.scared_pieces_value = scared_pieces_value 
         self.center_encouragement_value = center_encouragement_value
-        self.recurse = 3
-
-
-    def take_board(self, whitetomove, pieces, human_move, previous_moves):
-        self.board = Board(whitetomove, pieces, human_move, previous_moves)
-
-
+        self.recurse = 4
         
-        
-    def evaluate_board_abs_value(self):
-        return self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value) * 1 if board.whitetomove else -1
-           
-            
-            
-    def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
-        if self.board.current_hash in self.board.position_score:
-            return [None, None, self.board.position_score[self.board.current_hash]]
-        
-        elif recurse == 0 or self.board.victory() or self.board.draw():
-            score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
-            self.board.position_score[self.board.current_hash] = score
-            return  [None, None,score]
-
-        else:
-   
-  
-            if (self.board.whitetomove):
-                current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
-                for piece in self.board.current_pieces():
-                    for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        self.board.update([source_row, source_col], [dest_row, dest_col])
-                        childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
-                        if  childs_worst_score> current_best_score:
-                            current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
-                            alpha = max(alpha, childs_worst_score)
-                            if (alpha>beta):
-                                return [current_best_source, current_best_dest, current_best_score]
-
-                self.board.position_score[self.board.current_hash] = current_best_score                           
-                return [current_best_source, current_best_dest, current_best_score]
-
-
-
-            else:
-                current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
-                for piece in self.board.current_pieces():
-                    for source_row, source_col, dest_row, dest_col in piece.valid_moves():
-                        self.board.update([source_row, source_col], [dest_row, dest_col])
-                        childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
-                        self.board.undo_update( [source_row, source_col],[dest_row, dest_col])
-                        if  childs_best_score< current_worst_score:
-                            current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
-                            beta = min(beta, childs_best_score)
-                            if (alpha>beta):
-                                return [current_worst_source, current_worst_dest, current_worst_score]
-
-                self.board.position_score[self.board.current_hash] = current_worst_score 
-                return [current_worst_source, current_worst_dest, current_worst_score]
-
-                                  
+    def receive_data(self, whitetomove, pieces):
+        self.board_position_max_score   = {}
+        self.board_position_max_recurse = {}
+        self.board_position_min_score   = {}
+        self.board_position_min_recurse = {}
+        self.board = Board(whitetomove, pieces)
+        self.execute()
+      
     def execute(self):
-        self.ai_move = [None, None]
         if (not self.board.victory() and not self.board.draw()):
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
-            print(self.ai_move)
             self.board.update(self.ai_move[0], self.ai_move[1])
             
-            
+
     def send_updated_data(self):
         return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
+
+    def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
+
+        draw = self.board.draw()
+        if draw:
+            return 0
+
+        
+        victory = self.board.victory()
+        if victory:
+            return 1000000 * (1 if victory== 'WHITE' else -1)
+
+
+
+
+
+
+
+
+
+        if (self.board.whitetomove):
+
+                
+            if self.board.current_hash in self.board_position_max_recurse and \
+                self.board_position_max_recurse[self.board.current_hash] >= recurse:
+                return [None, None, self.board_position_max_score[self.board.current_hash]]
+
+            if recurse ==0:
+                score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
+                self.board_position_max_score[self.board.current_hash] = score
+                self.board_position_max_recurse[self.board.current_hash] = 0
+                return [None, None, score]
+
+            current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
+            for piece in self.board.current_pieces():
+                for source_row, source_col, dest_row, dest_col in piece.valid_moves():
+                    old_infear_trapped= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
+                    self.board.update([source_row, source_col], [dest_row, dest_col])
+                    childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
+                    self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                    if  childs_worst_score> current_best_score:
+                        current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
+                        alpha = max(alpha, childs_worst_score)
+                        if (alpha>beta):
+                            return [current_best_source, current_best_dest, current_best_score]
+            self.board_position_max_score[self.board.current_hash] = current_best_score
+            self.board_position_max_recurse[self.board.current_hash]  = recurse
+            return [current_best_source, current_best_dest, current_best_score]
+
+
+
+        else:
+
+            if self.board.current_hash in self.board_position_min_recurse and \
+                self.board_position_min_recurse[self.board.current_hash] >= recurse:
+                return [None, None, self.board_position_min_score[self.board.current_hash]]
+
+
+            if recurse ==0:
+                score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
+                self.board_position_min_score[self.board.current_hash] = score
+                self.board_position_min_recurse[self.board.current_hash] = 0
+                return [None, None, score]
+            
+            current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
+            for piece in self.board.current_pieces():
+                for source_row, source_col, dest_row, dest_col in piece.valid_moves():
+                    old_infear_trapped = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
+                    self.board.update([source_row, source_col], [dest_row, dest_col])
+                    childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
+                    self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
+                    if  childs_best_score< current_worst_score:
+                        current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
+                        beta = min(beta, childs_best_score)
+                        if (alpha>beta):
+                            return [current_worst_source, current_worst_dest, current_worst_score]
+            self.board_position_min_score[self.board.current_hash] = current_worst_score
+            self.board_position_min_recurse[self.board.current_hash]  = recurse
+            return [current_worst_source, current_worst_dest, current_worst_score]
+
+
 
 ##########################################
 class Backend:
     def __init__(self, watering_holes_value = [20,50], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
-        
         self.watering_holes_value = [0] + watering_holes_value + [1000000]
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
         self.center_encouragement_value = center_encouragement_value
         self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
 
-    def receive_data(self, whitetomove, pieces,human_move, previous_moves = []):
-        self.AI.take_board(whitetomove, pieces, human_move, previous_moves)
-        self.AI.execute()
+
+    def receive_data(self, whitetomove, pieces,human_move):
+        self.AI.receive_data(whitetomove,pieces)
+
+
 
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+if __name__ == "__main__":
+##
+##    j  = time.time()
+##    backend = Backend()
+##    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
+##                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
+##                                                                   ['BLACK', 'MOUSE', 4, 4, False, False],
+##                                                                   ['BLACK', 'MOUSE', 4, 5, False, False],
+##                                                                   ['BLACK', 'LION', 8, 3, False, False],
+##                                                                   ['BLACK', 'LION', 8, 6, False, False],
+##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+##                                                                   ['WHITE', 'LION', 1, 3, False, False],
+##                                                                   ['WHITE', 'LION', 1, 6, False, False]], [[1,3], [3,5]])
+##
+##    print(backend.send_updated_data())
+##
+##
+##    for i in backend.AI.board.board:
+##        print(i)
+##    print()
+##    output = backend.send_updated_data()
+##    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
+##                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
+##                         ['WHITE', 'LION', 1, 3, False, False],
+##                         ['WHITE', 'MOUSE', 1, 5, False, False],
+##                         ['WHITE', 'LION', 1, 6, False, False],
+##                         ['WHITE', 'MOUSE', 1, 4, True, False],
+##                         ['BLACK', 'LION', 5, 3, False, False],
+##                         ['BLACK', 'LION', 7, 4, False, False],
+##                         ['BLACK', 'MOUSE', 8, 4, False, False],
+##                         ['BLACK', 'MOUSE', 8, 5, False, False],
+##                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
+##                         ['BLACK', 'ELEPHANT', 9, 5, False, False]],[[1,3], [3,5]])
+##
+##    output = backend.send_updated_data()
+##    print(output)
+##    backend.receive_data(True,
+##                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
+##                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
+##                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
+##                                                                   ['BLACK', 'LION', 8, 3, False, False],
+##                                                                   ['BLACK', 'LION', 8, 6, False, False],
+##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
+##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
+##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
+##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
+##                                                                   ['WHITE', 'LION', 1, 3, False, False],
+##                                                                   ['WHITE', 'LION', 1, 6, False, False]],[[1,3], [3,5]])
+##
+##
+##    for i in backend.AI.board.board:
+##        print(i)
+##    print()
+##    output = backend.send_updated_data()
+##    print(time.time() -j)
 
-if __name__ == '__main__':
-    j  = time.time()
+
     backend = Backend()
-    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
-                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 4, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 4, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]], [[1,3], [3,5]])
+    backend.receive_data(False,[["WHITE","MOUSE",0,3,False,False],
+     ["BLACK","ELEPHANT",0,4,True,False],
+     ["BLACK","ELEPHANT",0,5,False,False],
+     ["BLACK","MOUSE",1,4,False,False],
+     ["BLACK","MOUSE",3,6,False,False],
+     ["BLACK","LION",4,0,False,False],
+     ["BLACK","LION",4,3,False,False],
+     ["WHITE","LION",8,3,False,False],
+     ["WHITE","MOUSE",8,5,False,False],
+     ["WHITE","LION",8,6,False,False],
+     ["WHITE","ELEPHANT",9,4,False,False],
+     ["WHITE","ELEPHANT",9,5,False,False]],
+     [[0,0],[0,4]])
 
     print(backend.send_updated_data())
 
 
+    for i in range(len(backend.AI.board.board_coord)):
+        print(backend.AI.board.board_coord[9-i])
+    print()
+
+
+
+
+
+
+
+
+
+    
+    backend.receive_data(False,[["BLACK","ELEPHANT",0,4,False,False],
+    ["BLACK","LION",1,0,False,False],
+    ["BLACK","LION",1,3,False,False],
+    ["BLACK","MOUSE",1,4,False,False],
+    ["BLACK","MOUSE",3,6,False,False],
+    ["WHITE","MOUSE",6,4,False,False],
+    ["WHITE","LION",8,3,False,False],
+    ["WHITE","MOUSE",8,5,False,False],
+    ["WHITE","LION",8,6,False,False],
+    ["BLACK","ELEPHANT",6,5,True,False],
+    ["WHITE","ELEPHANT",9,4,False,False],
+    ["WHITE","ELEPHANT",9,5,False,False]],
+    [[0,0],[0,4]])
+
+    print(backend.send_updated_data())
+
     for i in backend.AI.board.board_coord:
         print(i)
     print()
-    output = backend.send_updated_data()
-    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
-                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                         ['WHITE', 'LION', 1, 3, False, False],
-                         ['WHITE', 'MOUSE', 1, 5, False, False],
-                         ['WHITE', 'LION', 1, 6, False, False],
-                         ['WHITE', 'MOUSE', 1, 4, True, False],
-                         ['BLACK', 'LION', 5, 3, False, False],
-                         ['BLACK', 'LION', 7, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 4, False, False],
-                         ['BLACK', 'MOUSE', 8, 5, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
-                         ['BLACK', 'ELEPHANT', 9, 5, False, False]],[[1,3], [3,5]])
 
-    output = backend.send_updated_data()
-    print(output)
-    backend.receive_data(True,
-                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
-                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
-                                                                   ['BLACK', 'LION', 8, 3, False, False],
-                                                                   ['BLACK', 'LION', 8, 6, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-                                                                   ['WHITE', 'LION', 1, 3, False, False],
-                                                                   ['WHITE', 'LION', 1, 6, False, False]],[[1,3], [3,5]])
+
+
+
+    backend.receive_data(False,[["BLACK","ELEPHANT",0,2,False,False],
+    ["BLACK","ELEPHANT",0,8,False,False],
+    ["BLACK","MOUSE",1,4,False,False],
+    ["BLACK","LION",2,2,False,False],
+    ["BLACK","MOUSE",4,3,False,False],
+    ["WHITE","ELEPHANT",5,1,False,False],
+    ["WHITE","MOUSE",6,5,False,False],
+    ["WHITE","LION",8,3,False,False],
+    ["WHITE","MOUSE",8,5,False,False],
+    ["WHITE","LION",8,6,False,False],
+    ["BLACK","LION",5,2,True,False],
+    ["WHITE","ELEPHANT",9,5,False,False]],
+    [[0,0],[0,4]])
+
+    print(backend.send_updated_data())
+
+    for i in backend.AI.board.board_coord:
+        print(i)
+    print()
+
