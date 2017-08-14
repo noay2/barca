@@ -16,6 +16,12 @@ class Piece:
                                 (int(0),int(cols/2 -1)),(int(0),int(cols/2)), (int(1),int(cols/2 -1)),
                                 (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
              }
+             
+    white_player_initial_hash =     419616483301654593334721783932067741879967698371037654176895614914325882259333160480768
+    black_player_initial_hash = 		209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
+
+
+
     watering_holes      =\
             {
                               (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
@@ -154,6 +160,11 @@ class Board:
                                 (int(0),int(cols/2 -1)),(int(0),int(cols/2)), (int(1),int(cols/2 -1)),
                                 (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
              }
+    white_player_initial_hash =     419616483301654593334721783932067741879967698371037654176895614914325882259333160480768
+    black_player_initial_hash = 		209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
+
+
+
     watering_holes      =\
             {
                               (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
@@ -168,7 +179,7 @@ class Board:
                             }
 
     
-    def __init__(self,whitetomove, pieces):
+    def __init__(self,whitetomove, pieces,player_color, previous_moves):
         self.whitetomove = whitetomove
         self.board_coord = [[None for j in range(10)] for i in range(10) ]
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
@@ -176,27 +187,44 @@ class Board:
                 Piece(piece, self.board_coord, self.pieces)
 
 
-
-        self.current_hash =  self.initial_hash()
         self.position_counter = defaultdict(int)
+        self.hash_previous_moves(player_color,previous_moves)
+        self.find_current_hash()
 
 
 
+    def hash_previous_moves(self,player_color,previous_moves):
+        current_hash= Board.white_player_initial_hash if player_color == 'WHITE' else Board.black_player_initial_hash
+        self.position_counter[current_hash] +=1
+
+        for previous_move in previous_moves:
+            piece_color, piece_type, source_row, source_col, dest_row, dest_col = previous_move
+            current_hash = self.undo_hash_previous_move(current_hash, piece_color, piece_type, source_row, source_col)
+            current_hash = self.update_hash_previous_move(current_hash, piece_color, piece_type, dest_row, dest_col)
+            self.position_counter[current_hash] +=1
+            return
+          
+    
                 
+    def undo_hash_previous_move(self,hash, color, type, row, col):
+        return  hash- ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * 10 + col))
 
-    def initial_hash(self):
+
+    def update_hash_previous_move(self,hash, color, type, row, col):
+        return  hash + ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * 10 + col))
+
+    def find_current_hash(self):
         number = 0
         for piece in self.all_pieces():
             number +=  ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
-        return number
-
+        self.current_hash = number        
 
     def undo_hash(self, piece):
-        return  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash=  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
 
 
     def update_hash(self,piece):
-        return  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash=  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
         
                                                 
     def current_pieces(self):
@@ -293,9 +321,9 @@ class Board:
         piece = self.board_coord[source[0]][source[1]]
 
 
-        self.current_hash = self.undo_hash(piece)
+        self.undo_hash(piece)
         piece.update_piece(source,dest)
-        self.current_hash  = self.update_hash(piece)
+        self.update_hash(piece)
         self.position_counter[self.current_hash] +=1
         
         self.fear_update(piece)
@@ -305,9 +333,9 @@ class Board:
         piece = self.board_coord[dest[0]][dest[1]]
 
         self.position_counter[self.current_hash] -=1
-        self.current_hash = self.undo_hash(piece)
+        self.undo_hash(piece)
         piece.update_piece(dest, source)
-        self.current_hash  = self.update_hash(piece)
+        self.update_hash(piece)
 
 
         counter = 0
@@ -329,14 +357,23 @@ class AI:
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value 
         self.center_encouragement_value = center_encouragement_value
-        self.recurse = 4
+        self.recurse = 3
         
-    def receive_data(self, whitetomove, pieces):
-        self.board_position_max_score   = {}
-        self.board_position_max_recurse = {}
-        self.board_position_min_score   = {}
-        self.board_position_min_recurse = {}
-        self.board = Board(whitetomove, pieces)
+    def receive_data(self, whitetomove, pieces,player_color, previous_moves):
+        self.board_position_base_score   = {}
+        
+        self.board_position_black_recurse = {}
+        self.board_position_black_score = {}
+        self.board_position_black_move  = {}
+        
+        
+        self.board_position_white_recurse = {}
+        self.board_position_white_score = {}
+        self.board_position_white_move = {}
+        
+        self.board = Board(whitetomove, pieces,player_color, previous_moves)
+        
+        
         self.execute()
       
     def execute(self):
@@ -352,34 +389,30 @@ class AI:
 
         draw = self.board.draw()
         if draw:
-            return 0
+            return [None, None, 0]
 
         
         victory = self.board.victory()
         if victory:
-            return 1000000 * (1 if victory== 'WHITE' else -1)
+            return [None, None, 1000000 * (1 if victory== 'WHITE' else -1) ]
 
 
+        if recurse == 0:
+            if self.board.current_hash  in self.board_position_base_score:
+                return [None, None, self.board_position_base_score[self.board.current_hash]]
 
 
-
-
+            score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
+            self.board_position_base_score[self.board.current_hash] = score
+            return [None, None, score]
 
 
 
         if (self.board.whitetomove):
-
-                
-            if self.board.current_hash in self.board_position_max_recurse and \
-                self.board_position_max_recurse[self.board.current_hash] >= recurse:
-                return [None, None, self.board_position_max_score[self.board.current_hash]]
-
-            if recurse ==0:
-                score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
-                self.board_position_max_score[self.board.current_hash] = score
-                self.board_position_max_recurse[self.board.current_hash] = 0
-                return [None, None, score]
-
+            if self.board.current_hash in self.board_position_white_recurse\
+            			and recurse <= self.board_position_white_recurse[self.board.current_hash]:
+                return self.board_position_white_move[self.board.current_hash] + self.board_position_white_score[self.board.current_hash]
+        		
             current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
@@ -392,25 +425,20 @@ class AI:
                         alpha = max(alpha, childs_worst_score)
                         if (alpha>beta):
                             return [current_best_source, current_best_dest, current_best_score]
-            self.board_position_max_score[self.board.current_hash] = current_best_score
-            self.board_position_max_recurse[self.board.current_hash]  = recurse
+                            
+            self.board_position_white_recurse[self.board.current_hash] = recurse
+            self.board_position_white_move[self.board.current_hash] =  [current_best_source, current_best_dest]
+            self.board_position_white_score[self.board.current_hash] =   current_best_score
             return [current_best_source, current_best_dest, current_best_score]
 
 
 
         else:
-
-            if self.board.current_hash in self.board_position_min_recurse and \
-                self.board_position_min_recurse[self.board.current_hash] >= recurse:
-                return [None, None, self.board_position_min_score[self.board.current_hash]]
-
-
-            if recurse ==0:
-                score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
-                self.board_position_min_score[self.board.current_hash] = score
-                self.board_position_min_recurse[self.board.current_hash] = 0
-                return [None, None, score]
-            
+        
+            if self.board.current_hash in self.board_position_black_recurse\
+            			and recurse <= self.board_position_black_recurse[self.board.current_hash]:
+                  return self.board_position_black_move[self.board.current_hash] + self.board_position_black_score[self.board.current_hash]
+        
             current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
@@ -423,8 +451,10 @@ class AI:
                         beta = min(beta, childs_best_score)
                         if (alpha>beta):
                             return [current_worst_source, current_worst_dest, current_worst_score]
-            self.board_position_min_score[self.board.current_hash] = current_worst_score
-            self.board_position_min_recurse[self.board.current_hash]  = recurse
+                            
+            self.board_position_black_recurse[self.board.current_hash] = recurse
+            self.board_position_black_move[self.board.current_hash] =  [current_worst_source, current_worst_dest]
+            self.board_position_white_score[self.board.current_hash] =   current_worst_score
             return [current_worst_source, current_worst_dest, current_worst_score]
 
 
@@ -439,8 +469,8 @@ class Backend:
         self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
 
 
-    def receive_data(self, whitetomove, pieces,human_move):
-        self.AI.receive_data(whitetomove,pieces)
+    def receive_data(self, whitetomove, pieces,player_color = 'WHITE', previous_moves = [ ] ):
+        self.AI.receive_data(whitetomove,pieces,player_color, previous_moves)
 
 
 
