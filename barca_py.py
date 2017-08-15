@@ -411,7 +411,7 @@ class AI:
         if (self.board.whitetomove):
             if self.board.current_hash in self.board_position_white_recurse\
             			and recurse <= self.board_position_white_recurse[self.board.current_hash]:
-                return self.board_position_white_move[self.board.current_hash] + self.board_position_white_score[self.board.current_hash]
+                return self.board_position_white_move[self.board.current_hash] + [self.board_position_white_score[self.board.current_hash]]
         		
             current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
             for piece in self.board.current_pieces():
@@ -437,7 +437,7 @@ class AI:
         
             if self.board.current_hash in self.board_position_black_recurse\
             			and recurse <= self.board_position_black_recurse[self.board.current_hash]:
-                  return self.board_position_black_move[self.board.current_hash] + self.board_position_black_score[self.board.current_hash]
+                  return self.board_position_black_move[self.board.current_hash] + [self.board_position_black_score[self.board.current_hash]]
         
             current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
             for piece in self.board.current_pieces():
