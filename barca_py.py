@@ -454,7 +454,7 @@ class AI:
                             
             self.board_position_black_recurse[self.board.current_hash] = recurse
             self.board_position_black_move[self.board.current_hash] =  [current_worst_source, current_worst_dest]
-            self.board_position_white_score[self.board.current_hash] =   current_worst_score
+            self.board_position_black_score[self.board.current_hash] =   current_worst_score
             return [current_worst_source, current_worst_dest, current_worst_score]
 
 
