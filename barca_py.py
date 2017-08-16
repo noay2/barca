@@ -359,7 +359,6 @@ class AI:
         self.center_encouragement_value = center_encouragement_value
         self.recurse = 3
         
-    def receive_data(self, whitetomove, pieces,player_color, previous_moves):
         self.board_position_base_score   = {}
         
         self.board_position_black_recurse = {}
@@ -370,6 +369,9 @@ class AI:
         self.board_position_white_recurse = {}
         self.board_position_white_score = {}
         self.board_position_white_move = {}
+        
+    def receive_data(self, whitetomove, pieces,player_color, previous_moves):
+
         
         self.board = Board(whitetomove, pieces,player_color, previous_moves)
         
