@@ -179,7 +179,7 @@ class Board:
                             }
 
     
-    def __init__(self,whitetomove, pieces,player_color, previous_moves):
+    def __init__(self,whitetomove, pieces, previous_moves):
         self.whitetomove = whitetomove
         self.board_coord = [[None for j in range(10)] for i in range(10) ]
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
@@ -188,13 +188,13 @@ class Board:
 
 
         self.position_counter = defaultdict(int)
-        self.hash_previous_moves(player_color,previous_moves)
+        self.hash_previous_moves(previous_moves)
         self.find_current_hash()
 
 
 
-    def hash_previous_moves(self,player_color,previous_moves):
-        current_hash= Board.white_player_initial_hash if player_color == 'WHITE' else Board.black_player_initial_hash
+    def hash_previous_moves(self,previous_moves):
+        current_hash= Board.white_player_initial_hash
         self.position_counter[current_hash] +=1
 
         for previous_move in previous_moves:
@@ -370,10 +370,10 @@ class AI:
         self.board_position_white_score = {}
         self.board_position_white_move = {}
         
-    def receive_data(self, whitetomove, pieces,player_color, previous_moves):
+    def receive_data(self, whitetomove, pieces, previous_moves):
 
         
-        self.board = Board(whitetomove, pieces,player_color, previous_moves)
+        self.board = Board(whitetomove, pieces, previous_moves)
         
         
         self.execute()
@@ -471,8 +471,8 @@ class Backend:
         self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
 
 
-    def receive_data(self, whitetomove, pieces,player_color = 'WHITE', previous_moves = [ ] ):
-        self.AI.receive_data(whitetomove,pieces,player_color, previous_moves)
+    def receive_data(self, whitetomove, pieces, previous_moves = [ ] ):
+        self.AI.receive_data(whitetomove,pieces, previous_moves)
 
 
 
