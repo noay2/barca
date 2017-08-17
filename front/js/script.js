@@ -770,10 +770,20 @@ function recomputeValidClicks(turn){
 
 /*Function that returns right image extension for the piece*/
 function findImgName(side,type){
-	switch(type){
-		case 'E': return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
-		case 'L': return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
-		default: return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
+	if(rps == false){
+		switch(type){
+			case 'E': return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
+			case 'L': return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
+			default: return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
+		}
+	}
+	else{
+		switch(type){
+			case 'E': return (side == 'W') ? "WhiteRock.gif" : "BlackRock.gif";
+			case 'L': return (side == 'W') ? "WhiteScissor.gif" : "BlackScissor.gif";
+			default: return (side == 'W') ? "WhitePaper.gif" : "BlackPaper.gif";
+		}
+
 	}
 }
 
@@ -1085,14 +1095,14 @@ function	placeRockPaperScissorImages(){
 	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackRock.gif"/>';
 	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
 	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
-	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
-	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
-	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
-	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
-	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
-	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
-	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
-	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
 
 }
 
