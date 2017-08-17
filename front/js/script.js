@@ -61,6 +61,10 @@ var draw_move_cache = {};
 var fifo_for_draw_moves = [];
 var all_previous_moves = [];
 
+var rps = false;
+
+
+
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
 	{
@@ -289,6 +293,9 @@ function switchTurn(){
 }
 
 function printTurn(){
+
+	document.getElementById('rockPaperScissor').innerHTML = "Rock Paper Scissor Mode";
+
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
 		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " + player_TURN +"</b>";
 		//console.log(document.getElementById('turnDiv').innerHTML);
@@ -1033,6 +1040,20 @@ function resetGame(){
 			initializeGame();
 		}
 	}
+}
+function rockPaperScissor(){
+	if (rps == false){
+		rps = true;
+		document.getElementById('rockPaperScissor').innerHTML = "Elephant Lion Mouse Mode";
+
+	}
+	else{
+		rps = false;
+		document.getElementById('rockPaperScissor').innerHTML = "Rock Paper Scissors Mode";
+
+
+	}
+
 }
 
 function undoMove(){
