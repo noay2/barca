@@ -1045,23 +1045,36 @@ function rockPaperScissor(){
 	if (rps == false){
 		rps = true;
 		document.getElementById('rockPaperScissor').innerHTML = "Elephant Lion Mouse Mode";
-		removeElephantLionMouseImages();
-		removeAllForWateringHoles();
-		removeAllScaredAndTrappedPieces();
-		placeAllWateringHoles();
+		// removeAllForWateringHoles();
+		// removeAllScaredAndTrappedPieces();
+		
+		removeImageForWateringHoles();
+		removeImageForScaredAndTrappedPieces();
+		// removeElephantLionMouseImages();
+		
+		placeImageForWateringHolesIfEmpty();
 		placeRockPaperScissorImages();
-		placeAllScaredAndTrappedPieces();
+		placeImageForScaredAndTrappedPieces();
+
+		// placeAllWateringHoles();
+		// placeAllScaredAndTrappedPieces();
 
 	}
 	else{
 		rps = false;
 		document.getElementById('rockPaperScissor').innerHTML = "Rock Paper Scissors Mode";
-		removeRockPaperScissorImages();
-		removeAllForWateringHoles();
-		removeAllScaredAndTrappedPieces();
-		placeAllWateringHoles();
+		// removeAllForWateringHoles();
+		// removeAllScaredAndTrappedPieces();
+		
+		removeImageForWateringHoles();
+		removeImageForScaredAndTrappedPieces();
+		// removeRockPaperScissorImages();
+
+		placeImageForWateringHolesIfEmpty();
 		placeElephantLionMouseImages();
-		placeAllScaredAndTrappedPieces();
+		placeImageForScaredAndTrappedPieces();
+		// placeAllWateringHoles();
+		// placeAllScaredAndTrappedPieces();
 
 	}
 
@@ -1102,27 +1115,39 @@ function placeElephantLionMouseImages(){
 
 function 	removeElephantLionMouseImages(){
 // remove all images on the board of animals
+	for(p in piece_locations){
+		var image_x = document.getElementById(p);
+		image_x.parentNode.removeChild(image_x);
+
+	}
+
 }
 
 function	removeRockPaperScissorImages(){
 // remove all rps images
+	for(p in piece_locations){
+		var image_x = document.getElementById(p);
+		image_x.parentNode.removeChild(image_x);
+
+	}
+
 }
 
-function	removeAllForWateringHoles(){
-// remove all watering holes
-}
+// function	removeAllForWateringHoles(){
+// // remove all watering holes
+// }
 
-function	removeAllScaredAndTrappedPieces(){
-// remove all scared images
-}
+// function	removeAllScaredAndTrappedPieces(){
+// // remove all scared images
+// }
 
-function	placeAllWateringHoles(){
-// put back all watering holes
-}
+// function	placeAllWateringHoles(){
+// // put back all watering holes
+// }
 
-function	placeAllScaredAndTrappedPieces(){
-// put back all scared piece images
-}
+// function	placeAllScaredAndTrappedPieces(){
+// // put back all scared piece images
+// }
 
 
 
