@@ -1045,16 +1045,88 @@ function rockPaperScissor(){
 	if (rps == false){
 		rps = true;
 		document.getElementById('rockPaperScissor').innerHTML = "Elephant Lion Mouse Mode";
+		removeElephantLionMouseImages();
+		removeAllForWateringHoles();
+		removeAllScaredAndTrappedPieces();
+		placeAllWateringHoles();
+		placeRockPaperScissorImages();
+		placeAllScaredAndTrappedPieces();
 
 	}
 	else{
 		rps = false;
 		document.getElementById('rockPaperScissor').innerHTML = "Rock Paper Scissors Mode";
-
+		removeRockPaperScissorImages();
+		removeAllForWateringHoles();
+		removeAllScaredAndTrappedPieces();
+		placeAllWateringHoles();
+		placeElephantLionMouseImages();
+		placeAllScaredAndTrappedPieces();
 
 	}
 
 }
+
+function	placeRockPaperScissorImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackRock.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackRock.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+
+}
+
+function placeElephantLionMouseImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/lionW.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/lionW.gif"/>';
+
+
+}
+
+function 	removeElephantLionMouseImages(){
+
+}
+
+function	removeRockPaperScissorImages(){
+
+}
+
+function	removeAllForWateringHoles(){
+
+}
+
+function	removeAllScaredAndTrappedPieces(){
+
+}
+
+function	placeAllWateringHoles(){
+
+}
+
+function	placeAllScaredAndTrappedPieces(){
+
+}
+
+
+
+
 
 function undoMove(){
 
