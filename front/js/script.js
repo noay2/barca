@@ -1101,27 +1101,27 @@ function placeElephantLionMouseImages(){
 }
 
 function 	removeElephantLionMouseImages(){
-
+// remove all images on the board of animals
 }
 
 function	removeRockPaperScissorImages(){
-
+// remove all rps images
 }
 
 function	removeAllForWateringHoles(){
-
+// remove all watering holes
 }
 
 function	removeAllScaredAndTrappedPieces(){
-
+// remove all scared images
 }
 
 function	placeAllWateringHoles(){
-
+// put back all watering holes
 }
 
 function	placeAllScaredAndTrappedPieces(){
-
+// put back all scared piece images
 }
 
 
