@@ -7,30 +7,46 @@ h1 {
 
 
 .mainBox{
-	width: 540px;
+	width: 470px;
 	z-index: 1;
 	margin: 0 auto;
 	padding: 10px;
 }
 
 .smallBox1{
-	width: 50px;
-    height: 50px;
-    outline: 1px solid;
-    float: left;
-	background-color: #66ff99;
+	width: 42px;
+  height: 42px;
+  outline: 1px solid;
+  /*background-image: url("../images/White.jpg");*/
+
+
+  float: left;
 	display: flex;
   position: relative;
+
+background: #fceabb; /* Old browsers */
+background: -moz-linear-gradient(45deg,  #fceabb 0%, #fccd4d 50%, #f8b500 51%, #fbdf93 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(45deg,  #fceabb 0%,#fccd4d 50%,#f8b500 51%,#fbdf93 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(45deg,  #fceabb 0%,#fccd4d 50%,#f8b500 51%,#fbdf93 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fceabb', endColorstr='#fbdf93',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
 }
 
 .smallBox2{
-	width: 50px;
-    height: 50px;
-    outline: 1px solid;
-    float: left;
-	background-color: #ccccff;
+	width: 42px;
+  height: 42px;
+  outline: 1px solid;
+  float: left;
+  /* background-image: url("../images/Bluishshade.jpg"); */ 
 	display: flex;
   position: relative;
+
+background: rgb(148,186,78); /* Old browsers */
+background: -moz-linear-gradient(-45deg,  rgba(148,186,78,1) 0%, rgba(128,194,23,1) 49%, rgba(161,213,79,1) 50%, rgba(157,213,58,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg,  rgba(148,186,78,1) 0%,rgba(128,194,23,1) 49%,rgba(161,213,79,1) 50%,rgba(157,213,58,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg,  rgba(148,186,78,1) 0%,rgba(128,194,23,1) 49%,rgba(161,213,79,1) 50%,rgba(157,213,58,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#94ba4e', endColorstr='#9dd53a',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+
 }
 
 .smallBox1 > img {
@@ -47,5 +63,81 @@ h1 {
 }
 
 .turnDivClass{
+	  position: relative;
+
+   color: black;
+   font-size: 18px;
+   font-family: Georgia, Serif;
+   text-decoration: none;
+   vertical-align: middle;
 
 }
+
+
+.button2 {
+   border-top: 1px solid #c0c7cc;
+   background: #486a80;
+   background: -webkit-gradient(linear, left top, left bottom, from(#339ee6), to(#486a80));
+   background: -webkit-linear-gradient(top, #339ee6, #486a80);
+   background: -moz-linear-gradient(top, #339ee6, #486a80);
+   background: -ms-linear-gradient(top, #339ee6, #486a80);
+   background: -o-linear-gradient(top, #339ee6, #486a80);
+   padding: 10px 20px;
+   -webkit-border-radius: 22px;
+   -moz-border-radius: 22px;
+   border-radius: 22px;
+   -webkit-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   -moz-box-shadow: rgba(0,0,0,1) 0 1px 0;
+   box-shadow: rgba(0,0,0,1) 0 1px 0;
+   text-shadow: rgba(0,0,0,.4) 0 1px 0;
+   color: white;
+   font-size: 18px;
+   font-family: Georgia, Serif;
+   text-decoration: none;
+   vertical-align: middle;
+   }
+.button2:hover {
+   border-top-color: #4f88ad;
+   background: #4f88ad;
+   color: #edf2ff;
+   }
+.button2:active {
+   border-top-color: #2c6a94;
+   background: #2c6a94;
+   }
+
+  
+.area {
+  text-align: center;
+  font-size: 6.5em;
+  color: #fff;
+  letter-spacing: -7px;
+  font-weight: 700;
+  text-transform: uppercase;
+  animation: blur .75s ease-out ;
+  text-shadow: 0px 0px 5px #fff, 0px 0px 7px #fff;
+}
+
+@keyframes blur {
+  from {
+    text-shadow:0px 0px 10px #fff,
+      0px 0px 10px #fff, 
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 25px #fff,
+      0px 0px 50px #fff,
+      0px 0px 50px #fff,
+      0px 0px 50px #7B96B8,
+      0px 0px 150px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px 10px 100px #7B96B8,
+      0px -10px 100px #7B96B8,
+      0px -10px 100px #7B96B8;
+  }
+}
+
