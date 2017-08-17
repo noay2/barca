@@ -1,0 +1,93 @@
+<html>
+<!--
+
+#########################
+API Link:
+
+https://serene-everglades-79780.herokuapp.com/api
+
+
+
+-->
+<head>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
+  <link rel="stylesheet" href="animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+  <script src="https://use.fontawesome.com/a59013ea0b.js"></script>
+
+</head>
+<body>
+
+<div class = "row text-center ">
+<!-- <div class="area">⚠ Welcome To BARCA ⚠</div>
+ -->
+</div>
+
+
+
+<div class = "row">
+	<div class = "text-center " id = "message">
+		<b> Click on start game button to start the game
+		and also choose which side you want to play on!
+    <br> Note: For human mode, black or white will be allowed to move first.
+    For AI mode, white player will be moving first always.</b>
+	</div>
+</div>
+<br>
+<br>
+
+<div class = "row" id = "buttons">
+        <div id="turnDiv" class="col-xs-12 text-center turnDivClass "></div>
+    <h4 class = "animated tada">Welcome To Barca Version 1!</h4>
+
+    <div class = "col-xs-12 text-center">
+      <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
+        <optgroup label = "Type">
+          <option value = "PLAYER V. AI" data-icon = "fa fa-android" selected = "selected">AI</option>
+          <option value = "PLAYER V. PLAYER" data-icon = "glyphicon-user">Human</option>
+        </optgroup>
+      </select>
+      &nbsp;&nbsp;
+      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
+        <optgroup label = "Side">
+          <option value = "WHITE" selected = "selected">White</option>
+          <option value = "BLACK">Black</option>
+        </optgroup>
+      </select>
+      &nbsp;&nbsp;
+      <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
+      &nbsp;&nbsp;&nbsp;
+      <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
+        <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "undoMove" onclick="undoMove()">
+        <span class = "fa fa-undo" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "redoMove" onclick="redoMove()">
+        <span class = "fa fa-repeat" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "button2" id = "playFromHere" onclick="playFromHere()">
+        Play From Here
+      </button>
+    </div>
+</div>
+
+<div id="barca_board" class = "mainBox"></div>
+
+<script>newBoard();</script>
+<script>placeWateringHoles();</script>
+<script>placeInitImage();</script>
+
+</body>
+</html>
