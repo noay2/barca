@@ -185,19 +185,19 @@ class Board:
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
         for piece in pieces:
                 Piece(piece, self.board_coord, self.pieces)
-
-
-        self.position_counter = defaultdict(int)
-        self.hash_previous_moves(previous_moves)
         self.find_current_hash()
 
+        self.position_counter = defaultdict(int)
+        self.previous_moves = previous_moves
+        self.hash_previous_moves()
 
 
-    def hash_previous_moves(self,previous_moves):
+
+    def hash_previous_moves(self):
         current_hash= Board.white_player_initial_hash
         self.position_counter[current_hash] +=1
 
-        for previous_move in previous_moves:
+        for previous_move in self.previous_moves:
             piece_color, piece_type, source_row, source_col, dest_row, dest_col = previous_move
             current_hash = self.undo_hash_previous_move(current_hash, piece_color, piece_type, source_row, source_col)
             current_hash = self.update_hash_previous_move(current_hash, piece_color, piece_type, dest_row, dest_col)
@@ -325,12 +325,19 @@ class Board:
         piece.update_piece(source,dest)
         self.update_hash(piece)
         self.position_counter[self.current_hash] +=1
+
         
         self.fear_update(piece)
         self.switch_turn()
 
+
+        self.previous_moves.append( [piece.color, piece.type, source[0], source[1], dest[0], dest[1]] )
+
+
+
     def undo_update(self, source, dest, old_infear_trapped):
         piece = self.board_coord[dest[0]][dest[1]]
+
 
         self.position_counter[self.current_hash] -=1
         self.undo_hash(piece)
@@ -345,8 +352,12 @@ class Board:
             counter +=1
         self.switch_turn()
 
+
+        self.previous_moves.pop( -1)
+
+
     def send_updated_data(self):
-        return [self.whitetomove ]+ [[ piece.send_updated_data() for piece in self.all_pieces()]]
+        return [self.whitetomove  ,  [ piece.send_updated_data() for piece in self.all_pieces()] , self.previous_moves]
             
         
 ##########################################       
@@ -385,7 +396,7 @@ class AI:
             
 
     def send_updated_data(self):
-        return self.board.send_updated_data() + [[self.ai_move[0], self.ai_move[1]]]
+        return self.board.send_updated_data() 
 
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
 
@@ -479,137 +490,3 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
-if __name__ == "__main__":
-##
-##    j  = time.time()
-##    backend = Backend()
-##    backend.receive_data(True, [['BLACK', 'ELEPHANT', 9, 4, False, False],
-##                                                                   ['BLACK', 'ELEPHANT', 9, 5, False, False],
-##                                                                   ['BLACK', 'MOUSE', 4, 4, False, False],
-##                                                                   ['BLACK', 'MOUSE', 4, 5, False, False],
-##                                                                   ['BLACK', 'LION', 8, 3, False, False],
-##                                                                   ['BLACK', 'LION', 8, 6, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-##                                                                   ['WHITE', 'LION', 1, 3, False, False],
-##                                                                   ['WHITE', 'LION', 1, 6, False, False]], [[1,3], [3,5]])
-##
-##    print(backend.send_updated_data())
-##
-##
-##    for i in backend.AI.board.board:
-##        print(i)
-##    print()
-##    output = backend.send_updated_data()
-##    backend.receive_data(True, [['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                         ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                         ['WHITE', 'LION', 1, 3, False, False],
-##                         ['WHITE', 'MOUSE', 1, 5, False, False],
-##                         ['WHITE', 'LION', 1, 6, False, False],
-##                         ['WHITE', 'MOUSE', 1, 4, True, False],
-##                         ['BLACK', 'LION', 5, 3, False, False],
-##                         ['BLACK', 'LION', 7, 4, False, False],
-##                         ['BLACK', 'MOUSE', 8, 4, False, False],
-##                         ['BLACK', 'MOUSE', 8, 5, False, False],
-##                         ['BLACK', 'ELEPHANT', 9, 4, False, False],
-##                         ['BLACK', 'ELEPHANT', 9, 5, False, False]],[[1,3], [3,5]])
-##
-##    output = backend.send_updated_data()
-##    print(output)
-##    backend.receive_data(True,
-##                                                                     [['BLACK', 'ELEPHANT', 9, 5, False, False],
-##                                                                   ['BLACK', 'MOUSE', 8, 4, False, False],
-##                                                                   ['BLACK', 'MOUSE', 5, 5, False, False],
-##                                                                   ['BLACK', 'LION', 8, 3, False, False],
-##                                                                   ['BLACK', 'LION', 8, 6, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 4, False, False],
-##                                                                   ['WHITE', 'ELEPHANT', 0, 5, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 4, False, False],
-##                                                                   ['WHITE', 'MOUSE', 1, 5, False, False],
-##                                                                   ['WHITE', 'LION', 1, 3, False, False],
-##                                                                   ['WHITE', 'LION', 1, 6, False, False]],[[1,3], [3,5]])
-##
-##
-##    for i in backend.AI.board.board:
-##        print(i)
-##    print()
-##    output = backend.send_updated_data()
-##    print(time.time() -j)
-
-
-    backend = Backend()
-    backend.receive_data(False,[["WHITE","MOUSE",0,3,False,False],
-     ["BLACK","ELEPHANT",0,4,True,False],
-     ["BLACK","ELEPHANT",0,5,False,False],
-     ["BLACK","MOUSE",1,4,False,False],
-     ["BLACK","MOUSE",3,6,False,False],
-     ["BLACK","LION",4,0,False,False],
-     ["BLACK","LION",4,3,False,False],
-     ["WHITE","LION",8,3,False,False],
-     ["WHITE","MOUSE",8,5,False,False],
-     ["WHITE","LION",8,6,False,False],
-     ["WHITE","ELEPHANT",9,4,False,False],
-     ["WHITE","ELEPHANT",9,5,False,False]],
-     [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
-
-
-    for i in range(len(backend.AI.board.board_coord)):
-        print(backend.AI.board.board_coord[9-i])
-    print()
-
-
-
-
-
-
-
-
-
-    
-    backend.receive_data(False,[["BLACK","ELEPHANT",0,4,False,False],
-    ["BLACK","LION",1,0,False,False],
-    ["BLACK","LION",1,3,False,False],
-    ["BLACK","MOUSE",1,4,False,False],
-    ["BLACK","MOUSE",3,6,False,False],
-    ["WHITE","MOUSE",6,4,False,False],
-    ["WHITE","LION",8,3,False,False],
-    ["WHITE","MOUSE",8,5,False,False],
-    ["WHITE","LION",8,6,False,False],
-    ["BLACK","ELEPHANT",6,5,True,False],
-    ["WHITE","ELEPHANT",9,4,False,False],
-    ["WHITE","ELEPHANT",9,5,False,False]],
-    [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
-
-    for i in backend.AI.board.board_coord:
-        print(i)
-    print()
-
-
-
-
-    backend.receive_data(False,[["BLACK","ELEPHANT",0,2,False,False],
-    ["BLACK","ELEPHANT",0,8,False,False],
-    ["BLACK","MOUSE",1,4,False,False],
-    ["BLACK","LION",2,2,False,False],
-    ["BLACK","MOUSE",4,3,False,False],
-    ["WHITE","ELEPHANT",5,1,False,False],
-    ["WHITE","MOUSE",6,5,False,False],
-    ["WHITE","LION",8,3,False,False],
-    ["WHITE","MOUSE",8,5,False,False],
-    ["WHITE","LION",8,6,False,False],
-    ["BLACK","LION",5,2,True,False],
-    ["WHITE","ELEPHANT",9,5,False,False]],
-    [[0,0],[0,4]])
-
-    print(backend.send_updated_data())
-
-    for i in backend.AI.board.board_coord:
-        print(i)
-    print()
-
