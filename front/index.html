@@ -1,80 +1,174 @@
-<html>
+<!DOCTYPE HTML>
 <!--
-
-#########################
-API Link:
-
-https://serene-everglades-79780.herokuapp.com/api
-
-
-
+	Spatial by TEMPLATED
+	templated.co @templatedco
+	Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
 -->
-<head>
-  <link rel="stylesheet" type="text/css" href="css/style.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="js/script.js"></script>
-  <link rel="stylesheet" href="animate.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
-  <script src="https://use.fontawesome.com/a59013ea0b.js"></script>
+<html>
+	<head>
+		<title>Barca Board Game</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="landing">
 
-</head>
-<body>
+		<!-- Header -->
+			<header id="header" class="alt">
+			<!--	<h1><strong><a href="index.html">Barca</a></strong></h1> -->
+				<nav id="nav">
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li><a href="rules.html">Rules</a></li>
+						<li><a href="try.html">Game</a></li>
+					</ul>
+				</nav>
+			</header>
 
-<div class = "row text-center ">
-<h2 class="area">⚠ Welcome To BARCA ⚠</h2>
+			<a href="#menu" class="navPanelToggle"><span class="fa fa-bars"></span></a>
 
-</div>
+		<!-- Banner -->
+			<section id="banner">
+				<h2>Barca Board Game</h2>
+				<p>What would happen if Rock Paper Scissors met Chess?</p>
+				<ul class="actions">
+					<li><a href="try.html" class="button special big">Get Started</a></li>
+				</ul>
+			</section>
 
+			<!-- One -->
+				<section id="one" class="wrapper style1">
+					<div class="container 75%">
+						<div class="row 200%">
+							<div class="6u 12u$(medium)">
+								<header class="major">
+									<h2>Senior Design Project</h2>
+									<p>Team Astros</p>
+									<p>University of California, Irvine</p>
+								</header>
+							</div>
+							<div class="6u$ 12u$(medium)">
+								<p>Our project is a fully-functioning version of the Barca board game, which includes a strong AI engine as well as a modern user interface. Our team built this project from ground-up through designing a core game engine and embedding it as a web application.</p>
+								<p>Contributors to our project include Professor Pai Chou, who is provided the overall framework for the senior design course; Professor Sameer Singh who is our chosen mentor and person who delivered us guidance in artificial intelligence and machine learning; and Andrew Caldwell, the creator of the game, Barca.</p>
 
+								<p>This project will be a big contribution to the Barca community, as well as to our project development skills. We got familiarity with Artificial Intelligence and Web Development through our endeavors in making this game.</p>
 
-<div class = "row">
-	<div class = "text-center " id = "message">
-		<b> Click on start game button to start the game
-		and also choose which side you want to play on!
-    <br> Note: For human mode, black or white will be allowed to move first.
-    For AI mode, white player will be moving first always.</b>
-	</div>
-</div>
-<br>
-<br>
+							</div>
+						</div>
+					</div>
+				</section>
 
-<div class = "row" id = "buttons">
-        <div id="turnDiv" class="col-xs-12 text-center turnDivClass "></div>
-    <h4 class = "animated tada">Welcome To Barca Version 1!</h4>
+			<!-- Two -->
+				<section id="two" class="wrapper style2 special">
+					<div class="container">
+						<header class="major">
+							<h2>Original game vs Our Version</h2>
+							<p>Stronger AI and use of Machine Learning techniques.</p>
+						</header>
+						<div class="row 150%">
+							<div class="6u 12u$(xsmall)">
+								<div class="image fit captioned">
+									<img src="images/old_barca.jpg" alt="" />
+									<h3>Old Style game</h3>
+								</div>
+							</div>
+							<div class="6u$ 12u$(xsmall)">
+								<div class="image fit captioned">
+									<img src="images/new_barca.png" alt="" />
+									<h3>Newer version with more options.</h3>
+								</div>
+							</div>
+						</div>
+						<ul class="actions">
+							<li><a href="#" class="button special big">Play Barca</a></li>
+						</ul>
+					</div>
+				</section>
 
-    <div class = "col-xs-12 text-center">
-      <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
-        <optgroup label = "Type">
-          <option value = "PLAYER V. AI" data-icon = "fa fa-android" selected = "selected">AI</option>
-          <option value = "PLAYER V. PLAYER" data-icon = "glyphicon-user">Human</option>
-        </optgroup>
-      </select>
-      &nbsp;&nbsp;&nbsp;
-      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
-        <optgroup label = "Side">
-          <option value = "WHITE" selected = "selected">White</option>
-          <option value = "BLACK">Black</option>
-        </optgroup>
-      </select>
-      &nbsp;&nbsp;&nbsp;
-      <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
-      &nbsp;&nbsp;&nbsp;
-      <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
-        <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
-        </span>
-      </button>
+			<!-- Three -->
+				<section id="three" class="wrapper style1">
+					<div class="container">
+						<header class="major special">
+							<h2>Meet the Team</h2>
+							<p>Senior Design Team : Astros</p>
+						</header>
+						<div class="feature-grid">
+							<div class="feature">
+								<div class="image rounded"><img src="images/bhuv.png" alt="" /></div>
+								<div class="content">
+									<header>
+										<h4>Bhuvnesh Kumar</h4>
+										<p>Computer Science and Engineering</p>
+									</header>
+									<p>Bhuvnesh worked on the front end design, the GUI and logistics of the game. He has experience in Team Management from various previous projects and was the Team Captain.</p>
+								</div>
+							</div>
+							<div class="feature">
+								<div class="image rounded"><img src="images/noah.png" alt="" /></div>
+								<div class="content">
+									<header>
+										<h4>Noah Djenguerian</h4>
+										<p>Computer Science and Engineering</p>
+									</header>
+									<p>Noah is experienced in game theory, networking, and software development. His responsibility was to work on the AI agent and search tree. </p>
+								</div>
+							</div>
+							<div class="feature">
+								<div class="image rounded"><img src="images/matt.png" alt="" /></div>
+								<div class="content">
+									<header>
+										<h4>Matt Rommel</h4>
+										<p>Computer Science and Engineering</p>
+									</header>
+									<p>Matt is experienced in software development and artificial intelligence. He worked on the Machine Learning aspect of the game.</p>
+								</div>
+							</div>
+							<div class="feature">
+								<div class="image rounded"><img src="images/shank.png" alt="" /></div>
+								<div class="content">
+									<header>
+										<h4>Shashank Reddy Pulagam</h4>
+										<p>Computer Science and Engineering</p>
+									</header>
+									<p>Shashank is experienced in frontend design. His roles were to work with Bhuvnesh on developing the frontend for barca and deploying the flask rest api on heroku, which is a glue that allows communication between AI and user.</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 
-    </div>
-</div>
+			<!-- Four -->
+				<section id="four" class="wrapper style3 special">
+					<div class="container">
+						<header class="major"><h2>Special thanks to Professor Sameer Singh for being our mentor and giving us invaluable feedback during the development of this game.</h2>
+						</header>
+						<ul class="actions">
+							<li><a href="http://sameersingh.org/" class="button special big">Link to Bio</a></li>
+						</ul>
+					</div>
+				</section>
 
-<div id="barca_board" class = "mainBox"></div>
+		<!-- Footer -->
+			<footer id="footer">
+				<div class="container">
+					<ul class="icons">
+						<li><a href="#" class="icon fa-facebook"></a></li>
+						<li><a href="#" class="icon fa-twitter"></a></li>
+						<li><a href="#" class="icon fa-instagram"></a></li>
+					</ul>
+					<ul class="copyright">
+						<li>&copy; Astros</li>
+						<li><a href="http://uci.edu">University of California, Irvine </a></li>
+						<li><a href="http://engineering.uci.edu/">Henry Samueli School of Engineering</a></li>
+					</ul>
+				</div>
+			</footer>
 
-<script>newBoard();</script>
-<script>placeWateringHoles();</script>
-<script>placeInitImage();</script>
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
 
-</body>
+	</body>
 </html>
