@@ -56,10 +56,14 @@ var wateringHoleCounter = 0;
 var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
-var newgameStarted = false;
-var draw_move_cache = {};
-var fifo_for_draw_moves = [];
+// var draw_move_cache = {};
+// var fifo_for_draw_moves = [];
 var all_previous_moves = [];
+var undo_moves = [];
+var crown_counter = 0;
+
+//Data structure that is used to set the board back to its original point
+var original_board_state = {};
 
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
@@ -111,38 +115,38 @@ function placeWateringHoles() {
 	wateringHoleCounter = 4;
 }
 
-function addCurrentBoardPosition(){
-	var string = "";
-	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
-
-	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
-		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
-		if(piece_locations[keysSorted[keyLen]] < 10){
-			string += '0' + piece_locations[keysSorted[keyLen]];
-		}
-		else{
-			string += piece_locations[keysSorted[keyLen]];
-		}
-	}
-
-	fifo_for_draw_moves.push(string);
-
-	if(fifo_for_draw_moves.length === 21){
-		var poppedPos = fifo_for_draw_moves.shift();
-		draw_move_cache[poppedPos]--;
-		if(draw_move_cache[poppedPos] <= 0){
-			delete draw_move_cache[poppedPos];
-		}
-	}
-
-	if(string in draw_move_cache){
-		draw_move_cache[string]++;
-	}
-	else{
-		draw_move_cache[string] = 1;
-	}
-
-}
+// function addCurrentBoardPosition(){
+// 	var string = "";
+// 	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
+//
+// 	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
+// 		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
+// 		if(piece_locations[keysSorted[keyLen]] < 10){
+// 			string += '0' + piece_locations[keysSorted[keyLen]];
+// 		}
+// 		else{
+// 			string += piece_locations[keysSorted[keyLen]];
+// 		}
+// 	}
+//
+// 	fifo_for_draw_moves.push(string);
+//
+// 	if(fifo_for_draw_moves.length === 21){
+// 		var poppedPos = fifo_for_draw_moves.shift();
+// 		draw_move_cache[poppedPos]--;
+// 		if(draw_move_cache[poppedPos] <= 0){
+// 			delete draw_move_cache[poppedPos];
+// 		}
+// 	}
+//
+// 	if(string in draw_move_cache){
+// 		draw_move_cache[string]++;
+// 	}
+// 	else{
+// 		draw_move_cache[string] = 1;
+// 	}
+//
+// }
 
 function placeImageForWateringHolesIfEmpty(){
 //'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
@@ -181,6 +185,7 @@ function removeImageForWateringHoles(){
 
 function initializeGame(){
 	AIsmove = (player_TURN === "BLACK" && mode === "PLAYER V. AI") ? true : false;
+	console.log("INITIALIZE GAME");
 	initValidClicks();
 }
 
@@ -241,6 +246,9 @@ function initBoardPieces(){
 		piece_locations["WE1"] = 94;
 		piece_locations["WE2"] = 95;
 	}
+
+	original_board_state["board"] = barca_array;
+	original_board_state["piece_locations"] = piece_locations;
 }
 
 /*Initializes the initial valid clicks on the board*/
@@ -252,6 +260,7 @@ function initValidClicks(){
 	valid_clicks.push(94);
 	valid_clicks.push(95);
 
+	gameStarted = true;
 	initBoardPieces();
 	checkIfItIsAIsMove();
 }
@@ -291,12 +300,10 @@ function switchTurn(){
 function printTurn(){
 	if(mode === "PLAYER V. PLAYER" || AIsmove === false){
 		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " + player_TURN +"</b>";
-		//console.log(document.getElementById('turnDiv').innerHTML);
 	}
 	else if(AIsmove === true){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
 		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " +turn + ". AI is thinking...</b>";
-	//	console.log(document.getElementById('turnDiv').innerHTML);
 	}
 }
 
@@ -663,60 +670,87 @@ function checkVictory(){
 	}
 }
 
-function placeCrownOnWinningPieces() {
+function removeCrowns(){
+	if(crown_counter === 0){
+		return;
+	}
+	else{
+		for(var i = 0; i < crown_counter; i++){
+			var value = i + 1;
+			var element = document.getElementById("crown_"+value);
+			element.parentNode.remove(element);
+		}
+		crown_counter = 0;
+	}
+}
 
+function placeCrownOnWinningPieces() {
 	if(who_won === "BLACK"){
-			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
+			document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_2"/>';
+			document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_3"/>';
+			document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
+			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
+			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
 	}
 	else if(who_won === "WHITE"){
-
-			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("WL1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("WL2")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("WR1")).innerHTML += '<img src = "./images/crown.gif" />';
-			document.getElementById(getDiv("WR2")).innerHTML += '<img src = "./images/crown.gif" />';
+			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
+			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_2"/>';
+			document.getElementById(getDiv("WL1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_3"/>';
+			document.getElementById(getDiv("WL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
+			document.getElementById(getDiv("WR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
+			document.getElementById(getDiv("WR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
 	}
+
+	crown_counter = 6;
 }
 
 function resetBoardScaredAndTrappedPieces(data){
 	var pieces = data["pieces"];
-	var ai_move = data["move"];
-	var src = ai_move[0];
-	var dest = ai_move[1];
+	var length = data["draw_moves"].length;
+	var ai_move = data["draw_moves"][length-1];
+	if(player_TURN === "BLACK"){
+		var src = [9-ai_move[2],9-ai_move[3]];
+		var dest = [9-ai_move[4],9-ai_move[5]];
+	}
+	else{
+		var src = [ai_move[2],ai_move[3]];
+		var dest = [ai_move[4],ai_move[5]];
+	}
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
 	movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
+	var color = (piece_info[0] === 'B') ? "BLACK" : "WHITE";
+	var piece = (piece_info[1] === 'E') ? "ELEPHANT" : (piece_info[1] === 'R') ? "MOUSE" : "LION";
+	all_previous_moves.push([color,piece,src[0],src[1],dest[0],dest[1]]);
 	barca_array[dest[0]][dest[1]] = barca_array[src[0]][src[1]];
 	barca_array[src[0]][src[1]] = ".";
 	piece_locations[barca_array[dest[0]][dest[1]]] = dest[0] * 10 + dest[1];
+	checkVictory();
 	scared_pieces = new Set();
 	trapped_pieces = [];
 
-	for(var i = 0; i < pieces.length; i++){
-		if(pieces[i][5]){
-			trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
+	if(!victory){
+		for(var i = 0; i < pieces.length; i++){
+			if(pieces[i][5]){
+				trapped_pieces.push(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
+			}
+			else if(pieces[i][4]){
+				scared_pieces.add(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
+			}
 		}
-		else if(pieces[i][4]){
-			scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
-		}
-	}
 
-	for(var i = 0; i < trapped_pieces.length; i++){
-		if(trapped_pieces[i][0] === player_TURN[0]){
-			if(trapped_pieces[i][1] === 'L'){
-				checkIfASingleValidMoveExistsForLion(trapped_pieces[i]);
-			}
-			else if(trapped_pieces[i][1] === 'R'){
-				checkIfASingleValidMoveExistsForMouse(trapped_pieces[i]);
-			}
-			else{
-				checkIfASingleValidMoveExistsForElephant(trapped_pieces[i]);
+		for(var i = 0; i < trapped_pieces.length; i++){
+			if(trapped_pieces[i][0] === player_TURN[0]){
+				if(trapped_pieces[i][1] === 'L'){
+					checkIfASingleValidMoveExistsForLion(trapped_pieces[i]);
+				}
+				else if(trapped_pieces[i][1] === 'R'){
+					checkIfASingleValidMoveExistsForMouse(trapped_pieces[i]);
+				}
+				else{
+					checkIfASingleValidMoveExistsForElephant(trapped_pieces[i]);
+				}
 			}
 		}
 	}
@@ -758,7 +792,6 @@ function recomputeValidClicks(turn){
 				valid_clicks.push(piece_locations[turn[0]+"R2"]);
 		 	}
 	}
-	console.log(valid_clicks.size);
 }
 
 /*Function that returns right image extension for the piece*/
@@ -777,7 +810,9 @@ function movePiece(side,type,row,col){
 
 /*Function that gets the move made by the AI and updates the board accordingly*/
 function getAIMove(){
+	console.log("IN GET AI MOVE");
 	if(!gameStarted){
+		console.log("IN RETURN BYE BYE");
 		return;
 	}
 	var API_request = {};
@@ -787,25 +822,43 @@ function getAIMove(){
 		return;
 	}
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
-	API_request["draw_moves"] = fifo_for_draw_moves;
+	API_request["draw_moves"] = all_previous_moves;
 	pieces = [];
+
+	if(player_TURN === "BLACK"){
+		for(var i = 0; i < API_request["draw_moves"].length; i++){
+			API_request["draw_moves"][i][2] = 9-API_request["draw_moves"][i][2];
+			API_request["draw_moves"][i][3] = 9-API_request["draw_moves"][i][3];
+			API_request["draw_moves"][i][4] = 9-API_request["draw_moves"][i][4];
+			API_request["draw_moves"][i][5] = 9-API_request["draw_moves"][i][5];
+		}
+		console.log("GOT TO BLACK");
+	}
 
 	for(var piece in piece_locations){
 		var info = [[null,null,null,null,null,null]];
 		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
 		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
-		info[0][2] = getRow(piece);
-		info[0][3] = getCol(piece);
+		if(player_TURN === "BLACK"){
+			console.log("GOT TO BLACK");
+			info[0][2] = 9-getRow(piece);
+			info[0][3] = 9-getCol(piece);
+		}
+		else{
+			info[0][2] = getRow(piece);
+			info[0][3] = getCol(piece);
+		}
 		info[0][4] = checkIfInScaredPieces(piece);
 		info[0][5] = checkIfInTrappedPieces(piece);
 		pieces = pieces.concat(info);
 	}
-	API_request["human_move"] = [[0,0],[0,5]];
+	// API_request["human_move"] = [[0,0],[0,5]];
 	API_request["pieces"] = pieces;
 
+	console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
-			url: "https://serene-everglades-79780.herokuapp.com/api",
+			url: "https://serene-everglades-79780.herokuapp.com/version3",
 			data: JSON.stringify(API_request),
 			dataType: "json",
 			contentType: 'application/json',
@@ -814,17 +867,19 @@ function getAIMove(){
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
-				addCurrentBoardPosition();
+				// addCurrentBoardPosition();
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
-				checkVictory();
 				console.log("Move made");
 				AIsmove = false;
 				printTurn();
+				enableAllButtons();
 			},
 			error: function(data){
+				console.log(API_request);
 				alert(data);
+				enableAllButtons();
 			}
 		});
 }
@@ -871,6 +926,10 @@ function clickMade(row,col,id,val){
 	col = parseInt(col);
 	var num = row*10 + col;
 
+	if(undo_moves.length > 0){
+		return;
+	}
+
 	if(!gameStarted){
 		return;
 	}
@@ -890,27 +949,16 @@ function clickMade(row,col,id,val){
 	else if(clicks_made.length == 1){
 		var r1 = Math.floor(clicks_made[0]/10);
 		var c1 = clicks_made[0]%10;
-		var value = verifyValidMove(r1,c1,row,col);
 
-		if(value)
+		disableAllButtons();
+
+		if(verifyValidMove(r1,c1,row,col))
 		{
-			all_previous_moves.push([r1*10+c1,row*10+col]);
+			disableAllButtons();
+
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
-			removeImageForScaredAndTrappedPieces();
-			removeImageForWateringHoles();
-			document.getElementById("tile_"+r1+","+c1).innerHTML = "";
-			movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
-			barca_array[row][col] = barca_array[r1][c1];
-			barca_array[r1][c1] = ".";
-			piece_locations[barca_array[row][col]] = row * 10 + col;
-			clicks_made = [];
-			singleMoveExists = {};
-			addCurrentBoardPosition();
-			calculateScaredPieces();
-			calculateTrappedPieces();
-			placeImageForScaredAndTrappedPieces();
-			placeImageForWateringHolesIfEmpty();
+			makeMove(r1,c1,row,col,false);
 
 			if(mode === "PLAYER V. PLAYER"){
 				var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
@@ -918,6 +966,7 @@ function clickMade(row,col,id,val){
 			}
 
 			if(victory){
+				enableAllButtons();
 				return;
 			}
 			/* IF MODE IS PLAYER V. AI*/
@@ -930,12 +979,13 @@ function clickMade(row,col,id,val){
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
-				console.log(trapped_pieces);
 				switchTurn();
 				recomputeValidClicks(player_TURN);
+				enableAllButtons();
 			}
 		}
 		else{
+			enableAllButtons();
 			document.getElementById("message").innerHTML = "<b>Invalid Move. Please select a valid move for the piece you selected...</b>";
 		}
 	}
@@ -944,12 +994,61 @@ function clickMade(row,col,id,val){
 	}
 }
 
+function disableAllButtons(){
+	document.getElementById("playFromHere").disabled = true;
+	document.getElementById("undoMove").disabled = true;
+	document.getElementById("redoMove").disabled = true;
+	document.getElementById("setToOriginal").disabled = true;
+	document.getElementById("startGame").disabled = true;
+	document.getElementById("resetGame").disabled = true;
+}
+
+function enableAllButtons(){
+	document.getElementById("playFromHere").disabled = false;
+	document.getElementById("undoMove").disabled = false;
+	document.getElementById("redoMove").disabled = false;
+	document.getElementById("setToOriginal").disabled = false;
+	document.getElementById("startGame").disabled = false;
+	document.getElementById("resetGame").disabled = false;
+}
+
 /*Initially does the move checking if it is AIs turn*/
 function checkIfItIsAIsMove(){
 	if(AIsmove){
+			disableAllButtons();
 			printTurn();
 			getAIMove();
 	}
+}
+
+function makeMove(r1,c1,row,col,undo){
+	removeImageForScaredAndTrappedPieces();
+	removeImageForWateringHoles();
+	removeCrowns();
+	document.getElementById("tile_"+r1+","+c1).innerHTML = "";
+	movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
+	barca_array[row][col] = barca_array[r1][c1];
+	barca_array[r1][c1] = ".";
+	piece_locations[barca_array[row][col]] = row * 10 + col;
+	original_board_state["board"][row][col] = barca_array[row][col];
+	original_board_state["board"][r1][c1] = ".";
+	original_board_state["piece_locations"][barca_array[row][col]] = row * 10 + col;
+	clicks_made = [];
+	singleMoveExists = {};
+	checkVictory();
+	// addCurrentBoardPosition();
+	var color = (barca_array[row][col][0] === 'B') ? "BLACK" : "WHITE";
+	var piece = (barca_array[row][col][1] === 'E') ? "ELEPHANT" : (barca_array[row][col][1] === 'R') ? "MOUSE" : "LION";
+	if(!undo){
+		all_previous_moves.push([color,piece,r1,c1,row,col]);
+		original_board_state["all_previous_moves"].push([color,piece,r1,c1,row,col]);
+	}
+	if(!victory){
+		calculateScaredPieces();
+		calculateTrappedPieces();
+		placeImageForScaredAndTrappedPieces();
+	}
+	placeImageForWateringHolesIfEmpty();
 }
 
 /* Returns the div of the piece*/
@@ -959,90 +1058,156 @@ function getDiv(piece){
 	return "tile_" + row + "," + col;
 }
 
+function initialize(){
+	disableAllButtons();
+	console.log("INITIALIZE");
+	document.getElementById("barca_board").innerHTML = "";
+	gameStarted = false;
+	victory = false;
+	player_TURN = $("#playeroption").val();
+	mode = $("#gametype").val();
+	original_board_state = {};
+	resetState["player_TURN"] = player_TURN;
+	resetState["mode"] = mode;
+	original_board_state["player_TURN"] = player_TURN;
+	original_board_state["mode"] = mode;
+	fear_counter = 0;
+	wateringHoleCounter = 0;
+	crown_counter = 0;
+	valid_clicks = [];
+	// draw_move_counter = {};
+	all_previous_moves = [];
+	original_board_state["all_previous_moves"] = [];
+	undo_moves = [];
+	// fifo_for_draw_moves = [];
+	clearBarcaBoard();
+	newBoard();
+	initBoardPieces();
+	placeInitImage();
+	placeWateringHoles();
+}
+
 function startGame(){
 	if(gameStarted){
-		newgameStarted = confirm("Are you sure you want to start another game?");
+		var newgameStarted = confirm("Are you sure you want to start another game?");
 		if(newgameStarted){
-			document.getElementById("barca_board").innerHTML = "";
-			player_TURN = $("#playeroption").val();
-			mode = $("#gametype").val();
-			victory = false;
-			resetState["player_TURN"] = player_TURN;
-			resetState["mode"] = mode;
-			fear_counter = 0;
-			wateringHoleCounter = 0;
-			valid_clicks = [];
-			draw_move_counter = {};
-			fifo_for_draw_moves = [];
-			all_previous_moves = [];
-			clearBarcaBoard();
-			newBoard();
-			initBoardPieces();
-			placeInitImage();
-			placeWateringHoles();
-			gameStarted = true;
-			newgameStarted = false;
+			initialize();
 			initializeGame();
+			enableAllButtons();
 		}
 	}
 	else{
-		document.getElementById("barca_board").innerHTML = "";
-		gameStarted = false;
-		player_TURN = $("#playeroption").val();
-		mode = $("#gametype").val();
-		resetState["player_TURN"] = player_TURN;
-		resetState["mode"] = mode;
-		fear_counter = 0;
-		wateringHoleCounter = 0;
-		valid_clicks = [];
-		draw_move_counter = {};
-		all_previous_moves = [];
-		fifo_for_draw_moves = [];
-		clearBarcaBoard();
-		newBoard();
-		initBoardPieces();
-		placeInitImage();
-		placeWateringHoles();
-		gameStarted = true;
+		initialize();
 		initializeGame();
+		enableAllButtons();
 	}
 }
 
 function resetGame(){
 	if(gameStarted){
-		newgameStarted = confirm("Are you sure you want to reset the game back to its original state?");
+		var newgameStarted = confirm("Are you sure you want to reset the game back to its original state?");
 		if(newgameStarted){
-			document.getElementById("barca_board").innerHTML = "";
-			gameStarted = false;
-			victory = false;
-			player_TURN = resetState["player_TURN"];
-			mode = resetState["mode"];
-			fear_counter = 0;
-			wateringHoleCounter = 0;
-			valid_clicks = [];
-			draw_move_counter = {};
-			all_previous_moves = [];
-			fifo_for_draw_moves = [];
-			clearBarcaBoard();
-			newBoard();
-			initBoardPieces();
-			placeInitImage();
-			placeWateringHoles();
-			gameStarted = true;
-			newgameStarted = false;
+			initialize();
 			initializeGame();
+			enableAllButtons();
 		}
 	}
 }
 
-function undoMove(){
+function setBackToOriginalState(){
+	setToOriginalBoard = confirm("Are you sure you want to set back to original board game state");
+	if(setToOriginalBoard){
+		disableAllButtons();
+		removeImageForScaredAndTrappedPieces();
+		removeImageForWateringHoles();
+		removeCrowns();
+		// addCurrentBoardPosition();
+		for(var key in piece_locations){
+			var row = getRow(key);
+			var col = getCol(key);
+			barca_array[row][col] = ".";
+		}
+		piece_locations = original_board_state["piece_locations"];
+		for(var key in piece_locations){
+			var row = getRow(key);
+			var col = getCol(key);
+			barca_array[row][col] = key;
+		}
+		var size = undo_moves.length;
+		var counter = 0;
 
+		while(counter < size){
+			all_previous_moves.push(undo_moves.pop());
+			counter++;
+		}
+
+		recomputeValidClicks(player_TURN);
+		placeImageForScaredAndTrappedPieces();
+		placeImageForWateringHolesIfEmpty();
+		checkVictory();
+		if(original_board_state[mode] === "PLAYER V. AI"){
+			AIsmove = original_board_state["AIsmove"];
+		}
+		printTurn();
+		enableAllButtons();
+	}
+}
+
+function takeBack(src_row,src_col,dest_row,dest_col,undo){
+	makeMove(src_row,src_col,dest_row,dest_col,undo);
+
+	if(mode === "PLAYER V. AI"){
+		AIsmove = !AIsmove;
+	}
+	else{
+		switchTurn();
+		recomputeValidClicks(player_TURN);
+	}
+}
+
+function undoMove(){
+	if(all_previous_moves.length > 0){
+		undo_moves.push(all_previous_moves.pop());
+		var move = undo_moves[undo_moves.length-1];
+		console.log(move);
+		var src_row = move[2];
+		var src_col = move[3];
+		var dest_row = move[4];
+		var dest_col = move[5];
+		takeBack(dest_row,dest_col,src_row,src_col,true);
+	}
+	else{
+		alert("There is no move to undo");
+	}
 }
 
 function redoMove(){
-
+	if(undo_moves.length > 0){
+		all_previous_moves.push(undo_moves.pop());
+		var move = all_previous_moves[all_previous_moves.length - 1];
+		var src_row = move[2];
+		var src_col = move[3];
+		var dest_row = move[4];
+		var dest_col = move[5];
+		takeBack(src_row,src_col,dest_row,dest_col,true);
+	}
+	else{
+		alert("There is no move to redo");
+	}
 }
 
 function playFromHere(){
+	playNewGame = confirm("Do you want to make the move from here?");
 
+	if(playNewGame)
+	{
+		undo_moves = [];
+		if(mode === "PLAYER v. AI"){
+			if(AIsmove){
+				disableAllButtons();
+				printTurn();
+				getAIMove();
+			}
+		}
+	}
 }
