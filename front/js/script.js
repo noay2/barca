@@ -723,7 +723,11 @@ function placeCrownOnWinningPieces() {
 /*Fix bugs with this function for TOMORROW*/
 function resetBoardScaredAndTrappedPieces(data){
 	var pieces = data["pieces"];
+	var length = data["draw_moves"].length;
 	var ai_move = data["draw_moves"][length-1];
+
+	console.log(ai_move);
+
 	if(player_TURN === "BLACK"){
 		var src = [9-ai_move[2],9-ai_move[3]];
 		var dest = [9-ai_move[4],9-ai_move[5]];
@@ -732,8 +736,6 @@ function resetBoardScaredAndTrappedPieces(data){
 		var src = [ai_move[2],ai_move[3]];
 		var dest = [ai_move[4],ai_move[5]];
 	}
-
-	console.log(ai_move);
 
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
@@ -785,6 +787,7 @@ function resetBoardScaredAndTrappedPieces(data){
 			}
 		}
 	}
+	console.log(all_previous_moves);
 }
 
 
@@ -1081,6 +1084,7 @@ function makeMove(r1,c1,row,col,undo){
 	calculateTrappedPieces();
 	placeImageForScaredAndTrappedPieces();
 	placeImageForWateringHolesIfEmpty();
+	console.log(all_previous_moves);
 }
 
 /* Returns the div of the piece*/
