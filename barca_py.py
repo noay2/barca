@@ -18,7 +18,7 @@ class Piece:
              }
              
     white_player_initial_hash =     419616483301654593334721783932067741879967698371037654176895614914325882259333160480768
-    black_player_initial_hash = 		209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
+    black_player_initial_hash = 	209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
 
 
 
@@ -245,8 +245,9 @@ class Board:
                     yield piece
 
     
+    
     def board_evaluation(self, watering_holes_value, adjacent_watering_holes_value,\
-                               scared_pieces_value, center_encouragement_value):
+                               scared_pieces_value):
         score=0
         
 
@@ -273,7 +274,7 @@ class Board:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
                     score+=  adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
             #How close are you to the center 
-            score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
+            #score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
             
             #How many pieces do you fear the current turn
             if piece.infear:
@@ -282,8 +283,55 @@ class Board:
 
 
             
-
         return score
+
+    def can_cap_watering_hole(self):
+        blackcounter=0
+        whitecounter=0
+        #For each unoccupied wateringhole:
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board_coord[watering_hole_row][watering_hole_col] == None):
+                #For each cardinal and intercardinal direction
+                for x in (-1,2):
+                    for y in (-1,2):
+                        if ((x,y)!=(0,0)):
+                            #Walk three squares in that direction
+                            temp=[watering_hole_row+x, watering_hole_col+y] #First step
+                            for i in range(3): #Next two steps
+                                #Check if it's a watering hole and act accordingly 
+                                if (temp[0], temp[1]) in Board.watering_holes:
+                                    break
+                                #Check if it's a piece
+                                if self.board_coord[temp[0]][temp[1]]!=None:
+                                    if self.can_move_to_square(self.board_coord[temp[0]][temp[1]], (x,y), (watering_hole_row, watering_hole_col)):
+                                        print(str("****" + str(self.board_coord[temp[0]][temp[1]])) + " at " + str(temp[0]) + " "+ str(temp[1]) + " Can capture watering hole at " + str(watering_hole_row) + " "+ str(watering_hole_col)+ "****")
+                                        if (self.board_coord[temp[0]][temp[1]].color=="WHITE"):
+                                            whitecounter+=1
+                                        else:
+                                            blackcounter+=1
+                                    break
+                                    
+                            temp=[temp[0]+x, temp[1]+y]
+
+        return (whitecounter, blackcounter)
+
+    def can_move_to_square(self, piece, direction, destination):
+        #Made specifically for use in can_caputure_watering_hole function
+        #Assuming that there are no obstructions between piece and destination in provided direction
+
+        #Check if direction is appropriate to piece
+        if(direction[0]==0 or direction[1]==0):
+            if (piece.type=="LION"):
+                return False
+        elif (direction[0]==1 or direction[1]==1):
+            if (piece.type=="MOUSE"):
+                return False
+        #Check if piece is deterred
+        for fearsome_piece in piece.scared_of_pieces:
+            if fearsome_piece.adjacent_to(destination[0], destination[1]):
+                return False
+
+        return True
 
     
     def fear_update(self,moving_piece):
