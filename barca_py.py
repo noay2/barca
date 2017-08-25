@@ -202,7 +202,7 @@ class Board:
             current_hash = self.undo_hash_previous_move(current_hash, piece_color, piece_type, source_row, source_col)
             current_hash = self.update_hash_previous_move(current_hash, piece_color, piece_type, dest_row, dest_col)
             self.position_counter[current_hash] +=1
-            return
+            
           
     
                 
