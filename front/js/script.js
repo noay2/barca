@@ -555,20 +555,21 @@ function placeImageForScaredAndTrappedPieces(){
 	//'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
 	//'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 	//'<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
-	console.log("BEFORE PUTTING: " + fear_counter);
-	console.log("TRAPPED PIECES: " + trapped_pieces.length);
-	console.log("SCARED PIECES: " + scared_pieces.size);
+	// console.log("BEFORE PUTTING: " + fear_counter);
+	// console.log("TRAPPED PIECES: " + trapped_pieces.length);
+	// console.log("SCARED PIECES: " + scared_pieces.size);
 	for(var i = 0; i < trapped_pieces.length; i++){
 		var id = "fear_"+fear_counter;
 		document.getElementById(getDiv(trapped_pieces[i])).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
 	for(let i of scared_pieces){
+		console.log(i);
 		var id = "fear_"+fear_counter;
 		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
 	}
-	console.log("AFTER PUTTING: " + fear_counter);
+	// console.log("AFTER PUTTING: " + fear_counter);
 }
 
 function removeImageForScaredAndTrappedPieces(){
@@ -584,29 +585,39 @@ function removeImageForScaredAndTrappedPieces(){
 
 /*Checks if the move made is valid or invalid*/
 function verifyValidMove(from_row,from_col,to_row,to_col){
+	// console.log("Before verifying: ");
+	// console.log(barca_array);
 	var piece = barca_array[from_row][from_col];
 	var direction = directionMovedIn(from_row,from_col,to_row,to_col);
 	var side = piece[0];
 	/*Checks if the piece is moved in invalid direction*/
 	if(direction == "INVALID")
 	{
+		// console.log("After verifying: ");
+		// console.log(barca_array);
 		return false;
 	}
 	else if(!checkIfInTrappedPieces(piece) &&
 		checkIfPieceIsScared(piece,to_row,to_col))
 	{
+		// console.log("After verifying: ");
+		// console.log(barca_array);
 		return false;
 	}
 	else if(piece[1] == 'L')
 	{
 		if(direction !== "DIAGONAL" ||
 			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			// console.log("After verifying: ");
+			// console.log(barca_array);
 			return false;
 		}
 	}
 	else if(piece[1] == 'E')
 	{
 		if(checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			// console.log("After verifying: ");
+			// console.log(barca_array);
 			return false;
 		}
 	}
@@ -614,9 +625,13 @@ function verifyValidMove(from_row,from_col,to_row,to_col){
 	{
 		if((direction !== "VERTICAL" && direction !== "HORIZONTAL") ||
 			checkTheDirectionOfMoveForObstacles(from_row,from_col,to_row,to_col)){
+			// console.log("After verifying: ");
+			// console.log(barca_array);
 			return false;
 		}
 	}
+	// console.log("After verifying: ");
+	// console.log(barca_array);
 	return true;
 }
 
@@ -678,7 +693,7 @@ function removeCrowns(){
 		for(var i = 0; i < crown_counter; i++){
 			var value = i + 1;
 			var element = document.getElementById("crown_"+value);
-			element.parentNode.remove(element);
+			element.parentNode.removeChild(element);
 		}
 		crown_counter = 0;
 	}
@@ -705,9 +720,9 @@ function placeCrownOnWinningPieces() {
 	crown_counter = 6;
 }
 
+/*Fix bugs with this function for TOMORROW*/
 function resetBoardScaredAndTrappedPieces(data){
 	var pieces = data["pieces"];
-	var length = data["draw_moves"].length;
 	var ai_move = data["draw_moves"][length-1];
 	if(player_TURN === "BLACK"){
 		var src = [9-ai_move[2],9-ai_move[3]];
@@ -717,21 +732,29 @@ function resetBoardScaredAndTrappedPieces(data){
 		var src = [ai_move[2],ai_move[3]];
 		var dest = [ai_move[4],ai_move[5]];
 	}
+
+	console.log(ai_move);
+
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
 	movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
 	var color = (piece_info[0] === 'B') ? "BLACK" : "WHITE";
 	var piece = (piece_info[1] === 'E') ? "ELEPHANT" : (piece_info[1] === 'R') ? "MOUSE" : "LION";
 	all_previous_moves.push([color,piece,src[0],src[1],dest[0],dest[1]]);
+	original_board_state["all_previous_moves"].push([color,piece,src[0],src[1],dest[0],dest[1]]);
 	barca_array[dest[0]][dest[1]] = barca_array[src[0]][src[1]];
 	barca_array[src[0]][src[1]] = ".";
 	piece_locations[barca_array[dest[0]][dest[1]]] = dest[0] * 10 + dest[1];
+	original_board_state["board"][dest[0]][dest[1]] = barca_array[dest[0]][dest[1]];
+	original_board_state["board"][src[0]][src[1]] = ".";
+	var piece = original_board_state["board"][dest[0]][dest[1]];
+	original_board_state["piece_locations"][piece] = dest[0] * 10 + dest[1];
 	checkVictory();
 	scared_pieces = new Set();
 	trapped_pieces = [];
 
-	if(!victory){
-		for(var i = 0; i < pieces.length; i++){
+	for(var i = 0; i < pieces.length; i++){
+		if(player_TURN === "BLACK"){
 			if(pieces[i][5]){
 				trapped_pieces.push(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
 			}
@@ -739,18 +762,26 @@ function resetBoardScaredAndTrappedPieces(data){
 				scared_pieces.add(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
 			}
 		}
+		else{
+			if(pieces[i][5]){
+				trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
+			}
+			else if(pieces[i][4]){
+				scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
+			}
+		}
+	}
 
-		for(var i = 0; i < trapped_pieces.length; i++){
-			if(trapped_pieces[i][0] === player_TURN[0]){
-				if(trapped_pieces[i][1] === 'L'){
-					checkIfASingleValidMoveExistsForLion(trapped_pieces[i]);
-				}
-				else if(trapped_pieces[i][1] === 'R'){
-					checkIfASingleValidMoveExistsForMouse(trapped_pieces[i]);
-				}
-				else{
-					checkIfASingleValidMoveExistsForElephant(trapped_pieces[i]);
-				}
+	for(var i = 0; i < trapped_pieces.length; i++){
+		if(trapped_pieces[i][0] === player_TURN[0]){
+			if(trapped_pieces[i][1] === 'L'){
+				checkIfASingleValidMoveExistsForLion(trapped_pieces[i]);
+			}
+			else if(trapped_pieces[i][1] === 'R'){
+				checkIfASingleValidMoveExistsForMouse(trapped_pieces[i]);
+			}
+			else{
+				checkIfASingleValidMoveExistsForElephant(trapped_pieces[i]);
 			}
 		}
 	}
@@ -810,9 +841,9 @@ function movePiece(side,type,row,col){
 
 /*Function that gets the move made by the AI and updates the board accordingly*/
 function getAIMove(){
-	console.log("IN GET AI MOVE");
+	// console.log("IN GET AI MOVE");
 	if(!gameStarted){
-		console.log("IN RETURN BYE BYE");
+		// console.log("IN RETURN BYE BYE");
 		return;
 	}
 	var API_request = {};
@@ -832,7 +863,7 @@ function getAIMove(){
 			API_request["draw_moves"][i][4] = 9-API_request["draw_moves"][i][4];
 			API_request["draw_moves"][i][5] = 9-API_request["draw_moves"][i][5];
 		}
-		console.log("GOT TO BLACK");
+		// console.log("GOT TO BLACK");
 	}
 
 	for(var piece in piece_locations){
@@ -840,7 +871,7 @@ function getAIMove(){
 		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
 		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
 		if(player_TURN === "BLACK"){
-			console.log("GOT TO BLACK");
+			// console.log("GOT TO BLACK");
 			info[0][2] = 9-getRow(piece);
 			info[0][3] = 9-getCol(piece);
 		}
@@ -855,7 +886,7 @@ function getAIMove(){
 	// API_request["human_move"] = [[0,0],[0,5]];
 	API_request["pieces"] = pieces;
 
-	console.log("GOT TO REQUEST");
+	// console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
 			url: "https://serene-everglades-79780.herokuapp.com/version3",
@@ -871,7 +902,7 @@ function getAIMove(){
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
-				console.log("Move made");
+				// console.log("Move made");
 				AIsmove = false;
 				printTurn();
 				enableAllButtons();
@@ -942,6 +973,7 @@ function clickMade(row,col,id,val){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 	}
 	else if(verifyValidClick(num)){
+		console.log("Piece request to move: " + barca_array[row][col]);
 		clicks_made = [];
 		clicks_made.push(num);
 		document.getElementById("message").innerHTML = "<b>Choose where you want to move the piece to or select another piece to move...</b>";
@@ -959,6 +991,7 @@ function clickMade(row,col,id,val){
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
 			makeMove(r1,c1,row,col,false);
+			console.log("r1,c1;row,col: "+ r1+","+c1+";"+row+","+col);
 
 			if(mode === "PLAYER V. PLAYER"){
 				var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
@@ -1025,6 +1058,7 @@ function makeMove(r1,c1,row,col,undo){
 	removeImageForScaredAndTrappedPieces();
 	removeImageForWateringHoles();
 	removeCrowns();
+	console.log("r1,c1: " + r1+","+c1);
 	document.getElementById("tile_"+r1+","+c1).innerHTML = "";
 	movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
 	barca_array[row][col] = barca_array[r1][c1];
@@ -1043,11 +1077,9 @@ function makeMove(r1,c1,row,col,undo){
 		all_previous_moves.push([color,piece,r1,c1,row,col]);
 		original_board_state["all_previous_moves"].push([color,piece,r1,c1,row,col]);
 	}
-	if(!victory){
-		calculateScaredPieces();
-		calculateTrappedPieces();
-		placeImageForScaredAndTrappedPieces();
-	}
+	calculateScaredPieces();
+	calculateTrappedPieces();
+	placeImageForScaredAndTrappedPieces();
 	placeImageForWateringHolesIfEmpty();
 }
 
@@ -1122,39 +1154,38 @@ function setBackToOriginalState(){
 		removeImageForWateringHoles();
 		removeCrowns();
 		// addCurrentBoardPosition();
-		for(var key in piece_locations){
-			var row = getRow(key);
-			var col = getCol(key);
-			barca_array[row][col] = ".";
-		}
+		barca_array = original_board_state["board"];
 		piece_locations = original_board_state["piece_locations"];
-		for(var key in piece_locations){
-			var row = getRow(key);
-			var col = getCol(key);
-			barca_array[row][col] = key;
-		}
-		var size = undo_moves.length;
-		var counter = 0;
-
-		while(counter < size){
-			all_previous_moves.push(undo_moves.pop());
-			counter++;
-		}
-
-		recomputeValidClicks(player_TURN);
+		all_previous_moves = original_board_state["all_previous_moves"];
+		player_TURN = original_board_state["player_TURN"];
+		mode = original_board_state["mode"];
+		undo_moves = [];
+		checkVictory();
+		calculateScaredPieces();
+		calculateTrappedPieces();
 		placeImageForScaredAndTrappedPieces();
 		placeImageForWateringHolesIfEmpty();
-		checkVictory();
-		if(original_board_state[mode] === "PLAYER V. AI"){
+
+		if(mode === "PLAYER V. AI"){
 			AIsmove = original_board_state["AIsmove"];
 		}
+
 		printTurn();
+		if(!AIsmove){
+			recomputeValidClicks(player_TURN);
+		}
 		enableAllButtons();
 	}
 }
 
 function takeBack(src_row,src_col,dest_row,dest_col,undo){
+	if(undo){
+		console.log("piece_src: " + src_row + "," + src_col + "," + barca_array[src_row][src_col]);
+	}
 	makeMove(src_row,src_col,dest_row,dest_col,undo);
+	if(undo){
+		console.log("piece_dest: " + dest_row + "," + dest_col + "," + barca_array[dest_row][dest_col]);
+	}
 
 	if(mode === "PLAYER V. AI"){
 		AIsmove = !AIsmove;
@@ -1201,6 +1232,7 @@ function playFromHere(){
 
 	if(playNewGame)
 	{
+		// console.log(barca_array);
 		undo_moves = [];
 		if(mode === "PLAYER v. AI"){
 			if(AIsmove){
@@ -1209,5 +1241,6 @@ function playFromHere(){
 				getAIMove();
 			}
 		}
+		recomputeValidClicks(player_TURN);
 	}
 }
