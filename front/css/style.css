@@ -5,6 +5,59 @@ h1 {
     color: Black;
 }
 
+.navigationBar  {
+      height: 5%;
+      line-height: inherit;
+      position: relative;
+      right: 1.25em;
+      font-size: 1.25em;
+      top: 0;
+      vertical-align: middle;
+    }
+
+      .navigationBar  ul {
+        list-style: none;
+        margin: 0;
+        padding-left: 0;
+      }
+
+        .navigationBar  ul li {
+          border-radius: 4px;
+          display: inline-block;
+          margin-left: 2.5em;
+          padding-left: 0;
+        }
+
+          .navigationBar  ul li a {
+            -moz-transition: color 0.2s ease-in-out;
+            -webkit-transition: color 0.2s ease-in-out;
+            -ms-transition: color 0.2s ease-in-out;
+            transition: color 0.2s ease-in-out;
+            color: #666;
+            display: inline-block;
+            text-decoration: none;
+          }
+
+            .navigationBar  ul li a:hover {
+              color: #484848;
+            }
+
+          .navigationBar  ul li:first-child {
+            margin-left: 0;
+          }
+
+          .navigationBar  ul li .button {
+            border-color: rgba(144, 144, 144, 0.25);
+            box-shadow: none;
+            height: 3em;
+            line-height: 2.9em;
+            margin-bottom: 0;
+            padding: 0 1.5em;
+            position: relative;
+            top: -0.075em;
+            vertical-align: middle;
+          }
+
 
 .mainBox{
 	width: 470px;
@@ -107,37 +160,3 @@ h1 {
    }
 
   
-.area {
-  text-align: center;
-  font-size: 6.5em;
-  color: #fff;
-  letter-spacing: -7px;
-  font-weight: 700;
-  text-transform: uppercase;
-  animation: blur .75s ease-out ;
-  text-shadow: 0px 0px 5px #fff, 0px 0px 7px #fff;
-}
-
-@keyframes blur {
-  from {
-    text-shadow:0px 0px 10px #fff,
-      0px 0px 10px #fff, 
-      0px 0px 25px #fff,
-      0px 0px 25px #fff,
-      0px 0px 25px #fff,
-      0px 0px 25px #fff,
-      0px 0px 25px #fff,
-      0px 0px 25px #fff,
-      0px 0px 50px #fff,
-      0px 0px 50px #fff,
-      0px 0px 50px #7B96B8,
-      0px 0px 150px #7B96B8,
-      0px 10px 100px #7B96B8,
-      0px 10px 100px #7B96B8,
-      0px 10px 100px #7B96B8,
-      0px 10px 100px #7B96B8,
-      0px -10px 100px #7B96B8,
-      0px -10px 100px #7B96B8;
-  }
-}
-

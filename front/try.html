@@ -22,12 +22,15 @@ https://serene-everglades-79780.herokuapp.com/api
 
 </head>
 <body>
-
 <div class = "row text-center ">
-<!-- <div class="area">⚠ Welcome To BARCA ⚠</div>
- -->
-</div>
+  <div class="btn-group btn-group-lg ">
+    <button type="button" class="btn btn-default" onclick="location.href ='index.html'">Home</button>
+    <button type="button" class="btn btn-default" onclick="location.href ='rules.html'">Rules</button>
+    <button type="button" class="btn btn-default" onclick="location.href ='tech.html'">Technology</button>
 
+    <button type="button" class="btn btn-default active" onclick="location.href ='try.html'">Game</button>
+  </div>
+</div>
 
 
 <div class = "row">
@@ -38,7 +41,6 @@ https://serene-everglades-79780.herokuapp.com/api
     For AI mode, white player will be moving first always.</b>
 	</div>
 </div>
-<br>
 <br>
 
 <div class = "row" id = "buttons">
@@ -67,6 +69,13 @@ https://serene-everglades-79780.herokuapp.com/api
         </optgroup>
       </select>
       &nbsp;&nbsp;
+       <select class = "selectpicker show-tick" id = "hardness" data-width="100px">
+        <optgroup label = "Type">
+          <option value = "animals" data-icon = "glyphicon glyphicon-stop" selected = "selected">Easy</option>
+          <option value = "rps" data-icon = "glyphicon glyphicon-th-large">Medium</option>
+          <option value = "chess" data-icon = "glyphicon glyphicon-th">Hard</option>
+        </optgroup>
+      </select>
   </div>
 
 <!--       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
@@ -111,14 +120,37 @@ https://serene-everglades-79780.herokuapp.com/api
 
 
 </div>
+<div class = "row ">
 
 <div id="barca_board" class = "mainBox"></div>
+</div>
+<!-- 
     <div class =  "col-xs-12 text-center" >
     <br><br>
       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
     </div>
 
-    <div class = "col-xs-12 text-center" >
+<div class = "col-xs-8 text-center ">
+  <div class="btn-group btn-group-justified ">
+    <button type="button" class="btn btn-primary"  onclick="playFromHere()" >Play From Here</button>
+    <button type="button" class="btn btn-primary"  onclick="setBackToOriginalState()" >Set Back to Original State</button>
+  </div>
+</div>
+ -->
+<div class = "row text-center ">
+  <div class="btn-group btn-group-lg ">
+      <br><br>
+
+    <button type="button" class="btn btn-default" id = "playFromHere" onclick="playFromHere()" >Play From Here</button>
+    <button type="button" class="btn btn-default" id = "startGame" onclick = "startGame()">Start Game!</button>
+
+    <button type="button" class="btn btn-default" id = "setToOriginal" onclick="setBackToOriginalState()" >Set Back to Original State</button>
+    
+  </div>
+</div>
+
+
+<!--     <div class = "col-xs-8 text-center" >
     <br>
       <button class = "button2" id = "playFromHere" onclick="playFromHere()">
         Play From Here
@@ -126,7 +158,9 @@ https://serene-everglades-79780.herokuapp.com/api
       <button class = "button2" id = "setToOriginal" onclick="setBackToOriginalState()">
         Set Back to Original State
       </button>
-    </div>
+    </div>-->
+
+
 <script>newBoard();</script>
 <script>placeWateringHoles();</script>
 <script>placeInitImage();</script>
