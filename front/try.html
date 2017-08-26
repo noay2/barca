@@ -43,7 +43,6 @@ https://serene-everglades-79780.herokuapp.com/api
 
 <div class = "row" id = "buttons">
         <div id="turnDiv" class="col-xs-12 text-center turnDivClass "></div>
-    <h4 class = "animated tada">Welcome To Barca Version 1!</h4>
 
     <div class = "col-xs-12 text-center">
       <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
@@ -53,15 +52,30 @@ https://serene-everglades-79780.herokuapp.com/api
         </optgroup>
       </select>
       &nbsp;&nbsp;
-      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
-        <optgroup label = "Side">
-          <option value = "WHITE" selected = "selected">White</option>
-          <option value = "BLACK">Black</option>
+      <select class = "selectpicker show-tick" id = "pieceType" data-width="100px">
+        <optgroup label = "Type">
+          <option value = "animals" data-icon = "glyphicon glyphicon-fire" selected = "selected">Animals</option>
+          <option value = "rps" data-icon = "glyphicon glyphicon-scissors">Rock Paper Scissors</option>
+          <option value = "chess" data-icon = "glyphicon glyphicon-king">Chess</option>
         </optgroup>
       </select>
       &nbsp;&nbsp;
-      <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
+      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
+        <optgroup label = "Side">
+          <option value = "WHITE" data-icon="glyphicon glyphicon-unchecked"  selected = "selected">White</option>
+          <option value = "BLACK" data-icon=" glyphicon glyphicon-stop" >Black</option>
+        </optgroup>
+      </select>
+      &nbsp;&nbsp;
+  </div>
+
+<!--       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
       &nbsp;&nbsp;&nbsp;
+ -->
+
+<div class = "col-xs-12 text-center" >
+    <br>
+
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
         <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
         </span>
@@ -76,7 +90,36 @@ https://serene-everglades-79780.herokuapp.com/api
         <span class = "fa fa-repeat" aria-hidden = "true">
         </span>
       </button>
+
+    </div>
+
+<!-- 
+      <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
+        <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
+        </span>
+      </button>
       &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "undoMove" onclick="undoMove()">
+        <span class = "fa fa-undo" aria-hidden = "true">
+        </span>
+      </button>
+      &nbsp;&nbsp;
+      <button class = "btn btn-default" id = "redoMove" onclick="redoMove()">
+        <span class = "fa fa-repeat" aria-hidden = "true">
+        </span>
+      </button> -->
+
+
+</div>
+
+<div id="barca_board" class = "mainBox"></div>
+    <div class =  "col-xs-12 text-center" >
+    <br><br>
+      <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
+    </div>
+
+    <div class = "col-xs-12 text-center" >
+    <br>
       <button class = "button2" id = "playFromHere" onclick="playFromHere()">
         Play From Here
       </button>
@@ -84,10 +127,6 @@ https://serene-everglades-79780.herokuapp.com/api
         Set Back to Original State
       </button>
     </div>
-</div>
-
-<div id="barca_board" class = "mainBox"></div>
-
 <script>newBoard();</script>
 <script>placeWateringHoles();</script>
 <script>placeInitImage();</script>
