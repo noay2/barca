@@ -65,6 +65,8 @@ var crown_counter = 0;
 //Data structure that is used to set the board back to its original point
 var original_board_state = {};
 
+var piece_type = "animals";
+
 function checkForValue(i,j){
 	if((i+j)%2 != 0)
 	{
@@ -92,18 +94,30 @@ function newBoard(){
 
 /*Function that positions initial images onto the board*/
 function placeInitImage(){
-	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
-	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/elephantW.gif"/>';
-	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/elephantW.gif"/>';
-	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
-	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
-	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
-	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/lionW.gif"/>';
-	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/mouseW.gif"/>';
-	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/mouseW.gif"/>';
-	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/lionW.gif"/>';
+	if(piece_type == "animals")
+	{
+		placeElephantLionMouseImages();
+	}
+	else if( piece_type == "rps"){
+		placeRockPaperScissorImages();
+	}
+	else if(piece_type == "chess")
+	{
+		placeChessImages();
+	}
+
+	// document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	// document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	// document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	// document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	// document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	// document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	// document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	// document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	// document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/lionW.gif"/>';
+	// document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	// document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	// document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/lionW.gif"/>';
 }
 
 function placeWateringHoles() {
@@ -833,13 +847,59 @@ function recomputeValidClicks(turn){
 }
 
 /*Function that returns right image extension for the piece*/
+// function findImgName(side,type){
+// 	switch(type){
+// 		case 'E': return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
+// 		case 'L': return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
+// 		default: return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
+// 	}
+// }
+
 function findImgName(side,type){
 	switch(type){
-		case 'E': return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
-		case 'L': return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
-		default: return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
+		case 'E': 
+		{
+			if(piece_type == "animals"){
+				return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
+			}
+			else if(piece_type == "rps"){
+				return (side == 'W') ? "WhiteRock.gif" : "BlackRock.gif";
+			}
+			else if(piece_type == "chess"){
+				return (side == 'W') ? "ChessElephantWhite.gif" : "ChessBlackElephant.gif";
+			}
+		}
+		case 'L': 
+		{
+			if(piece_type == "animals"){
+				return (side == 'W') ? "lionW.gif" : "BlackLion.gif";			
+			}
+			else if(piece_type == "rps"){
+				return (side == 'W') ? "WhiteScissor.gif" : "BlackScissor.gif";			
+			}
+			
+			else if(piece_type == "chess"){
+				return (side == 'W') ? "ChessWhiteKing.gif" : "ChessBlackKing.gif";			
+			}
+		}
+		default: 
+		{
+			if(piece_type == "animals"){
+				return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
+			}
+			else if(piece_type == "rps"){
+				return (side == 'W') ? "WhitePaper.gif" : "BlackPaper.gif";
+			}
+			
+			else if(piece_type == "chess"){
+				return (side == 'W') ? "ChessWhitePawn.gif" : "ChessBlackPawn.gif";
+			}
+		}
 	}
 }
+
+
+
 
 /*Function set image to black*/
 function movePiece(side,type,row,col){
@@ -1104,6 +1164,8 @@ function makeMove(r1,c1,row,col,undo){
 	placeImageForWateringHolesIfEmpty();
 }
 
+
+
 /* Returns the div of the piece*/
 function getDiv(piece){
 	var row = getRow(piece);
@@ -1119,6 +1181,7 @@ function initialize(){
 	victory = false;
 	player_TURN = $("#playeroption").val();
 	mode = $("#gametype").val();
+	piece_type = $("#pieceType").val();
 	original_board_state = {};
 	resetState["player_TURN"] = player_TURN;
 	resetState["mode"] = mode;
@@ -1264,4 +1327,57 @@ function playFromHere(){
 		}
 		recomputeValidClicks(player_TURN);
 	}
+}
+
+function checkPieceType()
+{
+	piece_type = $("#pieceType").val();
+
+}
+
+function placeRockPaperScissorImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackRock.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackRock.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/WhiteRock.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackPaper.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackScissor.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/WhitePaper.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/WhiteScissor.gif"/>';
+
+}
+
+function placeElephantLionMouseImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/elephantW.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/BlackMouse.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/BlackLion.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/lionW.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/mouseW.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/lionW.gif"/>';
+}
+
+
+function placeChessImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/ChessBlackElephant.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/ChessBlackElephant.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/ChessElephantWhite.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/ChessElephantWhite.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/ChessBlackKing.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/ChessBlackPawn.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/ChessBlackPawn.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/ChessBlackKing.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/ChessWhiteKing.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/ChessWhitePawn.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/ChessWhitePawn.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/ChessWhiteKing.gif"/>';
 }
