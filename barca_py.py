@@ -517,7 +517,7 @@ class AI:
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,250000], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4):
+    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4):
         self.watering_holes_value =  watering_holes_value 
         self.future_watering_hole_value = future_watering_hole_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
