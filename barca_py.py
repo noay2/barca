@@ -30,10 +30,7 @@ class Piece:
             }
     piece_color_val = {"BLACK": 0, "WHITE": 1}
     piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
-    piece_type_direction = {"MOUSE": { (i,j) for j in range(-1,2,1) for i in range(-1,2,1) if (abs(i) ==abs(j) )       and not(i==0 and j==0)   },
-                            "LION":  { (i,j) for j in range(-1,2,1) for i in range(-1,2,1) if (i==0 or j==0 )and not(i==0 and j==0)   },
-                            "ELEPHANT":{(i,j)for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   }
-                            }
+
     
     def __init__(self, piece_arr, board_coord, pieces):
         self.color   = piece_arr[0]
@@ -46,7 +43,6 @@ class Piece:
         self.board_coord[self.row][self.col]  = self
         self.piece_type = pieces[Piece.piece_color_val[self.color] ][Piece.piece_type_val[self.type]]
         self.piece_type.append(self)
-        self.piece_type_directions = Piece.piece_type_direction[self.type]
         self.team_pieces = pieces[Piece.piece_color_val[self.color] ]
         self.scared_of_pieces = pieces[  (Piece.piece_color_val[self.color] +1)%2][(Piece.piece_type_val[self.type] +1) %3]
         
@@ -81,7 +77,23 @@ class Piece:
             if piece.adjacent_to(row, col):
                 return True
         return False      
+    def can_move_to_square(self, direction, destination):
+        #Made specifically for use in can_caputure_watering_hole function
+        #Assuming that there are no obstructions between piece and destination in provided direction
 
+        #Check if direction is appropriate to piece
+        if(direction[0]==0 or direction[1]==0):
+            if (piece.type=="LION"):
+                return False
+        elif (direction[0]==1 or direction[1]==1):
+            if (piece.type=="MOUSE"):
+                return False
+        #Check if piece is deterred
+        for fearsome_piece in piece.scared_of_pieces:
+            if fearsome_piece.adjacent_to(destination[0], destination[1]):
+                return False
+
+        return True
     def valid_moves(self):
         if not(self.infear):
             for piece_type in self.team_pieces:
@@ -161,7 +173,7 @@ class Board:
                                 (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
              }
     white_player_initial_hash =     419616483301654593334721783932067741879967698371037654176895614914325882259333160480768
-    black_player_initial_hash = 		209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
+    black_player_initial_hash =     209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
 
 
 
@@ -173,10 +185,7 @@ class Board:
             }
     piece_color_val = {"BLACK": 0, "WHITE": 1}
     piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
-    piece_type_direction = {"MOUSE": [ [i,j] for j in range(-1,2,1) for i in range(-1,2,1) if (abs(i) ==abs(j) )       and not(i==0 and j==0)   ],
-                            "LION":  [ [i,j] for j in range(-1,2,1) for i in range(-1,2,1) if (i==0 or j==0 )and not(i==0 and j==0)   ],
-                            "ELEPHANT":[[i,j]for j in range(-1,2,1) for i in range(-1,2,1) if                    not(i==0 and j==0)   ]
-                            }
+
 
     
     def __init__(self,whitetomove, pieces, previous_moves):
@@ -243,11 +252,9 @@ class Board:
             for piece_type in piece_color: 
                 for piece in piece_type:
                     yield piece
-
     
-    
-    def board_evaluation(self, watering_holes_value, adjacent_watering_holes_value,\
-                               scared_pieces_value):
+    def board_evaluation(self,watering_holes_value, future_watering_hole_value, adjacent_watering_holes_value,\
+                               scared_pieces_value, teammate_value, center_encouragement_value):
         score=0
         
 
@@ -255,8 +262,8 @@ class Board:
         white_counter = 0
         black_counter = 0
         for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
+            if (self.board_coord[watering_hole_row][watering_hole_col]!= None):
+                if (self.board_coord[watering_hole_row][watering_hole_col]).color == "BLACK":
                     black_counter +=1
                 else:
                     white_counter +=1
@@ -265,7 +272,33 @@ class Board:
         score -= watering_holes_value[black_counter]
 
 
-
+	#How many watering holes you can get the next turn
+        future_white_counter=0
+        future_black_counter=0
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board_coord[watering_hole_row][watering_hole_col] == None):
+                for x in (-1,2):
+                    for y in (-1,2):
+                        if ((x,y)!=(0,0)):
+                            temp=[watering_hole_row+x, watering_hole_col+y] 
+                            for i in range(3): 
+                                if (temp[0], temp[1]) in Board.watering_holes:
+                                    break
+                                if self.board_coord[temp[0]][temp[1]]!=None:
+                                    piece = self.board_coord[temp[0]][temp[1]]
+                                    if ((piece.type == 'ELEPHANT') or (piece.type == 'MOUSE' and (x ==0 or y == 0)) or (piece.type == 'LION' and ( abs(x) ==1 and abs(y) == 1)))\
+                                       and (piece.scared_of_pieces[0].adjacent_to(x,y) and piece.scared_of_pieces[1].adjacent_to(x,y)):
+                                        if (piece.color=="WHITE"):
+                                            future_white_counter+=1
+                                        else:
+                                            future_black_counter+=1
+                                    break
+                                    
+                            temp=[temp[0]+x, temp[1]+y]
+                            
+        score += future_watering_hole_value[white_counter + 1] * future_white_counter
+        score -= future_watering_hole_value[black_counter + 1] * future_black_counter
+        
 
 
         for piece in self.all_pieces():
@@ -273,65 +306,23 @@ class Board:
             for watering_hole_row, watering_hole_col in Board.watering_holes:
                 if piece.adjacent_to(watering_hole_row, watering_hole_col):
                     score+=  adjacent_watering_holes_value * (1 if piece.color == 'WHITE' else -1)
-            #How close are you to the center 
-            #score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
-            
+                    
             #How many pieces do you fear the current turn
             if piece.infear:
                 score -=scared_pieces_value * (1 if piece.color == 'WHITE' else -1)
-
+            
+            #Do you have a teammate that can protect you
+            for teammate in  self.pieces[Piece.piece_color_val[piece.color]][(Piece.piece_type_val[piece.type] +2 )%3]:
+              if teammate.adjacent_to(piece.row, piece.col):
+              	score += teammate_value * (1 if piece.color == 'WHITE' else -1)
+                
+            #How close are you to the center 
+            score += center_encouragement_value * (        (40.5 - ((4.5 - piece.row)**2 +(4.5-piece.col)**2    ))/40.5) * (1 if piece.color == 'WHITE' else -1)
+            
 
 
             
         return score
-
-    def can_cap_watering_hole(self):
-        blackcounter=0
-        whitecounter=0
-        #For each unoccupied wateringhole:
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board_coord[watering_hole_row][watering_hole_col] == None):
-                #For each cardinal and intercardinal direction
-                for x in (-1,2):
-                    for y in (-1,2):
-                        if ((x,y)!=(0,0)):
-                            #Walk three squares in that direction
-                            temp=[watering_hole_row+x, watering_hole_col+y] #First step
-                            for i in range(3): #Next two steps
-                                #Check if it's a watering hole and act accordingly 
-                                if (temp[0], temp[1]) in Board.watering_holes:
-                                    break
-                                #Check if it's a piece
-                                if self.board_coord[temp[0]][temp[1]]!=None:
-                                    if self.can_move_to_square(self.board_coord[temp[0]][temp[1]], (x,y), (watering_hole_row, watering_hole_col)):
-                                        print(str("****" + str(self.board_coord[temp[0]][temp[1]])) + " at " + str(temp[0]) + " "+ str(temp[1]) + " Can capture watering hole at " + str(watering_hole_row) + " "+ str(watering_hole_col)+ "****")
-                                        if (self.board_coord[temp[0]][temp[1]].color=="WHITE"):
-                                            whitecounter+=1
-                                        else:
-                                            blackcounter+=1
-                                    break
-                                    
-                            temp=[temp[0]+x, temp[1]+y]
-
-        return (whitecounter, blackcounter)
-
-    def can_move_to_square(self, piece, direction, destination):
-        #Made specifically for use in can_caputure_watering_hole function
-        #Assuming that there are no obstructions between piece and destination in provided direction
-
-        #Check if direction is appropriate to piece
-        if(direction[0]==0 or direction[1]==0):
-            if (piece.type=="LION"):
-                return False
-        elif (direction[0]==1 or direction[1]==1):
-            if (piece.type=="MOUSE"):
-                return False
-        #Check if piece is deterred
-        for fearsome_piece in piece.scared_of_pieces:
-            if fearsome_piece.adjacent_to(destination[0], destination[1]):
-                return False
-
-        return True
 
     
     def fear_update(self,moving_piece):
@@ -411,12 +402,20 @@ class Board:
 ##########################################       
 class AI:
 
-    def __init__(self,watering_holes_value, adjacent_watering_holes_value, scared_pieces_value, center_encouragement_value):
+    def __init__(self, watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value,center_encouragement_value):
         self.watering_holes_value = watering_holes_value
+        self.future_watering_hole_value = future_watering_hole_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value 
+        self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
         self.recurse = 3
+        
+        
+    def receive_data(self, whitetomove, pieces, previous_moves):
+  
+        
+        self.board = Board(whitetomove, pieces, previous_moves)
         
         self.board_position_base_score   = {}
         
@@ -429,16 +428,11 @@ class AI:
         self.board_position_white_score = {}
         self.board_position_white_move = {}
         
-    def receive_data(self, whitetomove, pieces, previous_moves):
-
-        
-        self.board = Board(whitetomove, pieces, previous_moves)
-        
-        
         self.execute()
       
     def execute(self):
         if (not self.board.victory() and not self.board.draw()):
+        
             self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
             
@@ -463,7 +457,7 @@ class AI:
                 return [None, None, self.board_position_base_score[self.board.current_hash]]
 
 
-            score = self.board.board_evaluation(self.watering_holes_value, self.adjacent_watering_holes_value,self.center_encouragement_value, self.scared_pieces_value)
+            score = self.board.board_evaluation(self.watering_holes_value,self.future_watering_hole_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
             self.board_position_base_score[self.board.current_hash] = score
             return [None, None, score]
 
@@ -522,12 +516,14 @@ class AI:
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [20,50], adjacent_watering_holes_value = 5, scared_pieces_value = 5, center_encouragement_value = .4 ):
-        self.watering_holes_value = [0] + watering_holes_value + [1000000]
+    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,250000], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4):
+        self.watering_holes_value =  watering_holes_value 
+        self.future_watering_hole_value = future_watering_hole_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value
+        self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
-        self.AI = AI(self.watering_holes_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.center_encouragement_value)
+        self.AI = AI(self.watering_holes_value,self.future_watering_hole_value , self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
 
 
     def receive_data(self, whitetomove, pieces, previous_moves = [ ] ):
@@ -538,3 +534,47 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+
+if __name__ == "__main__":
+    false = False
+    backend = Backend()
+    backend.receive_data(
+            false,[["BLACK","ELEPHANT",2,2,false,false],
+            ["BLACK","ELEPHANT",0,5,false,false],
+            ["BLACK", "LION", 3, 5, false, false],
+            ["BLACK", "MOUSE", 4, 2, false, false],
+            ["BLACK", "MOUSE", 1, 5, false, false],
+            ["BLACK", "LION", 2, 5, false, false],
+            ["WHITE", "LION", 6, 1, false, false],
+            ["WHITE", "MOUSE", 8, 4, false, false],
+            ["WHITE", "MOUSE", 8, 5, false, false],
+            ["WHITE", "LION", 2, 0, false, false],
+            ["WHITE", "ELEPHANT", 9, 4, false, false],
+            ["WHITE", "ELEPHANT", 9, 5, false, false]],
+            [["WHITE", "LION", 8, 6, 7, 7],
+            ["BLACK", "LION", 1, 6, 2, 5],
+            ["WHITE", "LION", 7, 7, 3, 3],
+            ["BLACK", "LION", 1, 3, 3, 5],
+            ["WHITE", "LION", 3, 3, 2, 4],
+            ["BLACK", "MOUSE", 1, 4, 1, 2],
+            ["WHITE", "LION", 2, 4, 0, 2],
+            ["BLACK", "MOUSE", 1, 2, 4, 2],
+            ["WHITE", "LION", 8, 3, 6, 1],
+            ["BLACK", "ELEPHANT", 0, 4, 1, 3],
+            ["WHITE", "LION", 0, 2, 2, 0],
+            ["BLACK", "ELEPHANT", 1, 3, 3, 1],
+            ["WHITE", "LION", 2, 0, 1, 1],
+            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
+            ["WHITE", "LION", 1, 1, 2, 0],
+            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
+            ["WHITE", "LION", 2, 0, 1, 1],
+            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
+            ["WHITE", "LION", 1, 1, 2, 0],
+            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
+            ["WHITE", "LION", 2, 0, 1, 1],
+            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
+            ["WHITE", "LION", 1, 1, 2, 0],
+            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
+            ["WHITE", "LION", 2, 0, 1, 1],
+            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
+            ["WHITE", "LION", 1, 1, 2, 0]])
