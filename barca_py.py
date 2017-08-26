@@ -413,11 +413,12 @@ class AI:
         self.recurse = 3
         
         
-    def receive_data(self, whitetomove, pieces, previous_moves):
+    def receive_data(self, whitetomove, pieces, previous_moves, recurse):
   
         
         self.board = Board(whitetomove, pieces, previous_moves)
-        
+        self.recurse = recurse
+
         self.board_position_base_score   = {}
         
         self.board_position_black_recurse = {}
@@ -430,6 +431,7 @@ class AI:
         self.board_position_white_move = {}
         
         self.execute()
+	
       
     def execute(self):
         if (not self.board.victory() and not self.board.draw()):
@@ -527,8 +529,8 @@ class Backend:
         self.AI = AI(self.watering_holes_value,self.future_watering_hole_value , self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
 
 
-    def receive_data(self, whitetomove, pieces, previous_moves = [ ] ):
-        self.AI.receive_data(whitetomove,pieces, previous_moves)
+    def receive_data(self, whitetomove, pieces, previous_moves = [ ], recurse = 3 ):
+        self.AI.receive_data(whitetomove,pieces, previous_moves, recurse)
 
 
 
