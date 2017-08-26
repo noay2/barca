@@ -318,7 +318,7 @@ class Board:
               	score += teammate_value * (1 if piece.color == 'WHITE' else -1)
                 
             #How close are you to the center 
-            score += center_encouragement_value * (        (      ((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2)    - ((float(Board.rows-1)/2 - piece.row)**2 +(float(Board.cols-1)/2-piece.col)**2)    )/((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2)) * (1 if piece.color == 'WHITE' else -1)
+            score += center_encouragement_value * (        (      ((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2)    - ((float(Board.rows-1)/2 - piece.row)**2 +(float(Board.cols-1)/2-piece.col)**2)    )/((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2) * (1 if piece.color == 'WHITE' else -1)
             
 
 
