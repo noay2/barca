@@ -1,4 +1,5 @@
 import time
+import math
 import random
 import copy
 from collections import defaultdict
@@ -190,7 +191,7 @@ class Board:
     
     def __init__(self,whitetomove, pieces, previous_moves):
         self.whitetomove = whitetomove
-        self.board_coord = [[None for j in range(10)] for i in range(10) ]
+        self.board_coord = [[None for j in range(Board.cols)] for i in range(Board.rows) ]
         self.pieces = [[ [] for j in range(3)]for i in range(2)]
         for piece in pieces:
                 Piece(piece, self.board_coord, self.pieces)
@@ -216,24 +217,24 @@ class Board:
     
                 
     def undo_hash_previous_move(self,hash, color, type, row, col):
-        return  hash- ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * 10 + col))
+        return  hash- ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * Board.rows + col))
 
 
     def update_hash_previous_move(self,hash, color, type, row, col):
-        return  hash + ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * 10 + col))
+        return  hash + ( Piece.piece_color_val[color] * 3 + Piece.piece_type_val[type] +1   ) *  (8  **  (row * Board.rows + col))
 
     def find_current_hash(self):
         number = 0
         for piece in self.all_pieces():
-            number +=  ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+            number +=  ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * Board.rows + piece.col))
         self.current_hash = number        
 
     def undo_hash(self, piece):
-        self.current_hash=  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash=  self.current_hash- ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * Board.rows + piece.col))
 
 
     def update_hash(self,piece):
-        self.current_hash=  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * 10 + piece.col))
+        self.current_hash=  self.current_hash + ( Piece.piece_color_val[piece.color] * 3 + Piece.piece_type_val[piece.type] +1   ) *  (8  **  (piece.row * Board.rows + piece.col))
         
                                                 
     def current_pieces(self):
