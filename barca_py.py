@@ -18,7 +18,7 @@ class Piece:
              }
              
     white_player_initial_hash =     419616483301654593334721783932067741879967698371037654176895614914325882259333160480768
-    black_player_initial_hash = 	209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
+    black_player_initial_hash =     209808241353657755148154874804759897695030898171462655505143703652773752188495670239232
 
 
 
@@ -287,7 +287,7 @@ class Board:
                                 if self.board_coord[temp[0]][temp[1]]!=None:
                                     piece = self.board_coord[temp[0]][temp[1]]
                                     if ((piece.type == 'ELEPHANT') or (piece.type == 'MOUSE' and (x ==0 or y == 0)) or (piece.type == 'LION' and ( abs(x) ==1 and abs(y) == 1)))\
-                                       and (piece.scared_of_pieces[0].adjacent_to(x,y) and piece.scared_of_pieces[1].adjacent_to(x,y)):
+                                       and not ( piece.scared_of_pieces[0].adjacent_to(x,y) or  piece.scared_of_pieces[1].adjacent_to(x,y)):
                                         if (piece.color=="WHITE"):
                                             future_white_counter+=1
                                         else:
