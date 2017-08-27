@@ -4,6 +4,22 @@ body {
 h1 {
     color: Black;
 }
+.mainSelections{
+  padding: 5px;
+
+}
+.threeOptionButtons {
+  padding: 5px;
+
+}
+
+.pieceTypeButtons {
+  padding: 5px;
+}
+
+.lastTwoButtons{
+  padding: 5px;
+}
 
 .navigationBar  {
       height: 7%;
