@@ -1334,7 +1334,7 @@ function playFromHere(){
 function checkPieceType()
 {
 	// piece_type = $("#pieceType").val();
-	console.log(piece_type);
+	// console.log(piece_type);
 
 }
 
@@ -1390,6 +1390,8 @@ function changePieceTypeToAnimals(){
 	if(piece_type != "animals"){
 
 		placeElephantLionMouseImages();
+				placeCrownOnWinningPieces();
+
 			piece_type = "animals";
 
 	}		
@@ -1401,6 +1403,8 @@ function changePieceTypeToRPS(){
 	if(piece_type != "rps"){
 
 		placeRockPaperScissorImages();
+				placeCrownOnWinningPieces();
+
 				piece_type = "rps";
 
 	}
@@ -1413,6 +1417,8 @@ function changePieceTypeToChess(){
 		if(piece_type != "chess"){
 
 		placeChessImages();
+				placeCrownOnWinningPieces();
+
 				piece_type = "chess";
 
 	}
