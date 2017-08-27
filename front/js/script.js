@@ -1332,6 +1332,7 @@ function playFromHere(){
 function checkPieceType()
 {
 	piece_type = $("#pieceType").val();
+	console.log(piece_type);
 
 }
 
@@ -1381,3 +1382,36 @@ function placeChessImages(){
 	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/ChessWhitePawn.gif"/>';
 	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/ChessWhiteKing.gif"/>';
 }
+
+function changePieceTypeToAnimals(){
+
+	if(piece_type != "animals"){
+
+		placeElephantLionMouseImages();
+		piece_type = "animals";
+	}
+}
+
+function changePieceTypeToRPS(){
+
+	if(piece_type != "rps"){
+
+		placeRockPaperScissorImages();
+		piece_type = "rps";
+	}
+
+
+}
+
+function changePieceTypeToChess(){
+
+		if(piece_type != "chess"){
+
+		placeChessImages();
+		piece_type = "chess";
+	}
+
+}
+
+
+

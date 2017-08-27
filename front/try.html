@@ -15,7 +15,6 @@ https://serene-everglades-79780.herokuapp.com/api
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="js/script.js"></script>
-  <link rel="stylesheet" href="animate.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
   <script src="https://use.fontawesome.com/a59013ea0b.js"></script>
@@ -145,6 +144,18 @@ https://serene-everglades-79780.herokuapp.com/api
     <button type="button" class="btn btn-default" id = "startGame" onclick = "startGame()">Start Game!</button>
 
     <button type="button" class="btn btn-default" id = "setToOriginal" onclick="setBackToOriginalState()" >Set Back to Original State</button>
+    
+  </div>
+</div>
+
+<div class = "row text-center ">
+<br>
+  <div class="btn-group btn-group-lg ">
+
+    <button type="button" class="btn btn-danger" onclick="changePieceTypeToAnimals()" >Elephant Lion Mouse</button>
+    <button type="button" class="btn btn-warning" onclick = "changePieceTypeToRPS()">Rock Paper Scissors</button>
+
+    <button type="button" class="btn btn-success" onclick="changePieceTypeToChess()" >Chess Pieces</button>
     
   </div>
 </div>
