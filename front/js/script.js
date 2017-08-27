@@ -1181,7 +1181,8 @@ function initialize(){
 	victory = false;
 	player_TURN = $("#playeroption").val();
 	mode = $("#gametype").val();
-	piece_type = $("#pieceType").val();
+	// piece_type = $("#pieceType").val();
+	checkPieceType();
 	original_board_state = {};
 	resetState["player_TURN"] = player_TURN;
 	resetState["mode"] = mode;
@@ -1242,6 +1243,7 @@ function setBackToOriginalState(){
 		piece_locations = original_board_state["piece_locations"];
 		all_previous_moves = original_board_state["all_previous_moves"];
 		player_TURN = original_board_state["player_TURN"];
+
 		mode = original_board_state["mode"];
 		undo_moves = [];
 		checkVictory();
@@ -1331,7 +1333,7 @@ function playFromHere(){
 
 function checkPieceType()
 {
-	piece_type = $("#pieceType").val();
+	// piece_type = $("#pieceType").val();
 	console.log(piece_type);
 
 }
@@ -1388,8 +1390,10 @@ function changePieceTypeToAnimals(){
 	if(piece_type != "animals"){
 
 		placeElephantLionMouseImages();
-		piece_type = "animals";
-	}
+			piece_type = "animals";
+
+	}		
+
 }
 
 function changePieceTypeToRPS(){
@@ -1397,7 +1401,8 @@ function changePieceTypeToRPS(){
 	if(piece_type != "rps"){
 
 		placeRockPaperScissorImages();
-		piece_type = "rps";
+				piece_type = "rps";
+
 	}
 
 
@@ -1408,7 +1413,8 @@ function changePieceTypeToChess(){
 		if(piece_type != "chess"){
 
 		placeChessImages();
-		piece_type = "chess";
+				piece_type = "chess";
+
 	}
 
 }

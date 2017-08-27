@@ -53,7 +53,7 @@ https://serene-everglades-79780.herokuapp.com/api
         </optgroup>
       </select>
       &nbsp;&nbsp;
-      <select class = "selectpicker show-tick" id = "pieceType" data-width="100px">
+<!--       <select class = "selectpicker show-tick" id = "pieceType" data-width="100px">
         <optgroup label = "Type">
           <option value = "animals" data-icon = "glyphicon glyphicon-fire" selected = "selected">Animals</option>
           <option value = "rps" data-icon = "glyphicon glyphicon-scissors">Rock Paper Scissors</option>
@@ -61,7 +61,8 @@ https://serene-everglades-79780.herokuapp.com/api
         </optgroup>
       </select>
       &nbsp;&nbsp;
-      <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
+ -->
+       <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
         <optgroup label = "Side">
           <option value = "WHITE" data-icon="glyphicon glyphicon-unchecked"  selected = "selected">White</option>
           <option value = "BLACK" data-icon=" glyphicon glyphicon-stop" >Black</option>
@@ -136,6 +137,19 @@ https://serene-everglades-79780.herokuapp.com/api
   </div>
 </div>
  -->
+
+ <div class = "row text-center ">
+ <br>
+
+  <div class="btn-group btn-group ">
+
+    <button type="button" class="btn btn-danger" onclick="changePieceTypeToAnimals()" >Elephant Lion Mouse</button>
+    <button type="button" class="btn btn-warning" onclick = "changePieceTypeToRPS()">Rock Paper Scissors</button>
+
+    <button type="button" class="btn btn-success" onclick="changePieceTypeToChess()" >Chess Pieces</button>
+    
+  </div>
+</div>
 <div class = "row text-center ">
 <br>
   <div class="btn-group btn-group-lg ">
@@ -148,17 +162,7 @@ https://serene-everglades-79780.herokuapp.com/api
   </div>
 </div>
 
-<div class = "row text-center ">
-<br>
-  <div class="btn-group btn-group-lg ">
 
-    <button type="button" class="btn btn-danger" onclick="changePieceTypeToAnimals()" >Elephant Lion Mouse</button>
-    <button type="button" class="btn btn-warning" onclick = "changePieceTypeToRPS()">Rock Paper Scissors</button>
-
-    <button type="button" class="btn btn-success" onclick="changePieceTypeToChess()" >Chess Pieces</button>
-    
-  </div>
-</div>
 
 
 <!--     <div class = "col-xs-8 text-center" >
