@@ -857,7 +857,7 @@ function recomputeValidClicks(turn){
 
 function findImgName(side,type){
 	switch(type){
-		case 'E': 
+		case 'E':
 		{
 			if(piece_type == "animals"){
 				return (side == 'W') ? "elephantW.gif" : "BlackElephant.gif";
@@ -869,20 +869,20 @@ function findImgName(side,type){
 				return (side == 'W') ? "ChessElephantWhite.gif" : "ChessBlackElephant.gif";
 			}
 		}
-		case 'L': 
+		case 'L':
 		{
 			if(piece_type == "animals"){
-				return (side == 'W') ? "lionW.gif" : "BlackLion.gif";			
+				return (side == 'W') ? "lionW.gif" : "BlackLion.gif";
 			}
 			else if(piece_type == "rps"){
-				return (side == 'W') ? "WhiteScissor.gif" : "BlackScissor.gif";			
+				return (side == 'W') ? "WhiteScissor.gif" : "BlackScissor.gif";
 			}
-			
+
 			else if(piece_type == "chess"){
-				return (side == 'W') ? "ChessWhiteKing.gif" : "ChessBlackKing.gif";			
+				return (side == 'W') ? "ChessWhiteKing.gif" : "ChessBlackKing.gif";
 			}
 		}
-		default: 
+		default:
 		{
 			if(piece_type == "animals"){
 				return (side == 'W') ? "mouseW.gif" : "BlackMouse.gif";
@@ -890,7 +890,7 @@ function findImgName(side,type){
 			else if(piece_type == "rps"){
 				return (side == 'W') ? "WhitePaper.gif" : "BlackPaper.gif";
 			}
-			
+
 			else if(piece_type == "chess"){
 				return (side == 'W') ? "ChessWhitePawn.gif" : "ChessBlackPawn.gif";
 			}
@@ -937,15 +937,8 @@ function getAIMove(move){
 		var info = [[null,null,null,null,null,null]];
 		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
 		info[0][1] = (piece[1] == 'E') ? "ELEPHANT" : (piece[1] == 'L') ? "LION" : "MOUSE";
-		if(player_TURN === "BLACK"){
-			// console.log("GOT TO BLACK");
-			info[0][2] = 9-getRow(piece);
-			info[0][3] = 9-getCol(piece);
-		}
-		else{
-			info[0][2] = getRow(piece);
-			info[0][3] = getCol(piece);
-		}
+		info[0][2] = getRow(piece);
+		info[0][3] = getCol(piece);
 		info[0][4] = checkIfInScaredPieces(piece);
 		info[0][5] = checkIfInTrappedPieces(piece);
 		pieces = pieces.concat(info);
@@ -1105,7 +1098,6 @@ function clickMade(row,col,id,val){
 	else{
 		document.getElementById("message").innerHTML = "<b>Invalid Move. The piece you selected is not allowed to move or has no valid moves...</b>";
 	}
-	console.log(all_previous_moves);
 }
 
 function disableAllButtons(){
@@ -1286,7 +1278,6 @@ function undoMove(){
 	if(all_previous_moves.length > 0){
 		undo_moves.push(all_previous_moves.pop());
 		var move = undo_moves[undo_moves.length-1];
-		console.log(move);
 		var src_row = move[2];
 		var src_col = move[3];
 		var dest_row = move[4];
@@ -1394,7 +1385,7 @@ function changePieceTypeToAnimals(){
 
 			piece_type = "animals";
 
-	}		
+	}
 
 }
 
@@ -1424,6 +1415,3 @@ function changePieceTypeToChess(){
 	}
 
 }
-
-
-
