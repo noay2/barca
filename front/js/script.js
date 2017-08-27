@@ -1173,9 +1173,9 @@ function initialize(){
 	document.getElementById("barca_board").innerHTML = "";
 	gameStarted = false;
 	victory = false;
+	who_won = "";
 	player_TURN = $("#playeroption").val();
 	mode = $("#gametype").val();
-	// piece_type = $("#pieceType").val();
 	checkPieceType();
 	original_board_state = {};
 	resetState["player_TURN"] = player_TURN;
@@ -1196,6 +1196,7 @@ function initialize(){
 	initBoardPieces();
 	placeInitImage();
 	placeWateringHoles();
+
 }
 
 function startGame(){
@@ -1383,9 +1384,10 @@ function changePieceTypeToAnimals(){
 	if(piece_type != "animals"){
 
 		placeElephantLionMouseImages();
-				placeCrownOnWinningPieces();
-
-			piece_type = "animals";
+		placeImageForScaredAndTrappedPieces();
+		placeImageForWateringHolesIfEmpty();
+		placeCrownOnWinningPieces();
+		piece_type = "animals";
 
 	}
 
@@ -1396,9 +1398,10 @@ function changePieceTypeToRPS(){
 	if(piece_type != "rps"){
 
 		placeRockPaperScissorImages();
-				placeCrownOnWinningPieces();
-
-				piece_type = "rps";
+		placeImageForScaredAndTrappedPieces();
+		placeImageForWateringHolesIfEmpty();
+		placeCrownOnWinningPieces();
+		piece_type = "rps";
 
 	}
 
@@ -1410,9 +1413,10 @@ function changePieceTypeToChess(){
 		if(piece_type != "chess"){
 
 		placeChessImages();
-				placeCrownOnWinningPieces();
-
-				piece_type = "chess";
+		placeImageForScaredAndTrappedPieces();
+		placeImageForWateringHolesIfEmpty();
+		placeCrownOnWinningPieces();
+		piece_type = "chess";
 
 	}
 
