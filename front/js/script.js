@@ -317,7 +317,8 @@ function printTurn(){
 	}
 	else if(AIsmove === true){
 		var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " +turn + ". AI is thinking...</b>";
+		document.getElementById('turnDiv').innerHTML = "<b>Current Turn: " +turn + " &#10070; The AI is thinking...</b>";
+
 	}
 }
 
@@ -967,6 +968,7 @@ function getAIMove(move){
 			dataType: "json",
 			contentType: 'application/json',
 			success: function(data){
+				// document.getElementById("message").innerHTML = "<b>AI is done making its move... now it is your turn...</b>";
 				document.getElementById("message").innerHTML = "<b>AI is done making its move... now it is your turn...</b>";
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();

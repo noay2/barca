@@ -21,29 +21,35 @@ https://serene-everglades-79780.herokuapp.com/api
 
 </head>
 <body>
-<div class = "row text-center ">
-  <div class="btn-group btn-group-lg ">
-    <button type="button" class="btn btn-default" onclick="location.href ='index.html'">Home</button>
-    <button type="button" class="btn btn-default" onclick="location.href ='rules.html'">Rules</button>
-    <button type="button" class="btn btn-default" onclick="location.href ='tech.html'">Technology</button>
+<div class="container "> 
+    <div class = "row text-center navigationBar">
+      <div class="btn-group btn-group-lg ">
+        <button type="button" class="btn btn-default" onclick="location.href ='index.html'">Home</button>
+        <button type="button" class="btn btn-default" onclick="location.href ='rules.html'">Rules</button>
+        <button type="button" class="btn btn-default" onclick="location.href ='tech.html'">Technology</button>
 
-    <button type="button" class="btn btn-default active" onclick="location.href ='try.html'">Game</button>
+        <button type="button" class="btn btn-default active" onclick="location.href ='try.html'">Game</button>
+      </div>
+    </div>
+
+
+  <div class = "row  text-center" >
+
+    <div class="panel panel-info">
+      <div class="panel-heading text-center" id="turnDiv"></div>
+      <div class="panel-body text-center" id="message">
+        <p>
+          <b> Click on Start Game button to start the game
+          and also choose which side you want to play on!</b>
+        </p>
+        Note: For human mode, black or white will be allowed to move first. For AI mode, white player will be moving first always.
+      </div>
+    </div>
   </div>
 </div>
 
-
-<div class = "row">
-	<div class = "text-center " id = "message">
-		<b> Click on start game button to start the game
-		and also choose which side you want to play on!
-    <br> Note: For human mode, black or white will be allowed to move first.
-    For AI mode, white player will be moving first always.</b>
-	</div>
-</div>
-<br>
-
 <div class = "row" id = "buttons">
-        <div id="turnDiv" class="col-xs-12 text-center turnDivClass "></div>
+        <!-- <div id="turnDiv" class="col-xs-12 text-center turnDivClass "></div> -->
 
     <div class = "col-xs-12 text-center">
       <select class = "selectpicker show-tick" id = "gametype" data-width="100px">
