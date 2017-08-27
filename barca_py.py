@@ -4,6 +4,18 @@ import random
 import copy
 from collections import defaultdict
 ##########################################
+board_position_base_score   = {}
+        
+board_position_black_recurse = {}
+board_position_black_score = {}
+board_position_black_move  = {}  
+
+board_position_white_recurse = {}
+board_position_white_score = {}
+board_position_white_move = {}
+
+
+
 class Piece:
     colors = ["BLACK", "WHITE"]
     types  = ["ELEPHANT", "MOUSE", "LION"]
@@ -410,33 +422,19 @@ class AI:
         self.scared_pieces_value = scared_pieces_value 
         self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
-        self.recurse = 3
         
         
-    def receive_data(self, whitetomove, pieces, previous_moves, recurse):
+    def receive_data(self, whitetomove, pieces, previous_moves, temp_recurse):
   
         
         self.board = Board(whitetomove, pieces, previous_moves)
-        self.recurse = recurse
-
-        self.board_position_base_score   = {}
-        
-        self.board_position_black_recurse = {}
-        self.board_position_black_score = {}
-        self.board_position_black_move  = {}
-        
-        
-        self.board_position_white_recurse = {}
-        self.board_position_white_score = {}
-        self.board_position_white_move = {}
-        
-        self.execute()
+        self.execute(temp_recurse)
 	
       
-    def execute(self):
+    def execute(self, recurse = 3):
         if (not self.board.victory() and not self.board.draw()):
         
-            self.ai_move= (self.AI_alpha_beta(self.recurse))[0:2]
+            self.ai_move= (self.AI_alpha_beta(recurse))[0:2]
             self.board.update(self.ai_move[0], self.ai_move[1])
             
 
@@ -456,20 +454,20 @@ class AI:
 
 
         if recurse == 0:
-            if self.board.current_hash  in self.board_position_base_score:
-                return [None, None, self.board_position_base_score[self.board.current_hash]]
+            if self.board.current_hash  in board_position_base_score:
+                return [None, None, board_position_base_score[self.board.current_hash]]
 
 
             score = self.board.board_evaluation(self.watering_holes_value,self.future_watering_hole_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
-            self.board_position_base_score[self.board.current_hash] = score
+            board_position_base_score[self.board.current_hash] = score
             return [None, None, score]
 
 
 
         if (self.board.whitetomove):
-            if self.board.current_hash in self.board_position_white_recurse\
-            			and recurse <= self.board_position_white_recurse[self.board.current_hash]:
-                return self.board_position_white_move[self.board.current_hash] + [self.board_position_white_score[self.board.current_hash]]
+            if self.board.current_hash in board_position_white_recurse\
+            			and recurse <= board_position_white_recurse[self.board.current_hash]:
+                return board_position_white_move[self.board.current_hash] + [board_position_white_score[self.board.current_hash]]
         		
             current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
             for piece in self.board.current_pieces():
@@ -484,18 +482,18 @@ class AI:
                         if (alpha>beta):
                             return [current_best_source, current_best_dest, current_best_score]
                             
-            self.board_position_white_recurse[self.board.current_hash] = recurse
-            self.board_position_white_move[self.board.current_hash] =  [current_best_source, current_best_dest]
-            self.board_position_white_score[self.board.current_hash] =   current_best_score
+            board_position_white_recurse[self.board.current_hash] = recurse
+            board_position_white_move[self.board.current_hash] =  [current_best_source, current_best_dest]
+            board_position_white_score[self.board.current_hash] =   current_best_score
             return [current_best_source, current_best_dest, current_best_score]
 
 
 
         else:
         
-            if self.board.current_hash in self.board_position_black_recurse\
-            			and recurse <= self.board_position_black_recurse[self.board.current_hash]:
-                  return self.board_position_black_move[self.board.current_hash] + [self.board_position_black_score[self.board.current_hash]]
+            if self.board.current_hash in board_position_black_recurse\
+            			and recurse <= board_position_black_recurse[self.board.current_hash]:
+                  return board_position_black_move[self.board.current_hash] + [board_position_black_score[self.board.current_hash]]
         
             current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
             for piece in self.board.current_pieces():
@@ -510,9 +508,9 @@ class AI:
                         if (alpha>beta):
                             return [current_worst_source, current_worst_dest, current_worst_score]
                             
-            self.board_position_black_recurse[self.board.current_hash] = recurse
-            self.board_position_black_move[self.board.current_hash] =  [current_worst_source, current_worst_dest]
-            self.board_position_black_score[self.board.current_hash] =   current_worst_score
+            board_position_black_recurse[self.board.current_hash] = recurse
+            board_position_black_move[self.board.current_hash] =  [current_worst_source, current_worst_dest]
+            board_position_black_score[self.board.current_hash] =   current_worst_score
             return [current_worst_source, current_worst_dest, current_worst_score]
 
 
@@ -529,8 +527,8 @@ class Backend:
         self.AI = AI(self.watering_holes_value,self.future_watering_hole_value , self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
 
 
-    def receive_data(self, whitetomove, pieces, previous_moves = [ ], recurse = 3 ):
-        self.AI.receive_data(whitetomove,pieces, previous_moves, recurse)
+    def receive_data(self, whitetomove, pieces, previous_moves = [ ], temp_recurse = 3 ):
+        self.AI.receive_data(whitetomove,pieces, previous_moves, temp_recurse)
 
 
 
@@ -539,45 +537,4 @@ class Backend:
         return updated_data
 
 if __name__ == "__main__":
-    false = False
-    backend = Backend()
-    backend.receive_data(
-            false,[["BLACK","ELEPHANT",2,2,false,false],
-            ["BLACK","ELEPHANT",0,5,false,false],
-            ["BLACK", "LION", 3, 5, false, false],
-            ["BLACK", "MOUSE", 4, 2, false, false],
-            ["BLACK", "MOUSE", 1, 5, false, false],
-            ["BLACK", "LION", 2, 5, false, false],
-            ["WHITE", "LION", 6, 1, false, false],
-            ["WHITE", "MOUSE", 8, 4, false, false],
-            ["WHITE", "MOUSE", 8, 5, false, false],
-            ["WHITE", "LION", 2, 0, false, false],
-            ["WHITE", "ELEPHANT", 9, 4, false, false],
-            ["WHITE", "ELEPHANT", 9, 5, false, false]],
-            [["WHITE", "LION", 8, 6, 7, 7],
-            ["BLACK", "LION", 1, 6, 2, 5],
-            ["WHITE", "LION", 7, 7, 3, 3],
-            ["BLACK", "LION", 1, 3, 3, 5],
-            ["WHITE", "LION", 3, 3, 2, 4],
-            ["BLACK", "MOUSE", 1, 4, 1, 2],
-            ["WHITE", "LION", 2, 4, 0, 2],
-            ["BLACK", "MOUSE", 1, 2, 4, 2],
-            ["WHITE", "LION", 8, 3, 6, 1],
-            ["BLACK", "ELEPHANT", 0, 4, 1, 3],
-            ["WHITE", "LION", 0, 2, 2, 0],
-            ["BLACK", "ELEPHANT", 1, 3, 3, 1],
-            ["WHITE", "LION", 2, 0, 1, 1],
-            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
-            ["WHITE", "LION", 1, 1, 2, 0],
-            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
-            ["WHITE", "LION", 2, 0, 1, 1],
-            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
-            ["WHITE", "LION", 1, 1, 2, 0],
-            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
-            ["WHITE", "LION", 2, 0, 1, 1],
-            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
-            ["WHITE", "LION", 1, 1, 2, 0],
-            ["BLACK", "ELEPHANT", 2, 2, 3, 1],
-            ["WHITE", "LION", 2, 0, 1, 1],
-            ["BLACK", "ELEPHANT", 3, 1, 2, 2],
-            ["WHITE", "LION", 1, 1, 2, 0]])
+    pass
