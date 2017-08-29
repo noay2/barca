@@ -1,0 +1,137 @@
+<!DOCTYPE HTML>
+
+<html>
+	<head>
+		<title>Barca Board Game</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="landing">
+
+		<!-- Header -->
+		<!--	<header id="header" class="alt"> -->
+				<h1><strong><a href="index.html">Barca</a></strong></h1>
+				
+			<header id="header">
+
+
+				<nav id="nav">
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li><a href="rules.html">Rules</a></li>
+						<li><a href="tech.html">Technology</a></li>
+						<li><a href="try.html">Game</a></li>
+					</ul>
+				</nav>
+			</header>
+
+				
+			<a href="#menu" class="navPanelToggle"><span class="fa fa-bars"></span></a>
+
+		<!-- Main -->
+			<section id="main" class="wrapper">
+				<div class="container">
+<br>
+					<header class="major special">
+						<h2>The Technology</h2>
+						<p>Explaination of what Artificial Intelligence and Machine Learning techniques used.</p>
+					</header>
+
+					<h2>Board evaluation</h2>
+					
+					<p>The AI agent checks several facets of the board and assigns them different values to determine how favorable a certain board position is.</p>
+
+					<p>The parameters of board evaluation are treated as a vector of integers. The first element of this “Board evaluation vector” may be the value given to the condition of owning one watering hole, the second element may be the value given to being able to scare an opponent’s piece next turn, etc. So the board is evaluated by taking a vector that contains boolean information about board conditions and taking its cross product with this board evaluation vector:</p>
+					
+					<img src="images/board_eval.png" style="width: 700px" alt="" />
+<h2>Self-Play </h2>
+
+<h3>Match Scoring</h3>
+
+<p>An integral part of the gradient descent architecture is knowing exactly how much better an AI using one board evaluation is than another AI using a different board evaluation vector. So we developed the following match scoring system to give a fair and high-resolution picture of how much better one AI is board evaluation vector is than another:</p>
+
+<p>Since the white pieces (the ones that move first) has the advantage of initiative, both AI’s are given the chance to play white against each other. Naturally, for winning a game, the AI receives a reward, and, in the case of a draw, both AI’s are rewarded roughly equally. </p>
+
+<p>Now this architecture is very fair, but not very high-resolution. If we are to use invariable reward amounts (say, +1 for winning, and +0.5 for drawing), then the answer of how much better one AI is than another would be some quantified amount, such as 0, 1.5, 2, etc. This is simply not accurate enough for high-resolution gradient descent, especially considering that a much more accurate scoring system can be implemented without much loss in efficiency. </p>
+
+<p>So to be more accurate, we consider how long the game has lasted, and what each AI agent’s average board position evaluation was during the game. As for the former, winning in 18 moves is obviously much more impressive than winning in 150 moves, so, in the event of a victory, the AI’s reward is inversely proportional to the length of the game it won. As for the latter, in the case of a draw, even though neither agent won, one agent still performed slightly better than the other. The fairest way to quantify this is, for every board position each agent encounters, get that agent’s opinion of how favorable the board position is, and also the opposing agent’s opinion of how favorable the board position would be if he were playing on that side. Average these two number to get an “unbiased” account of how favourable each board position in the game is. The notion is that the agent that had the more favorable board positions throughout the game is slightly better than the other agent, even in the case of a draw. So in the case of a draw, the “better” agent will be rewarded by his average board position evaluation minus his opponent’s average board position evaluation. </p>
+
+
+<h2>Expediting Move Updates</h2>
+
+<p>When a move is made, the board update technique used in this project is to recalculate all the valid moves of each piece individually and evaluate the board from scratch. Essentially, it does not use any information from the old board to evaluate the new one. However, seeing as only one piece can move at a time, there are more board attributes that remain the same between moves than attributes that change. Thus, if we are willing to invest some memory (of which there is more than enough on a computer), we can save significant amounts of time.</p>
+
+<p>To expedite the board update process, for each piece, we would keep several data structures, such as:</p>
+
+<ul>
+<li>All of its visible moves in each direction</li>
+<li>All of its valid moves in each direction</li>
+<li>All of the squares adjacent to its visible moves in each direction</li>
+<li>If it is occupying, or is adjacent to a watering hole</li>
+<li>Pieces it is deterring and pieces it is deterred by  </li>
+</ul>
+
+<p>So that, when a move is made, only one piece (the piece that moved) will need to have all of its information completely re-evaluated. Every other piece’s information would only need to undergo re-evaluation if one of the following occurs:</p>
+<ul>
+<li>If a piece that was deterring you moved away</li>
+<li>If a piece moved into a visible move of yours (thus obstructing you)</li>
+<li>If a piece that was obstructing you moved away</li>
+<li>If a piece just deterred one of your moves</li>
+</ul>
+
+<p>And even then, only a small subset of its information needs to be updated. Not only would this technique give us faster board updates when moves are made or considered, it would also give us more information about the board to use in our board evaluation function. For example,</p>
+<ul>
+<li>We could tell if a piece could capture a watering hole next turn in O(1) time.</li>
+<li>We would already know the number of valid moves that either side has available. </li>
+<li>We would be able to tell if a piece can scare or obstruct another piece next turn in only 11 O(1) hash lookups.</li>
+</ul>
+
+<p>So simply by using some memory to save aspects of the previous board in the re-evaluation of the board after a move is made, we will get faster updates, faster board evaluation, and more foresight in our board evaluation. </p>
+
+<p>This approach was not utilized in our project, but is the next major area of improvement if further research is to be done on this game. </p>
+
+<h2>Draw Mechanics</h2>
+
+<p>Consider the following situation:</p>
+<img src="images/draw_mech1.png" style="width: 250px" alt="" />
+<p>The lion decides to move to this flight square:</p>
+<img src="images/draw_mech2.png" style="width: 250px" alt="" />
+<p>The elephant decides to scare it again:</p>
+<img src="images/draw_mech3.png" style="width: 250px" alt="" />
+<p>So the lion moves back:</p>
+<img src="images/draw_mech4.png" style="width: 250px" alt="" />
+<p>And the Elephant determines that its best move is to recapture the watering hole, returning to the original position once again:</p>
+<img src="images/draw_mech5.png" style="width: 250px" alt="" />
+<p>This back-and-forth movement could occur indefinitely, so if the same board position occurs three times, then either player can call it a draw as they see fit. So if an AI only ever made the best move available to it and had no memory of the board’s history, it will find itself in draws when it could have taken an advantage and possibly won the game instead.</p>
+
+<p>Thus, we gave the AI agent a memory of the game’s history, and if the board being considered has occurred three times before, then it is given a board evaluation of zero. Thus it will not move into a draw if it has any move that will bring it an advantage, but will move into a draw when all other moves are disadvantageous. </p>
+
+
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<footer id="footer">
+				<div class="container">
+					<ul class="icons">
+						<li><a href="#" class="icon fa-facebook"></a></li>
+						<li><a href="#" class="icon fa-twitter"></a></li>
+						<li><a href="#" class="icon fa-instagram"></a></li>
+					</ul>
+					<ul class="copyright">
+						<li>&copy; Astros</li>
+						<li><a href="http://uci.edu">University of California, Irvine </a></li>
+						<li><a href="http://engineering.uci.edu/">Henry Samueli School of Engineering</a></li>
+					</ul>
+				</div>
+			</footer>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
