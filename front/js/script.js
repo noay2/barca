@@ -53,10 +53,12 @@ var mode = "PLAYER V. AI";
 var singleMoveExists = {};
 var fear_counter = 0;
 var wateringHoleCounter = 0;
+var first_to_move = "";
 var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
-// var draw_move_cache = {};
+var draw_move_cache = {};
+var difficultty = 3 ;
 // var fifo_for_draw_moves = [];
 var all_previous_moves = [];
 var undo_moves = [];
@@ -129,38 +131,38 @@ function placeWateringHoles() {
 	wateringHoleCounter = 4;
 }
 
-// function addCurrentBoardPosition(){
-// 	var string = "";
-// 	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
-//
-// 	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
-// 		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
-// 		if(piece_locations[keysSorted[keyLen]] < 10){
-// 			string += '0' + piece_locations[keysSorted[keyLen]];
-// 		}
-// 		else{
-// 			string += piece_locations[keysSorted[keyLen]];
-// 		}
-// 	}
-//
-// 	fifo_for_draw_moves.push(string);
-//
-// 	if(fifo_for_draw_moves.length === 21){
-// 		var poppedPos = fifo_for_draw_moves.shift();
-// 		draw_move_cache[poppedPos]--;
-// 		if(draw_move_cache[poppedPos] <= 0){
-// 			delete draw_move_cache[poppedPos];
-// 		}
-// 	}
-//
-// 	if(string in draw_move_cache){
-// 		draw_move_cache[string]++;
-// 	}
-// 	else{
-// 		draw_move_cache[string] = 1;
-// 	}
-//
-// }
+function addCurrentBoardPosition(){
+	var string = "";
+	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
+
+	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
+		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
+		if(piece_locations[keysSorted[keyLen]] < 10){
+			string += '0' + piece_locations[keysSorted[keyLen]];
+		}
+		else{
+			string += piece_locations[keysSorted[keyLen]];
+		}
+	}
+
+	fifo_for_draw_moves.push(string);
+
+	if(fifo_for_draw_moves.length === 21){
+		var poppedPos = fifo_for_draw_moves.shift();
+		draw_move_cache[poppedPos]--;
+		if(draw_move_cache[poppedPos] <= 0){
+			delete draw_move_cache[poppedPos];
+		}
+	}
+
+	if(string in draw_move_cache){
+		draw_move_cache[string]++;
+	}
+	else{
+		draw_move_cache[string] = 1;
+	}
+
+}
 
 function placeImageForWateringHolesIfEmpty(){
 //'<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
@@ -199,40 +201,11 @@ function removeImageForWateringHoles(){
 
 function initializeGame(){
 	AIsmove = (player_TURN === "BLACK" && mode === "PLAYER V. AI") ? true : false;
-	console.log("INITIALIZE GAME");
+	// console.log("INITIALIZE GAME");
 	initValidClicks();
 }
 
 function initBoardPieces(){
-	if(player_TURN === "BLACK"){
-		barca_array[0][4] = "WE1";
-		barca_array[0][5] = "WE2";
-		barca_array[1][3] = "WL1";
-		barca_array[1][4] = "WR1";
-		barca_array[1][5] = "WR2";
-		barca_array[1][6] = "WL2";
-		barca_array[8][3] = "BL1";
-		barca_array[8][4] = "BR1";
-		barca_array[8][5] = "BR2";
-		barca_array[8][6] = "BL2";
-		barca_array[9][4] = "BE1";
-		barca_array[9][5] = "BE2";
-
-		/*Set where pieces are located on the board*/
-		piece_locations["WE1"] = 4;
-		piece_locations["WE2"] = 5;
-		piece_locations["WL1"] = 13;
-		piece_locations["WR1"] = 14;
-		piece_locations["WR2"] = 15;
-		piece_locations["WL2"] = 16;
-		piece_locations["BL1"] = 83;
-		piece_locations["BR1"] = 84;
-		piece_locations["BR2"] = 85;
-		piece_locations["BL2"] = 86;
-		piece_locations["BE1"] = 94;
-		piece_locations["BE2"] = 95;
-	}
-	else{
 		barca_array[0][4] = "BE1";
 		barca_array[0][5] = "BE2";
 		barca_array[1][3] = "BL1";
@@ -259,10 +232,9 @@ function initBoardPieces(){
 		piece_locations["WL2"] = 86;
 		piece_locations["WE1"] = 94;
 		piece_locations["WE2"] = 95;
-	}
 
-	original_board_state["board"] = barca_array;
-	original_board_state["piece_locations"] = piece_locations;
+		// original_board_state["board"] = barca_array;
+		// original_board_state["piece_locations"] = piece_locations;
 }
 
 /*Initializes the initial valid clicks on the board*/
@@ -739,34 +711,24 @@ function recomputePositions(pieces,piece_info,src,dest){
 	var color = (piece_info[0] === 'B') ? "BLACK" : "WHITE";
 	var piece = (piece_info[1] === 'E') ? "ELEPHANT" : (piece_info[1] === 'R') ? "MOUSE" : "LION";
 	all_previous_moves.push([color,piece,src[0],src[1],dest[0],dest[1]]);
-	original_board_state["all_previous_moves"].push([color,piece,src[0],src[1],dest[0],dest[1]]);
+	// original_board_state["all_previous_moves"].push([color,piece,src[0],src[1],dest[0],dest[1]]);
 	barca_array[dest[0]][dest[1]] = barca_array[src[0]][src[1]];
 	barca_array[src[0]][src[1]] = ".";
 	piece_locations[barca_array[dest[0]][dest[1]]] = dest[0] * 10 + dest[1];
-	original_board_state["board"][dest[0]][dest[1]] = barca_array[dest[0]][dest[1]];
-	original_board_state["board"][src[0]][src[1]] = ".";
-	var piece_val = original_board_state["board"][dest[0]][dest[1]];
-	original_board_state["piece_locations"][piece_val] = dest[0] * 10 + dest[1];
+	// original_board_state["board"][dest[0]][dest[1]] = barca_array[dest[0]][dest[1]];
+	// original_board_state["board"][src[0]][src[1]] = ".";
+	// var piece_val = original_board_state["board"][dest[0]][dest[1]];
+	// original_board_state["piece_locations"][piece_val] = dest[0] * 10 + dest[1];
 	checkVictory();
 	scared_pieces = new Set();
 	trapped_pieces = [];
 
 	for(var i = 0; i < pieces.length; i++){
-		if(player_TURN === "BLACK"){
-			if(pieces[i][5]){
-				trapped_pieces.push(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
-			}
-			else if(pieces[i][4]){
-				scared_pieces.add(barca_array[9-pieces[i][2]][9-pieces[i][3]]);
-			}
+		if(pieces[i][5]){
+			trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
 		}
-		else{
-			if(pieces[i][5]){
-				trapped_pieces.push(barca_array[pieces[i][2]][pieces[i][3]]);
-			}
-			else if(pieces[i][4]){
-				scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
-			}
+		else if(pieces[i][4]){
+			scared_pieces.add(barca_array[pieces[i][2]][pieces[i][3]]);
 		}
 	}
 
@@ -791,21 +753,20 @@ function resetBoardScaredAndTrappedPieces(data){
 	var length = data["draw_moves"].length;
 	var ai_move = data["draw_moves"][length-1];
 
-	if(player_TURN === "BLACK"){
-		var src = [9-ai_move[2],9-ai_move[3]];
-		var dest = [9-ai_move[4],9-ai_move[5]];
-		var piece_info = barca_array[src[0]][src[1]];
-		document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
-		movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
-		recomputePositions(pieces,piece_info,src,dest);
+	var src = [ai_move[2],ai_move[3]];
+	var dest = [ai_move[4],ai_move[5]];
+	var piece_info = barca_array[src[0]][src[1]];
+	document.getElementById(getDiv(piece_info)).innerHTML = "";
+	recomputePositions(pieces,piece_info,src,dest);
+	movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
+}
+
+function determinePieceLocation(value){
+	if(first_to_move === "BLACK" || (mode === "PLAYER V. AI" && player_TURN === "BLACK")){
+		return 99-piece_locations[value];
 	}
 	else{
-		var src = [ai_move[2],ai_move[3]];
-		var dest = [ai_move[4],ai_move[5]];
-		var piece_info = barca_array[src[0]][src[1]];
-		document.getElementById("tile_"+src[0]+","+src[1]).innerHTML = "";
-		movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
-		recomputePositions(pieces,piece_info,src,dest);
+		return piece_locations[value];
 	}
 }
 
@@ -815,34 +776,34 @@ function recomputeValidClicks(turn){
 	valid_clicks = [];
 	scared_pieces.forEach(function(value){
 		if(value[0] === turn[0]){
-			valid_clicks.push(piece_locations[value]);
+			valid_clicks.push(determinePieceLocation(value));
 		}
 	});
 
 	if(valid_clicks.length == 0){
 			if((checkIfInTrappedPieces(turn[0]+"E1") && singleMoveExists[turn[0]+"E1"]) ||
 				checkIfASingleValidMoveExistsForElephant(turn[0]+"E1")){
-				valid_clicks.push(piece_locations[turn[0]+"E1"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"E1"));
 		 	}
 			if((checkIfInTrappedPieces(turn[0]+"E2") && singleMoveExists[turn[0]+"E2"]) ||
 				checkIfASingleValidMoveExistsForElephant(turn[0]+"E2")){
-				valid_clicks.push(piece_locations[turn[0]+"E2"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"E2"));
 		 	}
 			if((checkIfInTrappedPieces(turn[0]+"L1") && singleMoveExists[turn[0]+"L1"]) ||
 				checkIfASingleValidMoveExistsForLion(turn[0]+"L1")){
-				valid_clicks.push(piece_locations[turn[0]+"L1"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"L1"));
 		 	}
 			if((checkIfInTrappedPieces(turn[0]+"L2") && singleMoveExists[turn[0]+"L2"]) ||
 				checkIfASingleValidMoveExistsForLion(turn[0]+"L2")){
-				valid_clicks.push(piece_locations[turn[0]+"L2"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"L2"));
 		 	}
 			if((checkIfInTrappedPieces(turn[0]+"R1") && singleMoveExists[turn[0]+"R1"]) ||
 				checkIfASingleValidMoveExistsForMouse(turn[0]+"R1")){
-				valid_clicks.push(piece_locations[turn[0]+"R1"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"R1"));
 		 	}
 			if((checkIfInTrappedPieces(turn[0]+"R2") && singleMoveExists[turn[0]+"R2"]) ||
 				checkIfASingleValidMoveExistsForMouse(turn[0]+"R2")){
-				valid_clicks.push(piece_locations[turn[0]+"R2"]);
+				valid_clicks.push(determinePieceLocation(turn[0]+"R2"));
 		 	}
 	}
 }
@@ -904,7 +865,7 @@ function findImgName(side,type){
 
 /*Function set image to black*/
 function movePiece(side,type,row,col){
-	document.getElementById("tile_"+row+","+col).innerHTML = '<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
+	document.getElementById(getDiv(barca_array[row][col])).innerHTML = '<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 }
 
 /*Function that gets the move made by the AI and updates the board accordingly*/
@@ -924,16 +885,6 @@ function getAIMove(move){
 	API_request["draw_moves"] = all_previous_moves;
 	pieces = [];
 
-	if(player_TURN === "BLACK"){
-		for(var i = 0; i < API_request["draw_moves"].length; i++){
-			API_request["draw_moves"][i][2] = 9-API_request["draw_moves"][i][2];
-			API_request["draw_moves"][i][3] = 9-API_request["draw_moves"][i][3];
-			API_request["draw_moves"][i][4] = 9-API_request["draw_moves"][i][4];
-			API_request["draw_moves"][i][5] = 9-API_request["draw_moves"][i][5];
-		}
-		// console.log("GOT TO BLACK");
-	}
-
 	for(var piece in piece_locations){
 		var info = [[null,null,null,null,null,null]];
 		info[0][0] = (piece[0] == 'B') ? "BLACK" : "WHITE";
@@ -946,6 +897,7 @@ function getAIMove(move){
 	}
 	// API_request["human_move"] = [[0,0],[0,5]];
 	API_request["pieces"] = pieces;
+	API_request["difficulty"] = difficulty;
 
 	// if(move.length !== 0){
 	// 	var piece = barca_array[move[2]][move[3]];
@@ -963,7 +915,7 @@ function getAIMove(move){
 	// console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
-			url: "https://serene-everglades-79780.herokuapp.com/version3",
+			url: "https://serene-everglades-79780.herokuapp.com/version4",
 			data: JSON.stringify(API_request),
 			dataType: "json",
 			contentType: 'application/json',
@@ -1048,7 +1000,6 @@ function clickMade(row,col,id,val){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 	}
 	else if(verifyValidClick(num)){
-		console.log("Piece request to move: " + barca_array[row][col]);
 		clicks_made = [];
 		clicks_made.push(num);
 		document.getElementById("message").innerHTML = "<b>Choose where you want to move the piece to or select another piece to move...</b>";
@@ -1056,6 +1007,11 @@ function clickMade(row,col,id,val){
 	else if(clicks_made.length == 1){
 		var r1 = Math.floor(clicks_made[0]/10);
 		var c1 = clicks_made[0]%10;
+
+		r1 = (first_to_move === "BLACK") ? (9 - r1) : r1;
+		c1 = (first_to_move === "BLACK") ? (9 - c1) : c1;
+		row = (first_to_move === "BLACK") ? (9 - row) : row;
+		col = (first_to_move === "BLACK") ? (9 - col) : col;
 
 		disableAllButtons();
 
@@ -1106,7 +1062,7 @@ function disableAllButtons(){
 	document.getElementById("playFromHere").disabled = true;
 	document.getElementById("undoMove").disabled = true;
 	document.getElementById("redoMove").disabled = true;
-	document.getElementById("setToOriginal").disabled = true;
+	// document.getElementById("setToOriginal").disabled = true;
 	document.getElementById("startGame").disabled = true;
 	document.getElementById("resetGame").disabled = true;
 }
@@ -1115,7 +1071,7 @@ function enableAllButtons(){
 	document.getElementById("playFromHere").disabled = false;
 	document.getElementById("undoMove").disabled = false;
 	document.getElementById("redoMove").disabled = false;
-	document.getElementById("setToOriginal").disabled = false;
+	// document.getElementById("setToOriginal").disabled = false;
 	document.getElementById("startGame").disabled = false;
 	document.getElementById("resetGame").disabled = false;
 }
@@ -1133,15 +1089,14 @@ function makeMove(r1,c1,row,col,undo){
 	removeImageForScaredAndTrappedPieces();
 	removeImageForWateringHoles();
 	removeCrowns();
-	console.log("r1,c1: " + r1+","+c1);
-	document.getElementById("tile_"+r1+","+c1).innerHTML = "";
-	movePiece(barca_array[r1][c1][0],barca_array[r1][c1][1],row,col);
+	document.getElementById(getDiv(barca_array[r1][c1])).innerHTML = "";
 	barca_array[row][col] = barca_array[r1][c1];
 	barca_array[r1][c1] = ".";
 	piece_locations[barca_array[row][col]] = row * 10 + col;
-	original_board_state["board"][row][col] = barca_array[row][col];
-	original_board_state["board"][r1][c1] = ".";
-	original_board_state["piece_locations"][barca_array[row][col]] = row * 10 + col;
+	// original_board_state["board"][row][col] = barca_array[row][col];
+	// original_board_state["board"][r1][c1] = ".";
+	// original_board_state["piece_locations"][barca_array[row][col]] = row * 10 + col;
+	movePiece(barca_array[row][col][0],barca_array[row][col][1],row,col);
 	clicks_made = [];
 	singleMoveExists = {};
 	checkVictory();
@@ -1150,7 +1105,7 @@ function makeMove(r1,c1,row,col,undo){
 	var piece = (barca_array[row][col][1] === 'E') ? "ELEPHANT" : (barca_array[row][col][1] === 'R') ? "MOUSE" : "LION";
 	if(!undo){
 		all_previous_moves.push([color,piece,r1,c1,row,col]);
-		original_board_state["all_previous_moves"].push([color,piece,r1,c1,row,col]);
+		// original_board_state["all_previous_moves"].push([color,piece,r1,c1,row,col]);
 	}
 	calculateScaredPieces();
 	calculateTrappedPieces();
@@ -1164,31 +1119,47 @@ function makeMove(r1,c1,row,col,undo){
 function getDiv(piece){
 	var row = getRow(piece);
 	var col = getCol(piece);
-	return "tile_" + row + "," + col;
+	if(first_to_move === "BLACK" && (player_TURN === "BLACK" && mode === "PLAYER V. AI")){
+		return "tile_" + (9-row) + "," + (9-col);
+	}
+	else{
+		return "tile_" + row + "," + col;
+	}
 }
 
-function initialize(){
+function initialize(reset){
 	disableAllButtons();
-	console.log("INITIALIZE");
 	document.getElementById("barca_board").innerHTML = "";
 	gameStarted = false;
 	victory = false;
 	who_won = "";
-	player_TURN = $("#playeroption").val();
-	mode = $("#gametype").val();
+	if(reset){
+		player_TURN = resetState["player_TURN"];
+		mode = resetState["mode"];
+		difficulty = resetState["difficulty"];
+		first_to_move = resetState["first_to_move"];
+	}
+	else{
+		player_TURN = $("#playeroption").val();
+		mode = $("#gametype").val();
+		difficulty = parseInt($("#hardness").val());
+		first_to_move = player_TURN;
+		resetState["player_TURN"] = player_TURN;
+		resetState["mode"] = mode;
+		resetState["difficulty"] = difficulty;
+		resetState["first_to_move"] = first_to_move;
+	}
 	checkPieceType();
-	original_board_state = {};
-	resetState["player_TURN"] = player_TURN;
-	resetState["mode"] = mode;
-	original_board_state["player_TURN"] = player_TURN;
-	original_board_state["mode"] = mode;
+	// original_board_state = {};
+	// original_board_state["player_TURN"] = player_TURN;
+	// original_board_state["mode"] = mode;
 	fear_counter = 0;
 	wateringHoleCounter = 0;
 	crown_counter = 0;
 	valid_clicks = [];
-	// draw_move_counter = {};
+	draw_move_counter = {};
 	all_previous_moves = [];
-	original_board_state["all_previous_moves"] = [];
+	// original_board_state["all_previous_moves"] = [];
 	undo_moves = [];
 	// fifo_for_draw_moves = [];
 	clearBarcaBoard();
@@ -1203,13 +1174,13 @@ function startGame(){
 	if(gameStarted){
 		var newgameStarted = confirm("Are you sure you want to start another game?");
 		if(newgameStarted){
-			initialize();
+			initialize(false);
 			initializeGame();
 			enableAllButtons();
 		}
 	}
 	else{
-		initialize();
+		initialize(false);
 		initializeGame();
 		enableAllButtons();
 	}
@@ -1219,7 +1190,7 @@ function resetGame(){
 	if(gameStarted){
 		var newgameStarted = confirm("Are you sure you want to reset the game back to its original state?");
 		if(newgameStarted){
-			initialize();
+			initialize(true);
 			initializeGame();
 			enableAllButtons();
 		}
