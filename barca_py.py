@@ -362,7 +362,7 @@ class Board:
 
 
     def send_updated_data(self):
-        return [self.whitetomove  ,  [ piece.send_updated_data() for piece in self.all_pieces()] , dict(self.previous_moves)]
+        return [self.whitetomove  ,  [ piece.send_updated_data() for piece in self.all_pieces()] , self.previous_moves]
             
         
 ##########################################       
