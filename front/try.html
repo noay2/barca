@@ -1,14 +1,6 @@
 <html>
-<!--
-
-#########################
-API Link:
-
-https://serene-everglades-79780.herokuapp.com/api
 
 
-
--->
 <head>
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -58,15 +50,7 @@ https://serene-everglades-79780.herokuapp.com/api
       </select>
       &nbsp;&nbsp;
 
-<!--       <select class = "selectpicker show-tick" id = "pieceType" data-width="100px">
-        <optgroup label = "Type">
-          <option value = "animals" data-icon = "glyphicon glyphicon-fire" selected = "selected">Animals</option>
-          <option value = "rps" data-icon = "glyphicon glyphicon-scissors">Rock Paper Scissors</option>
-          <option value = "chess" data-icon = "glyphicon glyphicon-king">Chess</option>
-        </optgroup>
-      </select>
-      &nbsp;&nbsp;
- -->
+
        <select class = "selectpicker show-tick" id = "playeroption" data-width="125px">
         <optgroup label = "Side">
           <option value = "WHITE" data-icon="glyphicon glyphicon-unchecked"  selected = "selected">White</option>
@@ -76,18 +60,16 @@ https://serene-everglades-79780.herokuapp.com/api
       &nbsp;&nbsp;
        <select class = "selectpicker show-tick" id = "hardness" data-width="100px">
         <optgroup label = "Type">
-          <option value = "1" data-icon = "glyphicon glyphicon-stop" selected = "selected">Easy</option>
+          <option value = "1" data-icon = "glyphicon glyphicon-stop" >Easy</option>
           <option value = "2" data-icon = "glyphicon glyphicon-th-large">Medium</option>
-          <option value = "3" data-icon = "glyphicon glyphicon-th">Hard</option>
+          <option value = "3" data-icon = "glyphicon glyphicon-th" selected = "selected">Hard</option>
         </optgroup>
       </select>
       &nbsp;&nbsp;
       <button type="button" class="btn btn-default" id = "playFromHere" onclick="playFromHere()" >Play From Here</button>
     </div>
 
-<!--       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
-      &nbsp;&nbsp;&nbsp;
- -->
+
 
     <div class = "col-xs-12 text-center threeOptionButtons" >
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
@@ -111,39 +93,10 @@ https://serene-everglades-79780.herokuapp.com/api
       <button type="button" class="btn btn-default" id = "startGame" onclick = "startGame()">Start Game!</button>
     </div>
 
-<!--
-      <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
-        <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
-        </span>
-      </button>
-      &nbsp;&nbsp;
-      <button class = "btn btn-default" id = "undoMove" onclick="undoMove()">
-        <span class = "fa fa-undo" aria-hidden = "true">
-        </span>
-      </button>
-      &nbsp;&nbsp;
-      <button class = "btn btn-default" id = "redoMove" onclick="redoMove()">
-        <span class = "fa fa-repeat" aria-hidden = "true">
-        </span>
-      </button> -->
-
-
     <div class = "row ">
       <div id="barca_board" class = "mainBox"></div>
     </div>
-<!--
-    <div class =  "col-xs-12 text-center" >
-    <br><br>
-      <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
-    </div>
 
-<div class = "col-xs-8 text-center ">
-  <div class="btn-group btn-group-justified ">
-    <button type="button" class="btn btn-primary"  onclick="playFromHere()" >Play From Here</button>
-    <button type="button" class="btn btn-primary"  onclick="setBackToOriginalState()" >Set Back to Original State</button>
-  </div>
-</div>
- -->
 
   <div class = "row text-center pieceTypeButtons">
     <div class="btn-group btn-group ">
@@ -153,27 +106,11 @@ https://serene-everglades-79780.herokuapp.com/api
     </div>
   </div>
   <div class = "row text-center lastTwoButtons">
-    <!-- <div class="btn-group btn-group-lg ">
 
-
-      <button type="button" class="btn btn-default" id = "setToOriginal" onclick="setBackToOriginalState()" >Set Back to Original State</button>
-
-    </div> -->
   </div>
 </div>
 
 
-
-
-<!--     <div class = "col-xs-8 text-center" >
-    <br>
-      <button class = "button2" id = "playFromHere" onclick="playFromHere()">
-        Play From Here
-      </button>
-      <button class = "button2" id = "setToOriginal" onclick="setBackToOriginalState()">
-        Set Back to Original State
-      </button>
-    </div>-->
 
 
 <script>newBoard();</script>
