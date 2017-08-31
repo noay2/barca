@@ -38,6 +38,38 @@
 						<p>Explaination of what Artificial Intelligence and Machine Learning techniques used.</p>
 					</header>
 
+
+<h2>Introduction</h2>
+
+<p>This report details how our team constructed a highly challenging, user-friendly, visually-pleasing, online Barca AI opponent. The graphics and user interface are hosted on a javascript application that works on all browsers. This application, if prompted by the user make a move, will query a server that hosts a python file. This python file contains the artificial intelligence agent that searches several plies deep in a minimax tree to make the best move available to it and sends it back the the javascript frontend. The intuition that the artificial intelligence agent uses was refined using machine-learning techniques like self-play and gradient descent. </p>
+
+<h2>Python Prototype</h2>
+
+<p>The python prototype was a graphical, touch-sensitive, computerized Barca opponent that we created briefly before beginning the official project.</p>
+
+					<img src="images/python_proto.png" style="width: 300px" alt="" />
+
+<p>It features:</p>
+<ul>
+<li>Sound game logistics, not allowing illegal moves and only allowing the AI to make legal moves itself.</li>
+<li>Basic graphics: animated board, each of the twelve pieces, watering hole graphics, and fear animations.</li>
+<li>A board evaluation mechanism.</li>
+<li>A one-ply deep decision tree that the computerized opponent uses to determine its best move. </li>
+</ul>
+
+<p>However, it lacked the following necessary characteristics:</p>
+<ul>
+
+<li>It was not able to be hosted as a web application.</li>
+<li>It did not have spectacular graphics or any graphics options.</li>
+<li>It did not have draw recognition or avoidance.</li>
+<li>Its decision tree was not deep enough to play at an acceptable difficulty level.</li>
+</ul>
+
+<p>Although the decision search mechanism was extremely simple, it still makes a decent opponent, beating novice human players about half of the time.</p>
+
+
+
 					<h2>Board evaluation</h2>
 					
 					<p>The AI agent checks several facets of the board and assigns them different values to determine how favorable a certain board position is.</p>
@@ -56,6 +88,27 @@
 <p>Now this architecture is very fair, but not very high-resolution. If we are to use invariable reward amounts (say, +1 for winning, and +0.5 for drawing), then the answer of how much better one AI is than another would be some quantified amount, such as 0, 1.5, 2, etc. This is simply not accurate enough for high-resolution gradient descent, especially considering that a much more accurate scoring system can be implemented without much loss in efficiency. </p>
 
 <p>So to be more accurate, we consider how long the game has lasted, and what each AI agent’s average board position evaluation was during the game. As for the former, winning in 18 moves is obviously much more impressive than winning in 150 moves, so, in the event of a victory, the AI’s reward is inversely proportional to the length of the game it won. As for the latter, in the case of a draw, even though neither agent won, one agent still performed slightly better than the other. The fairest way to quantify this is, for every board position each agent encounters, get that agent’s opinion of how favorable the board position is, and also the opposing agent’s opinion of how favorable the board position would be if he were playing on that side. Average these two number to get an “unbiased” account of how favourable each board position in the game is. The notion is that the agent that had the more favorable board positions throughout the game is slightly better than the other agent, even in the case of a draw. So in the case of a draw, the “better” agent will be rewarded by his average board position evaluation minus his opponent’s average board position evaluation. </p>
+
+
+<h2>Gradient Ascent</h2>
+
+    <p>So now we have a layout that will tell us how much better one AI is than another, but how will we use this to find the best possible AI? Well, one can think of the situation like trying to maximize a variable (performance) that is a function of a vector (the board evaluation vector). While there is no known way of simply plotting performance as a function of board evaluation vector in the mathematical sense and using standard calculus methods to locate its maximum, we can compare its performance as different points and infer from this information what point to evaluate next. Fortunately, there is already a popular mechanism for doing this-- gradient ascent.</p>
+
+    <p>We perform gradient ascent in our situation by first approximating the partial derivative at the current point for every dimension of the board evaluation vector. This is done by playing an AI with the current board evaluation vector against another AI that uses that same board evaluation vector with a small delta added to one dimension. The performance gain is divided by the delta, and we now have the performance gain per unit increase in that dimension around that point. When we have this performance gain per unit increase in each dimension, they are compiled into a vector (called the gradient)-- this vector is the direction that is expected to give the greatest performance gains. We then choose our next BEV by traveling some distance in the gradient’s direction from the current BEV.</p>
+
+<h2>Problems encountered using gradient descent:</h2>
+
+    <p>Simply because one is always traveling in the direction of the gradient does not mean that performance is actually improving every time. Once we realized this fact, we decided to use some reference BEV as a standardized way of evaluating the performance of each BEV we encounter.  </p>
+
+    <p>There is also the issue of getting stuck around a local maximum. If we notice this behavior, we simply restart the process around this maximum, but using a different delta or learning rate. If even that failed, we would need to start at some other random point, but we have not needed to do so yet. </p>
+
+    <p>Additionally, the gradient descent can continue for some time without making any progress-- all of the points it is choosing to evaluate are not performing as well as a point you encountered before. Again, we would simply restart at the highest point reached so far with a different delta or learning rate upon noticing this behavior. </p>
+
+    <p>Lastly, there is the issue that the board evaluation vector that is found to work extremely well with AI’s that perform shallow minimax searches often only has modest performance gains when used in AI’s that perform deeper searches. This is an issue because the AI’s that perform deeper searches take far too long to make a move, so gradient descent cannot be accomplished in a reasonable amount of time with them. Perhaps one would need to use a supercomputer to seek performance gains on the human-competitive AI’s using gradient descent.</p>
+    
+
+
+
 
 
 <h2>Expediting Move Updates</h2>
