@@ -5,12 +5,13 @@ import copy
 from collections import defaultdict
 from collections import OrderedDict
 ##########################################
-
 class Piece:
     colors = ["BLACK", "WHITE"]
     types  = ["ELEPHANT", "MOUSE", "LION"]
     rows = 10                                  
     cols = 10
+
+
     init_piece_position =\
             {
                                 (int(rows -1),int(cols/2 -1)), (int(rows -1),int(cols/2)),(int(rows -2),int(cols/2 -1)),
@@ -18,19 +19,21 @@ class Piece:
            
                                 (int(0),int(cols/2 -1)),(int(0),int(cols/2)), (int(1),int(cols/2 -1)),
                                 (int(1),int(cols/2)), (int(1),int(cols/2 -2)), (int(1),int(cols/2 +1))
-             }
+            }
              
-
 
 
     watering_holes      =\
             {
                               (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
-                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))
-                            
+                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))                            
             }
+
+
+
     piece_color_val = {"BLACK": 0, "WHITE": 1}
     piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
+
 
     
     def __init__(self, piece_arr, board_coord, pieces):
@@ -78,23 +81,7 @@ class Piece:
             if piece.adjacent_to(row, col):
                 return True
         return False      
-    def can_move_to_square(self, direction, destination):
-        #Made specifically for use in can_caputure_watering_hole function
-        #Assuming that there are no obstructions between piece and destination in provided direction
 
-        #Check if direction is appropriate to piece
-        if(direction[0]==0 or direction[1]==0):
-            if (piece.type=="LION"):
-                return False
-        elif (direction[0]==1 or direction[1]==1):
-            if (piece.type=="MOUSE"):
-                return False
-        #Check if piece is deterred
-        for fearsome_piece in piece.scared_of_pieces:
-            if fearsome_piece.adjacent_to(destination[0], destination[1]):
-                return False
-
-        return True
     def valid_moves(self):
         if not(self.infear):
             for piece_type in self.team_pieces:
@@ -165,6 +152,8 @@ class Board:
     types  = ["ELEPHANT", "MOUSE", "LION"]
     rows = 10                                  
     cols = 10
+
+    
     init_piece_position =\
             {
                                 (int(rows -1),int(cols/2 -1)), (int(rows -1),int(cols/2)),(int(rows -2),int(cols/2 -1)),
@@ -175,12 +164,15 @@ class Board:
              }
 
 
+
     watering_holes      =\
             {
                               (int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),
-                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))
-                            
+                              (int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))                           
             }
+
+
+
     piece_color_val = {"BLACK": 0, "WHITE": 1}
     piece_type_val  = {"MOUSE":0, "LION":1, "ELEPHANT": 2}
 
@@ -376,7 +368,8 @@ class AI:
         self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
 
-        self.board_position_dict      = OrderedDict()
+        self.board_position_dict          = OrderedDict()
+        self.retired_board_position_dict  = defaultdict(lambda: [0,0,0,0]) 
         
     def receive_data(self, whitetomove, pieces, previous_moves, temp_recurse):
   
@@ -386,10 +379,28 @@ class AI:
 	
       
     def execute(self, temp_recurse):
+
+        
         if (not self.board.victory() and not self.board.draw()):
         
-            self.ai_move= (self.AI_alpha_beta(temp_recurse))[0:2]
-            self.board.update(self.ai_move[0], self.ai_move[1])
+            ai_board_hash = self.board.current_hash + str(int(self.board.whitetomove))
+
+
+            if ai_board_hash in self.board_position_dict:
+            	data = self.board_position_dict.pop(ai_board_hash)
+            	self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], data[3] +1]
+
+
+            else:
+            	data= (self.AI_alpha_beta(temp_recurse))
+            	self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], 0]
+            	
+            	if len(self.board_position_dict)>10000:
+            		old_data_key, old_data_value = self.board_position_dict.popitem(last = False) 
+            		if old_data_value[3] >5: self.retired_board_position_dict[old_data_key]  = old_data_value[0:3]
+
+            	
+            self.board.update(data[0], data[1])
             
 
     def send_updated_data(self):
@@ -398,8 +409,6 @@ class AI:
 
     def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
 
-        ai_board_hash = self.board.current_hash + str(int(self.board.whitetomove))
-
         draw = self.board.draw()
         if draw:
             return [None, None, 0]
@@ -407,20 +416,11 @@ class AI:
         
         victory = self.board.victory()
         if victory:
-            return [None, None, 1000000 * (1 if victory== 'WHITE' else -1) ]
+            return [None, None, self.watering_holes_value[3] * (1 if victory== 'WHITE' else -1) ]
         
-        if ai_board_hash in self.board_position_dict:
-            data = self.board_position_dict.pop(ai_board_hash)
-            if recurse <= data[0]:
-                self.board_position_dict[ai_board_hash] = data
-                return data[1:]
 
         if recurse == 0: 
             score = self.board.board_evaluation(self.watering_holes_value,self.future_watering_hole_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
-
-            self.board_position_dict[ai_board_hash] = [recurse, None, None,score]
-            if len(self.board_position_dict) == 10000: self.board_position_dict.popitem()
-            
             return [None, None, score]
 
 
@@ -438,10 +438,6 @@ class AI:
                         alpha = max(alpha, childs_worst_score)
                         if (alpha>beta):
                             return [current_best_source, current_best_dest, current_best_score]
-
-            self.board_position_dict[ai_board_hash] = [recurse, current_best_source, current_best_dest,current_best_score]
-            if len(self.board_position_dict) == 10000: self.board_position_dict.popitem()                           
-
             return [current_best_source, current_best_dest, current_best_score]
 
 
@@ -459,10 +455,6 @@ class AI:
                         beta = min(beta, childs_best_score)
                         if (alpha>beta):
                             return [current_worst_source, current_worst_dest, current_worst_score]
-                            
-            self.board_position_dict[ai_board_hash] = [recurse, current_worst_source, current_worst_dest,current_worst_score]
-            if len(self.board_position_dict) == 10000: self.board_position_dict.popitem()                           
-
             return [current_worst_source, current_worst_dest, current_worst_score]
 
 
@@ -474,7 +466,7 @@ class AI:
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4):
+    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4, oracle = False):
         self.watering_holes_value =  watering_holes_value 
         self.future_watering_hole_value = future_watering_hole_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
@@ -482,6 +474,7 @@ class Backend:
         self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
         self.AI = AI(self.watering_holes_value,self.future_watering_hole_value , self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
+	self.file = open(‘oracle_file.py’, ‘a+’)
 
 
     def receive_data(self, whitetomove, pieces, previous_moves = {}, temp_recurse = 3 ):
@@ -494,20 +487,5 @@ class Backend:
         return updated_data
 
 if __name__ == "__main__":
-    backend = Backend()
-    backend.receive_data(True, \
-     [
-     ["BLACK","ELEPHANT",9,4,True,False],
-     ["BLACK","ELEPHANT",9,5,False,False],
-     ["BLACK","MOUSE",8,4,False,False],
-     ["BLACK","MOUSE",8,5,False,False],
-     ["BLACK","LION",8,6,False,False],
-     ["BLACK","LION",8,3,False,False],
-     ["WHITE","MOUSE",1,4,False,False],
-     ["WHITE","MOUSE",1,5,False,False],
-     ["WHITE","LION",1,6,False,False],
-     ["WHITE","LION",1,3,False,False],
-     ["WHITE","ELEPHANT",0,4,False,False],
-     ["WHITE","ELEPHANT",0,5,False,False]
-     ])
+	pass
 
