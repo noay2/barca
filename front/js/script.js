@@ -58,10 +58,11 @@ var AIsmove = false;
 var gameStarted = false;
 var resetState = {};
 var draw_move_cache = {};
-var difficultty = 3 ;
+var difficulty = 3 ;
 // var fifo_for_draw_moves = [];
 var all_previous_moves = [];
 var undo_moves = [];
+var valid_move_set = {};
 var crown_counter = 0;
 
 //Data structure that is used to set the board back to its original point
@@ -479,6 +480,112 @@ function checkIfASingleValidMoveExistsForMouse(value){
 	return false;
 }
 
+// function computeAllValidMovesForMouse(value){
+// 	var obstacles = [false,false,false,false];
+// 	var directions = ["UP","R","D","L"];
+// 	var move_adv = 0;
+// 	var row = getRow(value);
+// 	var col = getCol(value);
+// 	singleMoveExists[value] = false;
+//
+// 	while(obstacles[0] || obstacles[1] || obstacles[2] || obstacles[3])
+// 	{
+// 		move_adv++;
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+// 			}
+// 		}
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
+// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) == false){
+// 						return true;
+// 				}
+// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
+// 			}
+// 		}
+// 	}
+//
+// 	return false;
+// }
+//
+// function computeAllValidMovesForLion(value){
+// 	var obstacles = [false,false,false,false];
+// 	var directions = ["UL","UR","BR","BL"];
+// 	var move_adv = 0;
+// 	var row = getRow(value);
+// 	var col = getCol(value);
+// 	singleMoveExists[value] = false;
+//
+// 	while(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3])
+// 	{
+// 		move_adv++;
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+// 			}
+// 		}
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
+// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) === false){
+// 						return true;
+// 				}
+// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
+// 			}
+// 		}
+// 	}
+//
+// 	return false;
+// }
+//
+// function computeAllValidMovesForElephant(value){
+// 	var obstacles = [false,false,false,false,false,false,false,false];
+// 	var directions = ["UP","UR","R","BR","D","BL","L","UL"];
+// 	var move_adv = 0;
+// 	var row = getRow(value);
+// 	var col = getCol(value);
+// 	singleMoveExists[value] = false;
+//
+// 	while(obstacles[0] || obstacles[1] || obstacles[2] || obstacles[3] ||
+// 		obstacles[4] || obstacles[5] || obstacles[6] || obstacles[7])
+// 	{
+// 		move_adv++;
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+// 			}
+// 		}
+//
+// 		for(var i = 0; i < obstacles.length; i++){
+// 			if(!obstacles[i]){
+// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
+// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
+// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) === false){
+// 						return true;
+// 				}
+// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
+// 			}
+// 		}
+// 	}
+//
+// 	return false;
+// }
+
 /*Calculates new scared pieces because of the move made*/
 function calculateScaredPieces(){
 	scared_pieces = new Set();
@@ -719,7 +826,6 @@ function recomputePositions(pieces,piece_info,src,dest){
 	// original_board_state["board"][src[0]][src[1]] = ".";
 	// var piece_val = original_board_state["board"][dest[0]][dest[1]];
 	// original_board_state["piece_locations"][piece_val] = dest[0] * 10 + dest[1];
-	checkVictory();
 	scared_pieces = new Set();
 	trapped_pieces = [];
 
@@ -925,6 +1031,7 @@ function getAIMove(move){
 				removeImageForScaredAndTrappedPieces();
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
+				checkVictory();
 				// addCurrentBoardPosition();
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
@@ -1142,7 +1249,8 @@ function initialize(reset){
 	else{
 		player_TURN = $("#playeroption").val();
 		mode = $("#gametype").val();
-		difficulty = parseInt($("#hardness").val());
+		var str = $("#hardness").val();
+		difficulty = parseInt(str);
 		first_to_move = player_TURN;
 		resetState["player_TURN"] = player_TURN;
 		resetState["mode"] = mode;
@@ -1197,38 +1305,38 @@ function resetGame(){
 	}
 }
 
-function setBackToOriginalState(){
-	setToOriginalBoard = confirm("Are you sure you want to set back to original board game state");
-	if(setToOriginalBoard){
-		disableAllButtons();
-		removeImageForScaredAndTrappedPieces();
-		removeImageForWateringHoles();
-		removeCrowns();
-		// addCurrentBoardPosition();
-		barca_array = original_board_state["board"];
-		piece_locations = original_board_state["piece_locations"];
-		all_previous_moves = original_board_state["all_previous_moves"];
-		player_TURN = original_board_state["player_TURN"];
-
-		mode = original_board_state["mode"];
-		undo_moves = [];
-		checkVictory();
-		calculateScaredPieces();
-		calculateTrappedPieces();
-		placeImageForScaredAndTrappedPieces();
-		placeImageForWateringHolesIfEmpty();
-
-		if(mode === "PLAYER V. AI"){
-			AIsmove = original_board_state["AIsmove"];
-		}
-
-		printTurn();
-		if(!AIsmove){
-			recomputeValidClicks(player_TURN);
-		}
-		enableAllButtons();
-	}
-}
+// function setBackToOriginalState(){
+// 	setToOriginalBoard = confirm("Are you sure you want to set back to original board game state");
+// 	if(setToOriginalBoard){
+// 		disableAllButtons();
+// 		removeImageForScaredAndTrappedPieces();
+// 		removeImageForWateringHoles();
+// 		removeCrowns();
+// 		// addCurrentBoardPosition();
+// 		barca_array = original_board_state["board"];
+// 		piece_locations = original_board_state["piece_locations"];
+// 		all_previous_moves = original_board_state["all_previous_moves"];
+// 		player_TURN = original_board_state["player_TURN"];
+//
+// 		mode = original_board_state["mode"];
+// 		undo_moves = [];
+// 		checkVictory();
+// 		calculateScaredPieces();
+// 		calculateTrappedPieces();
+// 		placeImageForScaredAndTrappedPieces();
+// 		placeImageForWateringHolesIfEmpty();
+//
+// 		if(mode === "PLAYER V. AI"){
+// 			AIsmove = original_board_state["AIsmove"];
+// 		}
+//
+// 		printTurn();
+// 		if(!AIsmove){
+// 			recomputeValidClicks(player_TURN);
+// 		}
+// 		enableAllButtons();
+// 	}
+// }
 
 function takeBack(src_row,src_col,dest_row,dest_col,undo){
 	if(undo){
@@ -1285,7 +1393,7 @@ function playFromHere(){
 	{
 		// console.log(barca_array);
 		undo_moves = [];
-		if(mode === "PLAYER v. AI"){
+		if(mode === "PLAYER V. AI"){
 			if(AIsmove){
 				disableAllButtons();
 				printTurn();

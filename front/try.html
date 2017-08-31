@@ -21,7 +21,7 @@ https://serene-everglades-79780.herokuapp.com/api
 
 </head>
 <body>
-<div class="container "> 
+<div class="container ">
     <div class = "row text-center navigationBar">
       <div class="btn-group btn-group-lg ">
         <button type="button" class="btn btn-default" onclick="location.href ='index.html'">Home</button>
@@ -76,11 +76,13 @@ https://serene-everglades-79780.herokuapp.com/api
       &nbsp;&nbsp;
        <select class = "selectpicker show-tick" id = "hardness" data-width="100px">
         <optgroup label = "Type">
-          <option value = "animals" data-icon = "glyphicon glyphicon-stop" selected = "selected">Easy</option>
-          <option value = "rps" data-icon = "glyphicon glyphicon-th-large">Medium</option>
-          <option value = "chess" data-icon = "glyphicon glyphicon-th">Hard</option>
+          <option value = "1" data-icon = "glyphicon glyphicon-stop" selected = "selected">Easy</option>
+          <option value = "2" data-icon = "glyphicon glyphicon-th-large">Medium</option>
+          <option value = "3" data-icon = "glyphicon glyphicon-th">Hard</option>
         </optgroup>
       </select>
+      &nbsp;&nbsp;
+      <button type="button" class="btn btn-default" id = "playFromHere" onclick="playFromHere()" >Play From Here</button>
     </div>
 
 <!--       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
@@ -89,23 +91,27 @@ https://serene-everglades-79780.herokuapp.com/api
 
     <div class = "col-xs-12 text-center threeOptionButtons" >
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
+        Reset
         <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
         </span>
       </button>
       &nbsp;&nbsp;
       <button class = "btn btn-default" id = "undoMove" onclick="undoMove()">
+        Undo
         <span class = "fa fa-undo" aria-hidden = "true">
         </span>
       </button>
       &nbsp;&nbsp;
       <button class = "btn btn-default" id = "redoMove" onclick="redoMove()">
+        Redo
         <span class = "fa fa-repeat" aria-hidden = "true">
         </span>
       </button>
-
+      &nbsp; &nbsp;
+      <button type="button" class="btn btn-default" id = "startGame" onclick = "startGame()">Start Game!</button>
     </div>
 
-<!-- 
+<!--
       <button class = "btn btn-default" id = "resetGame" onclick="resetGame()">
         <span class = "glyphicon glyphicon-refresh" aria-hidden = "true">
         </span>
@@ -125,7 +131,7 @@ https://serene-everglades-79780.herokuapp.com/api
     <div class = "row ">
       <div id="barca_board" class = "mainBox"></div>
     </div>
-<!-- 
+<!--
     <div class =  "col-xs-12 text-center" >
     <br><br>
       <button class = "button2 " id = "startGame" onclick = "startGame()">Start Game!</button>
@@ -147,14 +153,12 @@ https://serene-everglades-79780.herokuapp.com/api
     </div>
   </div>
   <div class = "row text-center lastTwoButtons">
-    <div class="btn-group btn-group-lg ">
+    <!-- <div class="btn-group btn-group-lg ">
 
-      <button type="button" class="btn btn-default" id = "playFromHere" onclick="playFromHere()" >Play From Here</button>
-      <button type="button" class="btn btn-default" id = "startGame" onclick = "startGame()">Start Game!</button>
 
       <button type="button" class="btn btn-default" id = "setToOriginal" onclick="setBackToOriginalState()" >Set Back to Original State</button>
-      
-    </div>
+
+    </div> -->
   </div>
 </div>
 
