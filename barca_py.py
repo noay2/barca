@@ -375,8 +375,8 @@ class AI:
 	    file.close()
             if data != '':
                 self.retired_board_position_dict = eval(data)
-                for key, value in self.retired_board_position_dict:
-                    self.board_position_dict[key] = value + [0]
+                for key_value, counter in zip(   self.retired_board_position_dict, range(len(10000))  ):
+                    self.board_position_dict[key_value[0]] = key_value[1] + [0]
                     
                 
 
@@ -412,7 +412,7 @@ class AI:
             	data= (self.AI_alpha_beta(temp_recurse))
             	self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], 0]
             	
-            	while len(self.board_position_dict)>10000:
+            	if len(self.board_position_dict)>10000:
             		old_data_key, old_data_value = self.board_position_dict.popitem(last = False) 
             		if old_data_value[3] >5: self.retired_board_position_dict[old_data_key]  = old_data_value[0:3]
 
