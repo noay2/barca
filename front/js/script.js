@@ -108,6 +108,9 @@ function placeInitImage(){
 	{
 		placeChessImages();
 	}
+	else if(piece_type == "metal"){
+		placeMetalImages();
+	}
 
 	// document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
 	// document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/BlackElephant.gif"/>';
@@ -936,6 +939,9 @@ function findImgName(side,type){
 			else if(piece_type == "chess"){
 				return (side == 'W') ? "ChessElephantWhite.gif" : "ChessBlackElephant.gif";
 			}
+			else if(piece_type == "metal"){
+				return (side == 'W') ? "MetalElephantWhite.gif" : "MetalBlackElephant.gif";
+			}
 		}
 		case 'L':
 		{
@@ -949,6 +955,9 @@ function findImgName(side,type){
 			else if(piece_type == "chess"){
 				return (side == 'W') ? "ChessWhiteKing.gif" : "ChessBlackKing.gif";
 			}
+			else if(piece_type == "metal"){
+				return (side == 'W') ? "MetalWhiteKing.gif" : "MetalBlackKing.gif";
+			}
 		}
 		default:
 		{
@@ -961,6 +970,9 @@ function findImgName(side,type){
 
 			else if(piece_type == "chess"){
 				return (side == 'W') ? "ChessWhitePawn.gif" : "ChessBlackPawn.gif";
+			}
+			else if(piece_type == "metal"){
+				return (side == 'W') ? "MetalWhitePawn.gif" : "MetalBlackPawn.gif";
 			}
 		}
 	}
@@ -1458,6 +1470,24 @@ function placeChessImages(){
 	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/ChessWhiteKing.gif"/>';
 }
 
+
+function placeMetalImages(){
+	document.getElementById(getDiv("BE1")).innerHTML = '<img src = "./images/MetalBlackElephant.gif"/>';
+	document.getElementById(getDiv("BE2")).innerHTML = '<img src = "./images/MetalBlackElephant.gif"/>';
+	document.getElementById(getDiv("WE1")).innerHTML = '<img src = "./images/MetalElephantWhite.gif"/>';
+	document.getElementById(getDiv("WE2")).innerHTML = '<img src = "./images/MetalElephantWhite.gif"/>';
+	document.getElementById(getDiv("BL1")).innerHTML = '<img src = "./images/MetalBlackKing.gif"/>';
+	document.getElementById(getDiv("BR1")).innerHTML = '<img src = "./images/MetalBlackPawn.gif"/>';
+	document.getElementById(getDiv("BR2")).innerHTML = '<img src = "./images/MetalBlackPawn.gif"/>';
+	document.getElementById(getDiv("BL2")).innerHTML = '<img src = "./images/MetalBlackKing.gif"/>';
+	document.getElementById(getDiv("WL1")).innerHTML = '<img src = "./images/MetalWhiteKing.gif"/>';
+	document.getElementById(getDiv("WR1")).innerHTML = '<img src = "./images/MetalWhitePawn.gif"/>';
+	document.getElementById(getDiv("WR2")).innerHTML = '<img src = "./images/MetalWhitePawn.gif"/>';
+	document.getElementById(getDiv("WL2")).innerHTML = '<img src = "./images/MetalWhiteKing.gif"/>';
+}
+
+
+
 function changePieceTypeToAnimals(){
 
 	if(piece_type != "animals"){
@@ -1496,6 +1526,20 @@ function changePieceTypeToChess(){
 		placeImageForWateringHolesIfEmpty();
 		checkVictory();
 		piece_type = "chess";
+
+	}
+
+}
+
+function changePieceTypeToMetal(){
+
+		if(piece_type != "metal"){
+
+		placeMetalImages();
+		placeImageForScaredAndTrappedPieces();
+		placeImageForWateringHolesIfEmpty();
+		checkVictory();
+		piece_type = "metal";
 
 	}
 
