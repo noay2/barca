@@ -343,8 +343,7 @@ class Board:
         self.update_hash()
 
 
-        for piece, counter in zip(self.all_pieces(), range(len(self.all_pieces()))): 
-		piece.infear,piece.trapped = old_infear_trapped[counter][0], old_infear_trapped[counter][1]         
+        for piece, counter in zip(self.all_pieces(), range(len(self.all_pieces()))): piece.infear,piece.trapped = old_infear_trapped[counter][0], old_infear_trapped[counter][1]         
         self.switch_turn()
 
 
