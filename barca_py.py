@@ -369,7 +369,7 @@ class AI:
         self.center_encouragement_value = center_encouragement_value
 
         self.board_position_dict          = OrderedDict()
-        self.retired_board_position_dict  = defaultdict(lambda: [0,0,0,0]) 
+        self.retired_board_position_dict  = {} 
         
     def receive_data(self, whitetomove, pieces, previous_moves, temp_recurse):
   
