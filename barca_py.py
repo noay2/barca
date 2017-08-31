@@ -368,13 +368,15 @@ class AI:
         self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
         self.oracle = oracle
-        self.oracle_file = open(oracle_file, 'a+')
+        self.oracle_file = oracle_file
         
         self.retired_board_position_dict  = {}
         self.board_position_dict          = OrderedDict()
 
         if self.oracle:
-            data = self.oracle_file.read()
+	    file = open(self.oracle_file, 'r')
+            data = file.read()
+	    file.close()
             if data != '':
                 self.retired_board_position_dict = eval(data)
                 for key, value in self.retired_board_position_dict:
@@ -384,7 +386,10 @@ class AI:
 
     def __del__(self):
         if self.oracle:
-            self.oracle_file.write(str(self.retired_board_position_dict))
+	    file = open(self.oracle_file, 'w')
+            file.write(str(self.retired_board_position_dict))
+	    file.close()
+
         
         
     def receive_data(self, whitetomove, pieces, previous_moves, temp_recurse):
