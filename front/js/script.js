@@ -801,6 +801,7 @@ function placeCrownOnWinningPieces() {
 			document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
 			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
 			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
+			crown_counter = 6;
 	}
 	else if(who_won === "WHITE"){
 			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
@@ -809,9 +810,8 @@ function placeCrownOnWinningPieces() {
 			document.getElementById(getDiv("WL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
 			document.getElementById(getDiv("WR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
 			document.getElementById(getDiv("WR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
+			crown_counter = 6;
 	}
-
-	crown_counter = 6;
 }
 
 function recomputePositions(pieces,piece_info,src,dest){
@@ -1465,7 +1465,7 @@ function changePieceTypeToAnimals(){
 		placeElephantLionMouseImages();
 		placeImageForScaredAndTrappedPieces();
 		placeImageForWateringHolesIfEmpty();
-		placeCrownOnWinningPieces();
+		checkVictory();
 		piece_type = "animals";
 
 	}
@@ -1479,7 +1479,7 @@ function changePieceTypeToRPS(){
 		placeRockPaperScissorImages();
 		placeImageForScaredAndTrappedPieces();
 		placeImageForWateringHolesIfEmpty();
-		placeCrownOnWinningPieces();
+		checkVictory();
 		piece_type = "rps";
 
 	}
@@ -1494,7 +1494,7 @@ function changePieceTypeToChess(){
 		placeChessImages();
 		placeImageForScaredAndTrappedPieces();
 		placeImageForWateringHolesIfEmpty();
-		placeCrownOnWinningPieces();
+		checkVictory();
 		piece_type = "chess";
 
 	}
