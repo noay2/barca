@@ -1284,7 +1284,7 @@ function makeMove(r1,c1,row,col,undo){
 function getDiv(piece){
 	var row = getRow(piece);
 	var col = getCol(piece);
-	if(first_to_move === "BLACK" && (player_TURN === "BLACK" && mode === "PLAYER V. AI")){
+	if(first_to_move === "BLACK" || (player_TURN === "BLACK" && mode === "PLAYER V. AI")){
 		return "tile_" + (9-row) + "," + (9-col);
 	}
 	else{
