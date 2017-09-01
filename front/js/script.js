@@ -1346,6 +1346,7 @@ function startGame(){
 		}
 	}
 	else{
+		document.getElementById('startGame').innerHTML = "Re-Start Game";
 		initialize(false);
 		initializeGame();
 		enableAllButtons();
