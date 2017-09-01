@@ -278,7 +278,6 @@ class Board:
             for teammate in  self.pieces[Piece.piece_color_val[piece.color]][(Piece.piece_type_val[piece.type] +2 )%3]:
               if teammate.adjacent_to(piece.row, piece.col):
               	score += teammate_value * (1 if piece.color == 'WHITE' else -1)
-                
             #How close are you to the center 
             score += center_encouragement_value * (          ((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2) - ((float(Board.rows-1)/2 - piece.row)**2 +(float(Board.cols-1)/2-piece.col)**2)        )/((float(Board.rows-1)/2 )**2 + (float(Board.cols-1)/2 )**2) * (1 if piece.color == 'WHITE' else -1)
             
@@ -343,7 +342,7 @@ class Board:
         self.update_hash()
 
 
-        for piece, counter in zip(self.all_pieces(), range(len(self.all_pieces()))): piece.infear,piece.trapped = old_infear_trapped[counter][0], old_infear_trapped[counter][1]         
+        for piece, old_infear_trapped_piece in zip(self.all_pieces(), old_infear_trapped): piece.infear,piece.trapped = old_infear_trapped_piece[0], old_infear_trapped_piece[1]         
         self.switch_turn()
 
 
@@ -366,25 +365,30 @@ class AI:
         self.oracle = oracle
         self.oracle_file = oracle_file
         
-        self.retired_board_position_dict  = {}
-        self.board_position_dict          = OrderedDict()
+
+
 
         if self.oracle:
-	    file = open(self.oracle_file, 'r')
-            data = file.read()
-	    file.close()
-            if data != '':
-                self.retired_board_position_dict = eval(data)
-                for key_value, counter in zip(   self.retired_board_position_dict, range(len(10000))  ):
-                    self.board_position_dict[key_value[0]] = key_value[1] + [0]
+            try:
+              i = time.time()
+              file = open(self.oracle_file, 'r')
+              dict = eval(file.read())
+              file.close()
+              print(time.time() -i)
+            except:
+            	dict = OrderedDict()
+            self.board_position_dict          = dict
+            self.equilizer_factor             = 2
+            self.equilizer_factor_delta       = 0
+
                     
                 
 
     def __del__(self):
         if self.oracle:
-	    file = open(self.oracle_file, 'w')
-            file.write(str(self.retired_board_position_dict))
-	    file.close()
+            file = open(self.oracle_file, 'w')
+            file.write(str(self.board_position_dict))
+            file.close()
 
         
         
@@ -392,33 +396,60 @@ class AI:
   
         
         self.board = Board(whitetomove, pieces, previous_moves)
-        self.execute(temp_recurse)
-	
+        if self.oracle:
+            self.oracle_execute(temp_recurse)
+        else:
+            self.execute(temp_recurse)
       
-    def execute(self, temp_recurse):
-
-        
+    def oracle_execute(self, temp_recurse):
         if (not self.board.victory() and not self.board.draw()):
         
             ai_board_hash = self.board.current_hash + str(int(self.board.whitetomove))
 
 
             if ai_board_hash in self.board_position_dict:
-            	data = self.board_position_dict.pop(ai_board_hash)
-            	self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], data[3] +1]
+                data = self.board_position_dict.pop(ai_board_hash)
+                data[3] +=1
+              
+                if math.log(data[3], 2).is_integer() and data[3] <16:
+                    data = self.AI_alpha_beta(temp_recurse + math.log(data[3], 2)) + [data[3]]
+                else:
+                    pass
+                
+                self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], data[3] ]
 
 
             else:
-            	data= (self.AI_alpha_beta(temp_recurse))
-            	self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], 0]
-            	
-            	if len(self.board_position_dict)>10000:
-            		old_data_key, old_data_value = self.board_position_dict.popitem(last = False) 
-            		if old_data_value[3] >5: self.retired_board_position_dict[old_data_key]  = old_data_value[0:3]
+                data= (self.AI_alpha_beta(temp_recurse))
+                self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], 1]
+                
+                while len(self.board_position_dict)>10000:
+                    old_data_key, old_data_value = self.board_position_dict.popitem(last = False) 
+                    if old_data_value[3] >= self.equilizer_factor: 
+                        self.board_position_dict[old_data_key]  = old_data_value
+                        self.equilizer_factor_delta += 1
+                    else:
+                        self.equilizer_factor_delta -= 1
+                  
+                    if self.equilizer_factor_delta == 3:
+                        self.equilizer_factor +=1
+                        self.equilizer_factor_delta = 0
+                    elif self.equilizer_factor_delta ==-3:
+                        self.equilizer_factor -=1
+                        self.equilizer_factor_delta = 0
 
             	
             self.board.update(data[0], data[1])
-            
+
+    
+    
+    def execute(self, temp_recurse):
+        print(temp_recurse)
+
+        if (not self.board.victory() and not self.board.draw()):
+            data= (self.AI_alpha_beta(temp_recurse))
+            self.board.update(data[0], data[1])
+
 
     def send_updated_data(self):
         return self.board.send_updated_data()
@@ -483,19 +514,18 @@ class AI:
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4, oracle = False, oracle_file = 'oracle_file.txt'):
+    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4, oracle = False, oracle_file = 'oracle_file'):
         self.AI = AI(watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value, center_encouragement_value,oracle ,oracle_file)
 
-    def receive_data(self, whitetomove, pieces, previous_moves = {}, temp_recurse = 3 ):
-        self.AI.receive_data(whitetomove,pieces, previous_moves, temp_recurse)
-
-
+    def receive_data(self, whitetomove, pieces, previous_moves = {}, temp_recurse = 2 ):
+    	self.AI.receive_data(whitetomove,pieces, previous_moves, temp_recurse)
 
     def send_updated_data(self):
-        updated_data = self.AI.send_updated_data()
-        return updated_data
+    	self.AI.send_updated_data()
+         
     
 
-if __name__ == "__main__":
-    pass
+
+        
+
 
