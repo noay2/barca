@@ -64,7 +64,7 @@ var all_previous_moves = [];
 var undo_moves = [];
 var valid_move_set = {};
 var crown_counter = 0;
-
+var draw = false;
 //Data structure that is used to set the board back to its original point
 var original_board_state = {};
 
@@ -140,7 +140,6 @@ function addCurrentBoardPosition(){
 	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
 
 	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
-		string += keysSorted[keyLen][0] + keysSorted[keyLen][1];
 		if(piece_locations[keysSorted[keyLen]] < 10){
 			string += '0' + piece_locations[keysSorted[keyLen]];
 		}
@@ -149,16 +148,16 @@ function addCurrentBoardPosition(){
 		}
 	}
 
-	fifo_for_draw_moves.push(string);
-
-	if(fifo_for_draw_moves.length === 21){
-		var poppedPos = fifo_for_draw_moves.shift();
-		draw_move_cache[poppedPos]--;
-		if(draw_move_cache[poppedPos] <= 0){
-			delete draw_move_cache[poppedPos];
-		}
-	}
-
+	// fifo_for_draw_moves.push(string);
+	//
+	// if(fifo_for_draw_moves.length === 21){
+	// 	var poppedPos = fifo_for_draw_moves.shift();
+	// 	draw_move_cache[poppedPos]--;
+	// 	if(draw_move_cache[poppedPos] <= 0){
+	// 		delete draw_move_cache[poppedPos];
+	// 	}
+	// }
+	//
 	if(string in draw_move_cache){
 		draw_move_cache[string]++;
 	}
@@ -166,6 +165,30 @@ function addCurrentBoardPosition(){
 		draw_move_cache[string] = 1;
 	}
 
+	if(draw_move_cache[string] >= 3){
+		draw = true;
+	}
+}
+
+function undoBoardPosition(){
+	var string = "";
+	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
+
+	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
+		if(piece_locations[keysSorted[keyLen]] < 10){
+			string += '0' + piece_locations[keysSorted[keyLen]];
+		}
+		else{
+			string += piece_locations[keysSorted[keyLen]];
+		}
+	}
+
+	if(string in draw_move_cache){
+		draw_move_cache[string]--;
+		if(draw_move_cache[string] < 3){
+			draw = false;
+		}
+	}
 }
 
 function placeImageForWateringHolesIfEmpty(){
@@ -995,8 +1018,11 @@ function getAIMove(move){
 	}
 	var API_request = {};
 
+
+
 	checkVictory();
-	if(victory){
+
+	if(victory || draw){
 		return;
 	}
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
@@ -1044,7 +1070,7 @@ function getAIMove(move){
 				removeImageForWateringHoles();
 				resetBoardScaredAndTrappedPieces(data);
 				checkVictory();
-				// addCurrentBoardPosition();
+				addCurrentBoardPosition();
 				recomputeValidClicks(player_TURN);
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
@@ -1052,6 +1078,7 @@ function getAIMove(move){
 				AIsmove = false;
 				printTurn();
 				enableAllButtons();
+				printDrawMessage();
 			},
 			error: function(data){
 				console.log(API_request);
@@ -1097,6 +1124,12 @@ function printBoardPosition(){
 		});
 }
 
+function printDrawMessage(){
+	if(draw){
+		document.getElementById("message").innerHTML = "<b> Threefold repitition has been detected... Game is a draw </b>";
+	}
+}
+
 /*Function that detects clicks and displays interactive user messages*/
 function clickMade(row,col,id,val){
 	row = parseInt(row);
@@ -1117,6 +1150,11 @@ function clickMade(row,col,id,val){
 
 	if(victory){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
+		return;
+	}
+	if(draw){
+		document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
+		return;
 	}
 	else if(verifyValidClick(num)){
 		clicks_made = [];
@@ -1141,14 +1179,18 @@ function clickMade(row,col,id,val){
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
 			makeMove(r1,c1,row,col,false);
-			console.log("r1,c1;row,col: "+ r1+","+c1+";"+row+","+col);
+			// console.log("r1,c1;row,col: "+ r1+","+c1+";"+row+","+col);
+			addCurrentBoardPosition();
 
 			if(mode === "PLAYER V. PLAYER"){
 				var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
 				document.getElementById("message").innerHTML = "<b> " + player_TURN + " has made the move.. Now it is " + turn + "'s move...</b>";
 			}
 
-			if(victory){
+
+			printDrawMessage();
+
+			if(victory || draw){
 				enableAllButtons();
 				return;
 			}
@@ -1183,7 +1225,7 @@ function disableAllButtons(){
 	document.getElementById("redoMove").disabled = true;
 	// document.getElementById("setToOriginal").disabled = true;
 	document.getElementById("startGame").disabled = true;
-	document.getElementById("resetGame").disabled = true;
+	// document.getElementById("resetGame").disabled = true;
 }
 
 function enableAllButtons(){
@@ -1192,7 +1234,7 @@ function enableAllButtons(){
 	document.getElementById("redoMove").disabled = false;
 	// document.getElementById("setToOriginal").disabled = false;
 	document.getElementById("startGame").disabled = false;
-	document.getElementById("resetGame").disabled = false;
+	// document.getElementById("resetGame").disabled = false;
 }
 
 /*Initially does the move checking if it is AIs turn*/
@@ -1202,6 +1244,10 @@ function checkIfItIsAIsMove(){
 			printTurn();
 			getAIMove([]);
 	}
+}
+
+function printValidMoveDots(){
+
 }
 
 function makeMove(r1,c1,row,col,undo){
@@ -1269,7 +1315,7 @@ function initialize(reset){
 		resetState["difficulty"] = difficulty;
 		resetState["first_to_move"] = first_to_move;
 	}
-	checkPieceType();
+	// checkPieceType();
 	// original_board_state = {};
 	// original_board_state["player_TURN"] = player_TURN;
 	// original_board_state["mode"] = mode;
@@ -1377,6 +1423,7 @@ function undoMove(){
 		var dest_row = move[4];
 		var dest_col = move[5];
 		takeBack(dest_row,dest_col,src_row,src_col,true);
+		undoBoardPosition();
 	}
 	else{
 		alert("There is no move to undo");
@@ -1392,6 +1439,7 @@ function redoMove(){
 		var dest_row = move[4];
 		var dest_col = move[5];
 		takeBack(src_row,src_col,dest_row,dest_col,true);
+		addCurrentBoardPosition();
 	}
 	else{
 		alert("There is no move to redo");
@@ -1414,13 +1462,6 @@ function playFromHere(){
 		}
 		recomputeValidClicks(player_TURN);
 	}
-}
-
-function checkPieceType()
-{
-	// piece_type = $("#pieceType").val();
-	// console.log(piece_type);
-
 }
 
 function placeRockPaperScissorImages(){

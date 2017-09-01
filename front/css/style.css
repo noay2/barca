@@ -8,6 +8,9 @@ h1 {
   padding: 5px;
 
 }
+.valid-move-dot{
+
+}
 .threeOptionButtons {
   padding: 5px;
 
@@ -106,7 +109,7 @@ h1 {
   height: 50px;
   outline: 1px solid;
   float: left;
-   background-image: url("../images/Bluishshade.jpg");  
+   background-image: url("../images/Bluishshade.jpg");
 	display: flex;
   position: relative;
 
@@ -132,7 +135,7 @@ h1 {
 }
 
 /*.turnDivClass{
-	 
+
    position: relative;
    color: black;
    font-size: 18px;
