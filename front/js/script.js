@@ -1298,8 +1298,6 @@ function clickMade(row,col,id,val){
 		if(verifyValidMove(r1,c1,row,col))
 		{
 			current_value_chosen = null;
-			valid_move_dict = {};
-			invalid_move_dict = {};
 			removeValidAndInvalidMoveDots();
 			disableAllButtons();
 			disableValidMovesButton();
@@ -1350,6 +1348,8 @@ function clickMade(row,col,id,val){
 function disableValidMovesButton(){
 		document.getElementById("displayValidMoves").innerHTML = "Can't show Valid Moves";
 		document.getElementById("displayValidMoves").disabled = true;
+		valid_move_dict = {};
+		invalid_move_dict = {};
 }
 
 function enableValidMovesButton(){
@@ -1571,6 +1571,7 @@ function takeBack(src_row,src_col,dest_row,dest_col,undo){
 
 function undoMove(){
 	if(all_previous_moves.length > 0){
+		disableValidMovesButton();
 		undo_moves.push(all_previous_moves.pop());
 		var move = undo_moves[undo_moves.length-1];
 		var src_row = move[2];
