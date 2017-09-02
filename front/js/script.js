@@ -306,12 +306,18 @@ function directionMovedIn(from_row,from_col,to_row,to_col)
 /*Switches turn of players in two-player mode*/
 function switchTurn(){
 	checkVictory();
-	if(victory){
-		return;
+
+	if(mode === "PLAYER V. AI"){
+		AIsmove = !AIsmove;
 	}
-	else{
+	else if(mode === "PLAYER V. PLAYER"){
 		player_TURN = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-		printTurn();
+	}
+	printTurn();
+
+	if(victory){
+		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
+		return;
 	}
 }
 
@@ -828,6 +834,7 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
+		// console.log("WON");
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
@@ -835,6 +842,7 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
+		// console.log("WON");
 	}
 	else if(barca_array[3][3] != "." && barca_array[3][3][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[3][6][0]){
@@ -842,6 +850,7 @@ function checkVictory(){
 		who_won = (barca_array[3][3][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
+		// console.log("WON");
 	}
 	else if(barca_array[3][6] != "." && barca_array[3][6][0] == barca_array[6][3][0] &&
 		barca_array[6][3][0] == barca_array[6][6][0]){
@@ -849,6 +858,11 @@ function checkVictory(){
 		who_won = (barca_array[3][6][0] == 'W') ? "WHITE" : "BLACK";
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 		placeCrownOnWinningPieces();
+		// console.log("WON");
+	}
+	else{
+		victory = false;
+		// console.log("LOST");
 	}
 }
 
@@ -857,10 +871,12 @@ function removeCrowns(){
 		return;
 	}
 	else{
-		for(var i = 0; i < crown_counter; i++){
-			var value = i + 1;
-			var element = document.getElementById("crown_"+value);
-			element.parentNode.removeChild(element);
+		for(var i = crown_counter; i > 0; i--){
+			if(document.getElementById("crown_"+i)){
+				console.log("IN REMOVE");
+				var element = document.getElementById("crown_"+i);
+				element.parentNode.removeChild(element);
+			}
 		}
 		crown_counter = 0;
 	}
@@ -868,22 +884,46 @@ function removeCrowns(){
 
 function placeCrownOnWinningPieces() {
 	if(who_won === "BLACK"){
-			document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
-			document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_2"/>';
-			document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_3"/>';
-			document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
-			document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
-			document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
+			if(!document.getElementById("crown_1")){
+				document.getElementById(getDiv("BE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
+			}
+			if(!document.getElementById("crown_2")){
+				document.getElementById(getDiv("BE2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_2"/>';
+			}
+			if(!document.getElementById("crown_3")){
+				document.getElementById(getDiv("BL1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_3"/>';
+			}
+			if(!document.getElementById("crown_4")){
+				document.getElementById(getDiv("BL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
+			}
+			if(!document.getElementById("crown_5")){
+				document.getElementById(getDiv("BR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
+			}
+			if(!document.getElementById("crown_6")){
+				document.getElementById(getDiv("BR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
+			}
 			crown_counter = 6;
 	}
 	else if(who_won === "WHITE"){
+		if(!document.getElementById("crown_1")){
 			document.getElementById(getDiv("WE1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_1"/>';
+		}
+		if(!document.getElementById("crown_2")){
 			document.getElementById(getDiv("WE2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_2"/>';
+		}
+		if(!document.getElementById("crown_3")){
 			document.getElementById(getDiv("WL1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_3"/>';
+		}
+		if(!document.getElementById("crown_4")){
 			document.getElementById(getDiv("WL2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_4"/>';
+		}
+		if(!document.getElementById("crown_5")){
 			document.getElementById(getDiv("WR1")).innerHTML += '<img src = "./images/crown.gif" id = "crown_5"/>';
+		}
+		if(!document.getElementById("crown_6")){
 			document.getElementById(getDiv("WR2")).innerHTML += '<img src = "./images/crown.gif" id = "crown_6"/>';
-			crown_counter = 6;
+		}
+		crown_counter = 6;
 	}
 }
 
@@ -1193,8 +1233,7 @@ function getAIMove(move){
 				placeImageForScaredAndTrappedPieces();
 				placeImageForWateringHolesIfEmpty();
 				// console.log("Move made");
-				AIsmove = false;
-				printTurn();
+				switchTurn();
 				enableAllButtons();
 				printDrawMessage();
 			},
@@ -1261,6 +1300,9 @@ function clickMade(row,col,id,val){
 	if(!gameStarted){
 		return;
 	}
+
+	console.log("AIsmove: " + AIsmove);
+
 	if(AIsmove){
 		document.getElementById("message").innerHTML = "<b>Invalid move... It is AI's turn to move. Please wait until it is done making its move...</b>";
 		return;
@@ -1302,35 +1344,40 @@ function clickMade(row,col,id,val){
 			disableAllButtons();
 			disableValidMovesButton();
 
-			AIsmove = (mode === "PLAYER V. AI") ? true : false;
-			printTurn();
 			makeMove(r1,c1,row,col,false);
 			// console.log("r1,c1;row,col: "+ r1+","+c1+";"+row+","+col);
 			addCurrentBoardPosition();
+			switchTurn();
 
 			if(mode === "PLAYER V. PLAYER"){
 				var turn = (player_TURN === "WHITE") ? "BLACK" : "WHITE";
-				document.getElementById("message").innerHTML = "<b> " + player_TURN + " has made the move.. Now it is " + turn + "'s move...</b>";
+				document.getElementById("message").innerHTML = "<b> " + turn + " has made the move.. Now it is " + player_TURN + "'s move...</b>";
 			}
-
 
 			printDrawMessage();
 
 			if(victory || draw){
 				enableAllButtons();
-				return;
+				if(victory){
+					document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
+					return;
+				}
+				else{
+					document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
+					return;
+				}
 			}
 			/* IF MODE IS PLAYER V. AI*/
 			else if(mode === "PLAYER V. AI"){
 				document.getElementById("message").innerHTML = "<b>You have made your move.. Now it is AI's turn</b>";
 				getAIMove([r1,c1,row,col]);
 				if(victory){
+					document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 					return;
 				}
 			}
 			/* IF MODE IS PLAYER V. PLAYER */
 			else{
-				switchTurn();
 				recomputeValidClicks(player_TURN);
 				enableAllButtons();
 			}
@@ -1412,7 +1459,7 @@ function makeMove(r1,c1,row,col,undo){
 	movePiece(barca_array[row][col][0],barca_array[row][col][1],row,col);
 	clicks_made = [];
 	singleMoveExists = {};
-	checkVictory();
+	// checkVictory();
 	// addCurrentBoardPosition();
 	var color = (barca_array[row][col][0] === 'B') ? "BLACK" : "WHITE";
 	var piece = (barca_array[row][col][1] === 'E') ? "ELEPHANT" : (barca_array[row][col][1] === 'R') ? "MOUSE" : "LION";
@@ -1446,6 +1493,7 @@ function initialize(reset){
 	document.getElementById("barca_board").innerHTML = "";
 	gameStarted = false;
 	victory = false;
+	draw = false;
 	who_won = "";
 	if(reset){
 		player_TURN = resetState["player_TURN"];
@@ -1552,19 +1600,16 @@ function resetGame(){
 // }
 
 function takeBack(src_row,src_col,dest_row,dest_col,undo){
-	if(undo){
-		console.log("piece_src: " + src_row + "," + src_col + "," + barca_array[src_row][src_col]);
-	}
+	// if(undo){
+	// 	console.log("piece_src: " + src_row + "," + src_col + "," + barca_array[src_row][src_col]);
+	// }
 	makeMove(src_row,src_col,dest_row,dest_col,undo);
-	if(undo){
-		console.log("piece_dest: " + dest_row + "," + dest_col + "," + barca_array[dest_row][dest_col]);
-	}
+	// if(undo){
+	// 	console.log("piece_dest: " + dest_row + "," + dest_col + "," + barca_array[dest_row][dest_col]);
+	// }
 
-	if(mode === "PLAYER V. AI"){
-		AIsmove = !AIsmove;
-	}
-	else{
-		switchTurn();
+	switchTurn();
+	if(mode === "PLAYER V. AI" && AIsmove === false){
 		recomputeValidClicks(player_TURN);
 	}
 }
@@ -1578,8 +1623,11 @@ function undoMove(){
 		var src_col = move[3];
 		var dest_row = move[4];
 		var dest_col = move[5];
+		// console.log("IN UNDO");
 		takeBack(dest_row,dest_col,src_row,src_col,true);
+		// console.log(crown_counter);
 		undoBoardPosition();
+		// checkVictory();
 	}
 	else{
 		alert("There is no move to undo");
@@ -1594,8 +1642,10 @@ function redoMove(){
 		var src_col = move[3];
 		var dest_row = move[4];
 		var dest_col = move[5];
+		// console.log("IN REDO");
 		takeBack(src_row,src_col,dest_row,dest_col,true);
 		addCurrentBoardPosition();
+		// checkVictory();
 	}
 	else{
 		alert("There is no move to redo");
@@ -1609,11 +1659,24 @@ function playFromHere(){
 	{
 		// console.log(barca_array);
 		undo_moves = [];
+		checkVictory();
+		if(victory){
+			document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
+			return;
+		}
 		if(mode === "PLAYER V. AI"){
 			if(AIsmove){
 				disableAllButtons();
 				printTurn();
 				getAIMove([]);
+				if(victory){
+					document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
+					return;
+				}
+				if(draw){
+					document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
+					return;
+				}
 			}
 		}
 		recomputeValidClicks(player_TURN);
