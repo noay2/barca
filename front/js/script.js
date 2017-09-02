@@ -1300,6 +1300,7 @@ function clickMade(row,col,id,val){
 			current_value_chosen = null;
 			removeValidAndInvalidMoveDots();
 			disableAllButtons();
+			disableValidMovesButton();
 
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
 			printTurn();
@@ -1370,7 +1371,7 @@ function disableAllButtons(){
 	document.getElementById("redoMove").disabled = true;
 	// document.getElementById("setToOriginal").disabled = true;
 	document.getElementById("startGame").disabled = true;
-	document.getElementById("displayValidMoves").disabled = true;
+	// document.getElementById("displayValidMoves").disabled = true;
 	// document.getElementById("hideValidMoves").disabled = true;
 	// document.getElementById("resetGame").disabled = true;
 }
