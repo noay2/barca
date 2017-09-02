@@ -737,7 +737,7 @@ function placeImageForScaredAndTrappedPieces(){
 		fear_counter++;
 	}
 	for(let i of scared_pieces){
-		console.log(i);
+		// console.log(i);
 		var id = "fear_"+fear_counter;
 		document.getElementById(getDiv(i)).innerHTML += '<img src = \''+"./images/cross.gif"+'\' id = \''+id+'\'/>';
 		fear_counter++;
@@ -1238,7 +1238,7 @@ function getAIMove(move){
 				printDrawMessage();
 			},
 			error: function(data){
-				console.log(API_request);
+				// console.log(API_request);
 				alert(data);
 				enableAllButtons();
 			}
@@ -1301,7 +1301,7 @@ function clickMade(row,col,id,val){
 		return;
 	}
 
-	console.log("AIsmove: " + AIsmove);
+	// console.log("AIsmove: " + AIsmove);
 
 	if(AIsmove){
 		document.getElementById("message").innerHTML = "<b>Invalid move... It is AI's turn to move. Please wait until it is done making its move...</b>";
@@ -1627,6 +1627,16 @@ function undoMove(){
 		takeBack(dest_row,dest_col,src_row,src_col,true);
 		// console.log(crown_counter);
 		undoBoardPosition();
+		if(!(victory || draw)){
+			if(mode === "PLAYER V. PLAYER"){
+				var turn = (player_TURN === "BLACK") ? "WHITE" : "BLACK";
+				document.getElementById("message").innerHTML = "<b> " + turn + " has made the move.. Now it is " + player_TURN + "'s move...</b>";
+			}
+			else{
+				var turn = (AIsmove) ? "AI's Turn" : player_TURN+"'s Turn";
+				document.getElementById("message").innerHTML = "<b> It is " + turn + " now ";
+			}
+		}
 		// checkVictory();
 	}
 	else{
@@ -1646,6 +1656,16 @@ function redoMove(){
 		takeBack(src_row,src_col,dest_row,dest_col,true);
 		addCurrentBoardPosition();
 		// checkVictory();
+		if(!(victory || draw)){
+			if(mode === "PLAYER V. PLAYER"){
+				var turn = (player_TURN === "BLACK") ? "WHITE" : "BLACK";
+				document.getElementById("message").innerHTML = "<b> " + turn + " has made the move.. Now it is " + player_TURN + "'s move...</b>";
+			}
+			else{
+				var turn = (AIsmove) ? player_TURN+"'s Turn" : "AI's Turn";
+				document.getElementById("message").innerHTML = "<b> It is " + turn + " now ";
+			}
+		}
 	}
 	else{
 		alert("There is no move to redo");
