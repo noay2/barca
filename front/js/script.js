@@ -1298,6 +1298,8 @@ function clickMade(row,col,id,val){
 		if(verifyValidMove(r1,c1,row,col))
 		{
 			current_value_chosen = null;
+			valid_move_dict = {};
+			invalid_move_dict = {};
 			removeValidAndInvalidMoveDots();
 			disableAllButtons();
 			disableValidMovesButton();
