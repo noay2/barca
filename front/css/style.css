@@ -136,6 +136,22 @@ h1 {
 	width: 100%;
 	height: 100%;
 }
+.valid-move-dot{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+	height: 100%;
+  background-color: #00FA9A;
+}
+.invalid-move-dot{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+	height: 100%;
+  background-color: red;
+}
 
 /*.turnDivClass{
 

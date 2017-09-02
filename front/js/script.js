@@ -62,11 +62,16 @@ var difficulty = 3 ;
 // var fifo_for_draw_moves = [];
 var all_previous_moves = [];
 var undo_moves = [];
-var valid_move_set = {};
 var crown_counter = 0;
 var draw = false;
 //Data structure that is used to set the board back to its original point
 var original_board_state = {};
+var valid_move_counter = 0;
+var invalid_move_counter = 0;
+var valid_move_dict = {};
+var invalid_move_dict = {};
+var current_value_chosen = null;
+var displayValidMovesChosen = false;
 
 var piece_type = "animals";
 
@@ -506,111 +511,153 @@ function checkIfASingleValidMoveExistsForMouse(value){
 	return false;
 }
 
-// function computeAllValidMovesForMouse(value){
-// 	var obstacles = [false,false,false,false];
-// 	var directions = ["UP","R","D","L"];
-// 	var move_adv = 0;
-// 	var row = getRow(value);
-// 	var col = getCol(value);
-// 	singleMoveExists[value] = false;
-//
-// 	while(obstacles[0] || obstacles[1] || obstacles[2] || obstacles[3])
-// 	{
-// 		move_adv++;
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
-// 			}
-// 		}
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
-// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
-// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) == false){
-// 						return true;
-// 				}
-// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
-// 			}
-// 		}
-// 	}
-//
-// 	return false;
-// }
-//
-// function computeAllValidMovesForLion(value){
-// 	var obstacles = [false,false,false,false];
-// 	var directions = ["UL","UR","BR","BL"];
-// 	var move_adv = 0;
-// 	var row = getRow(value);
-// 	var col = getCol(value);
-// 	singleMoveExists[value] = false;
-//
-// 	while(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3])
-// 	{
-// 		move_adv++;
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
-// 			}
-// 		}
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
-// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
-// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) === false){
-// 						return true;
-// 				}
-// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
-// 			}
-// 		}
-// 	}
-//
-// 	return false;
-// }
-//
-// function computeAllValidMovesForElephant(value){
-// 	var obstacles = [false,false,false,false,false,false,false,false];
-// 	var directions = ["UP","UR","R","BR","D","BL","L","UL"];
-// 	var move_adv = 0;
-// 	var row = getRow(value);
-// 	var col = getCol(value);
-// 	singleMoveExists[value] = false;
-//
-// 	while(obstacles[0] || obstacles[1] || obstacles[2] || obstacles[3] ||
-// 		obstacles[4] || obstacles[5] || obstacles[6] || obstacles[7])
-// 	{
-// 		move_adv++;
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
-// 			}
-// 		}
-//
-// 		for(var i = 0; i < obstacles.length; i++){
-// 			if(!obstacles[i]){
-// 				var increment = getIncrementOfDirection(move_adv,directions[i]);
-// 				setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
-// 				if(barca_array[row+increment[0]][col+increment[1]] === "." &&
-// 					checkIfPieceIsScared(value,row+increment[0],col+increment[1]) === false){
-// 						return true;
-// 				}
-// 				obstacles[i] = (barca_array[row+increment[0]][col+increment[1]] != ".") ? true : obstacles[i];
-// 			}
-// 		}
-// 	}
-//
-// 	return false;
-// }
+function calculateAllValidMovesForMouse(value){
+	if(value in valid_move_dict || value in invalid_move_dict){
+		return;
+	}
+	var obstacles = [false,false,false,false];
+	var directions = ["UP","R","D","L"];
+	var move_adv = 0;
+	var row = getRow(value);
+	var col = getCol(value);
+	// singleMoveExists[value] = false;
+	valid_move_dict[value] = new Set();
+	invalid_move_dict[value] = new Set();
+	var trapped = checkIfInTrappedPieces(value);
+
+	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
+	{
+		move_adv++;
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+			}
+		}
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				// setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+				var r1 = row + increment[0];
+				var c1 = col + increment[1];
+				if(barca_array[r1][c1] === "."){
+					 if(trapped){
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else if(checkIfPieceIsScared(value,r1,c1)){
+						 invalid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else{
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+				}
+				obstacles[i] = (barca_array[r1][c1] != ".") ? true : obstacles[i];
+			}
+		}
+	}
+
+}
+
+function calculateAllValidMovesForLion(value){
+	if(value in valid_move_dict || value in invalid_move_dict){
+		return;
+	}
+	var obstacles = [false,false,false,false];
+	var directions = ["UL","UR","BR","BL"];
+	var move_adv = 0;
+	var row = getRow(value);
+	var col = getCol(value);
+	// singleMoveExists[value] = false;
+	valid_move_dict[value] = new Set();
+	invalid_move_dict[value] = new Set();
+	var trapped = checkIfInTrappedPieces(value);
+
+	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3]))
+	{
+		move_adv++;
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+			}
+		}
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				// setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+				var r1 = row + increment[0];
+				var c1 = col + increment[1];
+				if(barca_array[r1][c1] === "."){
+					 if(trapped){
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else if(checkIfPieceIsScared(value,r1,c1)){
+						 invalid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else{
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+				}
+				obstacles[i] = (barca_array[r1][c1] != ".") ? true : obstacles[i];
+			}
+		}
+	}
+}
+
+function calculateAllValidMovesForElephant(value){
+	if(value in valid_move_dict || value in invalid_move_dict){
+		return;
+	}
+
+	var obstacles = [false,false,false,false,false,false,false,false];
+	var directions = ["UP","UR","R","BR","D","BL","L","UL"];
+	var move_adv = 0;
+	var row = getRow(value);
+	var col = getCol(value);
+	// singleMoveExists[value] = false;
+	valid_move_dict[value] = new Set();
+	invalid_move_dict[value] = new Set();
+	var trapped = checkIfInTrappedPieces(value);
+
+	while(!(obstacles[0] && obstacles[1] && obstacles[2] && obstacles[3] &&
+		obstacles[4] && obstacles[5] && obstacles[6] && obstacles[7]))
+	{
+		move_adv++;
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				obstacles[i] = checkIfOutOfBounds(row+increment[0],col+increment[1]);
+			}
+		}
+
+		for(var i = 0; i < obstacles.length; i++){
+			if(!obstacles[i]){
+				var increment = getIncrementOfDirection(move_adv,directions[i]);
+				// setIfSingleMoveExists(value,row+increment[0],col+increment[1]);
+				var r1 = row + increment[0];
+				var c1 = col + increment[1];
+				if(barca_array[r1][c1] === "."){
+					 if(trapped){
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else if(checkIfPieceIsScared(value,r1,c1)){
+						 invalid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+					 else{
+						 valid_move_dict[value].add(determinePointValue(r1*10+c1));
+					 }
+				}
+				obstacles[i] = (barca_array[r1][c1] != ".") ? true : obstacles[i];
+			}
+		}
+	}
+
+}
 
 /*Calculates new scared pieces because of the move made*/
 function calculateScaredPieces(){
@@ -893,6 +940,77 @@ function resetBoardScaredAndTrappedPieces(data){
 	movePiece(piece_info[0],piece_info[1],dest[0],dest[1]);
 }
 
+function removeValidAndInvalidMoveDots(){
+	// console.log("IN REMOVE");
+	for(var i = 0; i < valid_move_counter; i++){
+		// console.log("IN REMOVE");
+		var element = document.getElementById("valid_move_"+(i+1));
+		element.parentNode.removeChild(element);
+	}
+	for(var i = 0; i < invalid_move_counter; i++){
+		// console.log("IN REMOVE");
+		var element = document.getElementById("invalid_move_"+(i+1));
+		element.parentNode.removeChild(element);
+	}
+	valid_move_counter = 0;
+	invalid_move_counter = 0;
+}
+
+function putValidAndInvalidMoveDots(value){
+
+	switch(value[1]){
+		case 'E':
+			calculateAllValidMovesForElephant(value);
+			break;
+		case 'R':
+			calculateAllValidMovesForMouse(value);
+			break;
+		default:
+			calculateAllValidMovesForLion(value);
+			break;
+	}
+
+	var valid_moves = valid_move_dict[value];
+	var invalid_moves = invalid_move_dict[value];
+
+	// output += '<div id= \''+title+'\' class="'+ checkForValue(i,j) + '" onclick = "clickMade(\''+i+'\',\''+j+'\',\''+title+'\',\''+barca_array[i][j]+'\')"></div>';
+
+	valid_moves.forEach(function(value){
+		valid_move_counter++;
+		var row = Math.floor(value/10);
+		var col = value%10;
+		var title = "valid_move_" + valid_move_counter;
+		if(document.getElementById("tile_" + row + "," + col).innerHTML){
+			document.getElementById("tile_" + row + "," + col).innerHTML += '<div id = \''+title+'\' class = "valid-move-dot"></div>';
+		}
+		else{
+			document.getElementById("tile_" + row + "," + col).innerHTML = '<div id = \''+title+'\' class = "valid-move-dot"></div>';
+		}
+	});
+
+	invalid_moves.forEach(function(value){
+		invalid_move_counter++;
+		var row = Math.floor(value/10);
+		var col = value%10;
+		var title = "invalid_move_" + invalid_move_counter;
+		if(document.getElementById("tile_" + row + "," + col).innerHTML){
+			document.getElementById("tile_" + row + "," + col).innerHTML += '<div id = \''+title+'\' class = "invalid-move-dot"></div>';
+		}
+		else{
+			document.getElementById("tile_" + row + "," + col).innerHTML = '<div id = \''+title+'\' class = "invalid-move-dot"></div>';
+		}
+	});
+}
+
+function determinePointValue(num){
+	if(first_to_move === "BLACK" || (mode === "PLAYER V. AI" && player_TURN === "BLACK")){
+		return 99-num;
+	}
+	else{
+		return num;
+	}
+}
+
 function determinePieceLocation(value){
 	if(first_to_move === "BLACK" || (mode === "PLAYER V. AI" && player_TURN === "BLACK")){
 		return 99-piece_locations[value];
@@ -1157,9 +1275,14 @@ function clickMade(row,col,id,val){
 		return;
 	}
 	else if(verifyValidClick(num)){
-		clicks_made = [];
-		clicks_made.push(num);
-		document.getElementById("message").innerHTML = "<b>Choose where you want to move the piece to or select another piece to move...</b>";
+		enableValidMovesButton();
+		if(num != current_value_chosen){
+			current_value_chosen = num;
+			validMoves();
+			clicks_made = [];
+			clicks_made.push(num);
+			document.getElementById("message").innerHTML = "<b>Choose where you want to move the piece to or select another piece to move...</b>";
+		}
 	}
 	else if(clicks_made.length == 1){
 		var r1 = Math.floor(clicks_made[0]/10);
@@ -1174,6 +1297,8 @@ function clickMade(row,col,id,val){
 
 		if(verifyValidMove(r1,c1,row,col))
 		{
+			current_value_chosen = null;
+			removeValidAndInvalidMoveDots();
 			disableAllButtons();
 
 			AIsmove = (mode === "PLAYER V. AI") ? true : false;
@@ -1219,12 +1344,34 @@ function clickMade(row,col,id,val){
 	}
 }
 
+function disableValidMovesButton(){
+		document.getElementById("displayValidMoves").innerHTML = "Can't show Valid Moves";
+		document.getElementById("displayValidMoves").disabled = true;
+}
+
+function enableValidMovesButton(){
+	document.getElementById("displayValidMoves").disabled = false;
+	if(displayValidMovesChosen){
+		validMoves();
+	}
+	if(document.getElementById("displayValidMoves").innerHTML === "Can't show Valid Moves"){
+		if(displayValidMovesChosen){
+			document.getElementById("displayValidMoves").innerHTML = "Hide Valid Moves";
+		}
+		else{
+			document.getElementById("displayValidMoves").innerHTML = "Show Valid Moves";
+		}
+	}
+}
+
 function disableAllButtons(){
 	document.getElementById("playFromHere").disabled = true;
 	document.getElementById("undoMove").disabled = true;
 	document.getElementById("redoMove").disabled = true;
 	// document.getElementById("setToOriginal").disabled = true;
 	document.getElementById("startGame").disabled = true;
+	document.getElementById("displayValidMoves").disabled = true;
+	// document.getElementById("hideValidMoves").disabled = true;
 	// document.getElementById("resetGame").disabled = true;
 }
 
@@ -1234,6 +1381,8 @@ function enableAllButtons(){
 	document.getElementById("redoMove").disabled = false;
 	// document.getElementById("setToOriginal").disabled = false;
 	document.getElementById("startGame").disabled = false;
+	// document.getElementById("displayValidMoves").disabled = false;
+	// document.getElementById("hideValidMoves").disabled = false;
 	// document.getElementById("resetGame").disabled = false;
 }
 
@@ -1244,10 +1393,6 @@ function checkIfItIsAIsMove(){
 			printTurn();
 			getAIMove([]);
 	}
-}
-
-function printValidMoveDots(){
-
 }
 
 function makeMove(r1,c1,row,col,undo){
@@ -1294,6 +1439,7 @@ function getDiv(piece){
 
 function initialize(reset){
 	disableAllButtons();
+	disableValidMovesButton();
 	document.getElementById("barca_board").innerHTML = "";
 	gameStarted = false;
 	victory = false;
@@ -1327,13 +1473,18 @@ function initialize(reset){
 	all_previous_moves = [];
 	// original_board_state["all_previous_moves"] = [];
 	undo_moves = [];
+	valid_move_counter = 0;
+	invalid_move_counter = 0;
+	valid_move_dict = {};
+	invalid_move_dict = {};
+	current_value_chosen = null;
+	displayValidMovesChosen = false;
 	// fifo_for_draw_moves = [];
 	clearBarcaBoard();
 	newBoard();
 	initBoardPieces();
 	placeInitImage();
 	placeWateringHoles();
-
 }
 
 function startGame(){
@@ -1346,7 +1497,7 @@ function startGame(){
 		}
 	}
 	else{
-		document.getElementById('startGame').innerHTML = "Re-Start Game";
+		document.getElementById("startGame").innerHTML = "Re-start Game";
 		initialize(false);
 		initializeGame();
 		enableAllButtons();
@@ -1585,4 +1736,44 @@ function changePieceTypeToMetal(){
 
 	}
 
+}
+
+// function hideValidMoves(){
+// 	removeValidAndInvalidMoveDots();
+// }
+
+function displayValidMoves(){
+	if(undo_moves.length > 0){
+		document.getElementById("displayValidMoves").innerHTML = "Can't show Valid Moves";
+		document.getElementById("displayValidMoves").disabled = true;
+	}
+	else if(displayValidMovesChosen){
+		removeValidAndInvalidMoveDots();
+		displayValidMovesChosen = false;
+		document.getElementById("displayValidMoves").innerHTML = "Show Valid Moves";
+	}
+	else{
+		displayValidMovesChosen = true;
+		document.getElementById("displayValidMoves").innerHTML = "Hide Valid Moves";
+		if(current_value_chosen != null){
+			removeValidAndInvalidMoveDots();
+			var value = determinePointValue(current_value_chosen);
+			var r = Math.floor(value/10);
+			var c = value%10;
+			putValidAndInvalidMoveDots(barca_array[r][c]);
+		}
+	}
+}
+
+function validMoves(){
+	// console.log("DISPLAY VALID MOVES CHOSEN: " + displayValidMovesChosen);
+	if(displayValidMovesChosen){
+		if(current_value_chosen != null){
+			removeValidAndInvalidMoveDots();
+			var value = determinePointValue(current_value_chosen);
+			var r = Math.floor(value/10);
+			var c = value%10;
+			putValidAndInvalidMoveDots(barca_array[r][c]);
+		}
+	}
 }
