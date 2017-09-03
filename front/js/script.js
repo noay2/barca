@@ -1520,7 +1520,7 @@ function initialize(reset){
 	wateringHoleCounter = 0;
 	crown_counter = 0;
 	valid_clicks = [];
-	draw_move_counter = {};
+	draw_move_cache = {};
 	all_previous_moves = [];
 	// original_board_state["all_previous_moves"] = [];
 	undo_moves = [];
