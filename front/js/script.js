@@ -1237,12 +1237,14 @@ function getAIMove(move){
 				// console.log("Move made");
 				switchTurn();
 				enableAllButtons();
+				enableValidMovesButton();
 				printDrawMessage();
 			},
 			error: function(data){
 				// console.log(API_request);
 				alert(data);
 				enableAllButtons();
+				enableValidMovesButton();
 			}
 		});
 }
@@ -1319,7 +1321,6 @@ function clickMade(row,col,id,val){
 		return;
 	}
 	else if(verifyValidClick(num)){
-		enableValidMovesButton();
 		if(num != current_value_chosen){
 			current_value_chosen = num;
 			validMoves();
@@ -1360,6 +1361,7 @@ function clickMade(row,col,id,val){
 
 			if(victory || draw){
 				enableAllButtons();
+				enableValidMovesButton();
 				if(victory){
 					document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 					return;
@@ -1382,6 +1384,7 @@ function clickMade(row,col,id,val){
 			else{
 				recomputeValidClicks(player_TURN);
 				enableAllButtons();
+				enableValidMovesButton();
 			}
 		}
 		else{
@@ -1395,8 +1398,8 @@ function clickMade(row,col,id,val){
 }
 
 function disableValidMovesButton(){
-		document.getElementById("displayValidMoves").innerHTML = "Can't show Valid Moves";
 		document.getElementById("displayValidMoves").disabled = true;
+		current_value_chosen = null;
 		valid_move_dict = {};
 		invalid_move_dict = {};
 }
@@ -1406,13 +1409,11 @@ function enableValidMovesButton(){
 	if(displayValidMovesChosen){
 		validMoves();
 	}
-	if(document.getElementById("displayValidMoves").innerHTML === "Can't show Valid Moves"){
-		if(displayValidMovesChosen){
-			document.getElementById("displayValidMoves").innerHTML = "Hide Valid Moves";
-		}
-		else{
-			document.getElementById("displayValidMoves").innerHTML = "Show Valid Moves";
-		}
+	if(displayValidMovesChosen){
+		document.getElementById("displayValidMoves").innerHTML = "Hide Valid Moves";
+	}
+	else{
+		document.getElementById("displayValidMoves").innerHTML = "Show Valid Moves";
 	}
 }
 
@@ -1547,6 +1548,7 @@ function startGame(){
 			initialize(false);
 			initializeGame();
 			enableAllButtons();
+			enableValidMovesButton();
 		}
 	}
 	else{
@@ -1554,6 +1556,7 @@ function startGame(){
 		initialize(false);
 		initializeGame();
 		enableAllButtons();
+		enableValidMovesButton();
 	}
 }
 
@@ -1564,6 +1567,7 @@ function resetGame(){
 			initialize(true);
 			initializeGame();
 			enableAllButtons();
+			enableValidMovesButton();
 		}
 	}
 }
@@ -1682,6 +1686,8 @@ function playFromHere(){
 		// console.log(barca_array);
 		undo_moves = [];
 		checkVictory();
+		enableValidMovesButton();
+
 		if(victory){
 			document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
 			return;
