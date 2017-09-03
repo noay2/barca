@@ -1400,6 +1400,7 @@ function clickMade(row,col,id,val){
 function disableValidMovesButton(){
 		document.getElementById("displayValidMoves").disabled = true;
 		current_value_chosen = null;
+		removeValidAndInvalidMoveDots();
 		valid_move_dict = {};
 		invalid_move_dict = {};
 }
