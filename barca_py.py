@@ -1,9 +1,10 @@
 import time
 import math
-import random
 import copy
+from  random     import randint
 from collections import defaultdict
 from collections import OrderedDict
+from queue       import PriorityQueue
 ##########################################
 class Piece:
     colors = ["BLACK", "WHITE"]
@@ -186,7 +187,10 @@ class Board:
         self.previous_moves = defaultdict(int, previous_moves)
         self.current_hash = self.initial_hash()
 
-
+    def send_updated_data(self):
+        return [self.whitetomove  ,  [ piece.send_updated_data() for piece in self.all_pieces()] , self.previous_moves]
+            
+        
     def initial_hash(self):
         string = ''
         for piece in self.all_pieces():
@@ -259,8 +263,8 @@ class Board:
                                     
                             temp=[temp[0]+x, temp[1]+y]
                             
-        score += future_watering_hole_value[white_counter + 1] * future_white_counter
-        score -= future_watering_hole_value[black_counter + 1] * future_black_counter
+        score += future_watering_hole_value[min(3,white_counter + 1)] * future_white_counter
+        score -= future_watering_hole_value[min(3, black_counter + 1)] * future_black_counter
         
 
 
@@ -342,190 +346,475 @@ class Board:
         self.update_hash()
 
 
-        for piece, old_infear_trapped_piece in zip(self.all_pieces(), old_infear_trapped): piece.infear,piece.trapped = old_infear_trapped_piece[0], old_infear_trapped_piece[1]         
+
+        for piece, counter in zip(self.all_pieces(), range(12)): piece.infear,piece.trapped = old_infear_trapped[counter][0], old_infear_trapped[counter][1]         
         self.switch_turn()
 
 
-
-
-    def send_updated_data(self):
-        return [self.whitetomove  ,  [ piece.send_updated_data() for piece in self.all_pieces()] , self.previous_moves]
-            
-        
 ##########################################       
 class AI:
 
-    def __init__(self, watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value,center_encouragement_value, oracle, oracle_file):
+    def __init__(self, watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value,center_encouragement_value):
         self.watering_holes_value = watering_holes_value
         self.future_watering_hole_value = future_watering_hole_value
         self.adjacent_watering_holes_value = adjacent_watering_holes_value
         self.scared_pieces_value = scared_pieces_value 
         self.teammate_value = teammate_value
         self.center_encouragement_value = center_encouragement_value
-        self.oracle = oracle
-        self.oracle_file = oracle_file
-        
-
-
-
-        if self.oracle:
-            try:
-              i = time.time()
-              file = open(self.oracle_file, 'r')
-              dict = eval(file.read())
-              file.close()
-              print(time.time() -i)
-            except:
-            	dict = OrderedDict()
-            self.board_position_dict          = dict
-            self.equilizer_factor             = 2
-            self.equilizer_factor_delta       = 0
-
-                    
-                
-
-    def __del__(self):
-        if self.oracle:
-            file = open(self.oracle_file, 'w')
-            file.write(str(self.board_position_dict))
-            file.close()
+        self.easy_boards_dict = OrderedDict()
+        self.medd_boards_dict = OrderedDict()
+        self.hard_boards_dict = OrderedDict()
 
         
-        
-    def receive_data(self, whitetomove, pieces, previous_moves, temp_recurse):
-  
-        
+    def receive_data(self, whitetomove, pieces, previous_moves, recurse):
         self.board = Board(whitetomove, pieces, previous_moves)
-        if self.oracle:
-            self.oracle_execute(temp_recurse)
-        else:
-            self.execute(temp_recurse)
+        return self.execute(recurse)
       
-    def oracle_execute(self, temp_recurse):
+    def execute(self, recurse):
         if (not self.board.victory() and not self.board.draw()):
-        
-            ai_board_hash = self.board.current_hash + str(int(self.board.whitetomove))
-
-
-            if ai_board_hash in self.board_position_dict:
-                data = self.board_position_dict.pop(ai_board_hash)
-                data[3] +=1
-              
-                if math.log(data[3], 2).is_integer() and data[3] <16:
-                    data = self.AI_alpha_beta(temp_recurse + math.log(data[3], 2)) + [data[3]]
-                else:
-                    pass
-                
-                self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], data[3] ]
-
-
-            else:
-                data= (self.AI_alpha_beta(temp_recurse))
-                self.board_position_dict[ai_board_hash]= [data[0],data[1], data[2], 1]
-                
-                while len(self.board_position_dict)>10000:
-                    old_data_key, old_data_value = self.board_position_dict.popitem(last = False) 
-                    if old_data_value[3] >= self.equilizer_factor: 
-                        self.board_position_dict[old_data_key]  = old_data_value
-                        self.equilizer_factor_delta += 1
-                    else:
-                        self.equilizer_factor_delta -= 1
-                  
-                    if self.equilizer_factor_delta == 3:
-                        self.equilizer_factor +=1
-                        self.equilizer_factor_delta = 0
-                    elif self.equilizer_factor_delta ==-3:
-                        self.equilizer_factor -=1
-                        self.equilizer_factor_delta = 0
-
-            	
-            self.board.update(data[0], data[1])
-
+            moves= self.AI_alpha_beta(recurse, recurse)
+            move = self.decide_move_to_make(moves)
+            self.board.update(move[0], move[1])
+            
     
-    
-    def execute(self, temp_recurse):
-        print(temp_recurse)
-
-        if (not self.board.victory() and not self.board.draw()):
-            data= (self.AI_alpha_beta(temp_recurse))
-            self.board.update(data[0], data[1])
-
 
     def send_updated_data(self):
         return self.board.send_updated_data()
 
 
-    def AI_alpha_beta(self, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
+
+    def decide_move_to_make(self, moves):
+        moves.reverse()
+
+        
+        if (self.board.whitetomove and moves[0][-1] <0 )  or  ( (not self.board.whitetomove) and moves[0][-1] >0):
+            const = moves[0][-1]
+            for move in moves:
+                move[-1] += const * -1
+
+
+        chances=[]
+        counter=0
+        
+        for move in moves:
+            chances.append(move[-1])
+            counter+=move[-1]
+
+        rand = randint(0, int(counter)) if self.board.whitetomove else randint(int(counter), 0)
+        temp=0
+        for chance, move in zip(chances, moves):
+            temp+=chance
+            if rand<temp:
+                return move
+
+            
+        return moves[-1]
+               
+            
+        
+
+    def AI_alpha_beta(self,original_recurse, recurse,alpha =-1000000000.0, beta = 1000000000.0 ):
 
         draw = self.board.draw()
         if draw:
-            return [None, None, 0]
+            return 0
+
+
+
 
         
         victory = self.board.victory()
         if victory:
-            return [None, None, self.watering_holes_value[3] * (1 if victory== 'WHITE' else -1) ]
+            return self.watering_holes_value[3] * (1 if victory== 'WHITE' else -1) 
         
 
-        if recurse == 0: 
+        values = self.retrieve_boards_dict(original_recurse, recurse)
+        if values != None:
+            if recurse == original_recurse:
+                return values
+            else:
+                return values[0][-1]
+                
+        
+
+        if recurse == 0:
             score = self.board.board_evaluation(self.watering_holes_value,self.future_watering_hole_value, self.adjacent_watering_holes_value, self.scared_pieces_value, self.teammate_value, self.center_encouragement_value)
-            return [None, None, score]
+            return score
 
 
-
+    
+        priority_queue = PriorityQueue()
         if (self.board.whitetomove):
-            current_best_source,current_best_dest,current_best_score   = None,None,-1000000000.0
+            current_best_score   = -1000000000.0
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                     old_infear_trapped= [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                     self.board.update([source_row, source_col], [dest_row, dest_col])
-                    childs_worst_source, childs_worst_dest, childs_worst_score= self.AI_alpha_beta(  recurse-1,alpha, beta)
+                    childs_worst_score= self.AI_alpha_beta( original_recurse, recurse-1,alpha, beta)
+                    priority_queue.put([-childs_worst_score, [[source_row, source_col],[dest_row, dest_col], childs_worst_score]])
                     self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
                     if  childs_worst_score> current_best_score:
-                        current_best_source,current_best_dest,current_best_score = [source_row, source_col],[dest_row, dest_col ],childs_worst_score
+                        current_best_score = childs_worst_score
                         alpha = max(alpha, childs_worst_score)
                         if (alpha>beta):
-                            return [current_best_source, current_best_dest, current_best_score]
-            return [current_best_source, current_best_dest, current_best_score]
-
-
+                            return priority_queue.get()[1][-1]
+            values = [  priority_queue.get()[1]      for i in range(min(5, priority_queue.qsize())) ]
+            self.update_boards_dict(values,original_recurse, recurse)
+            if recurse == original_recurse:
+                return values
+            else:
+                return values[0][-1]
+            
 
         else:
-            current_worst_source,current_worst_dest,current_worst_score   = None,None,1000000000.0
+            current_worst_score   = 1000000000.0
             for piece in self.board.current_pieces():
                 for source_row, source_col, dest_row, dest_col in piece.valid_moves():
                     old_infear_trapped = [[piece.infear, piece.trapped] for piece in (self.board.all_pieces())]
                     self.board.update([source_row, source_col], [dest_row, dest_col])
-                    childs_best_source, childs_best_dest, childs_best_score = self.AI_alpha_beta(  recurse-1,alpha, beta)
+                    childs_best_score = self.AI_alpha_beta( original_recurse, recurse-1,alpha, beta)
+                    priority_queue.put([childs_best_score,[ [source_row, source_col], [dest_row, dest_col], childs_best_score]])
                     self.board.undo_update( [source_row, source_col],[dest_row, dest_col],old_infear_trapped)
                     if  childs_best_score< current_worst_score:
-                        current_worst_source,current_worst_dest,current_worst_score = [source_row, source_col],[dest_row, dest_col ],childs_best_score
+                        current_worst_score = childs_best_score
                         beta = min(beta, childs_best_score)
                         if (alpha>beta):
-                            return [current_worst_source, current_worst_dest, current_worst_score]
-            return [current_worst_source, current_worst_dest, current_worst_score]
+                            return priority_queue.get()[1][-1]
+            values = [  priority_queue.get()[1]      for i in range(min(5, priority_queue.qsize())) ]
+            self.update_boards_dict(values,original_recurse, recurse)
+            if recurse == original_recurse:
+                return values
+            else:
+                return values[0][-1]
 
-
-
-
+    def update_boards_dict(self, values, original_recurse, recurse):
+        boards_dict = self.easy_boards_dict if original_recurse ==1 else self.medd_boards_dict if original_recurse == 2 else self.hard_boards_dict
+        board_hash = self.board.current_hash + str(int(self.board.whitetomove))
         
+        if board_hash in boards_dict:
+            boards_dict.pop(board_hash)
+        if len(boards_dict) > 1000000:
+            boards_dict.popitem()
+        boards_dict[board_hash] = (values, recurse)
 
 
+    def retrieve_boards_dict(self, original_recurse, recurse):
+        boards_dict = self.easy_boards_dict if original_recurse ==1 else self.medd_boards_dict if original_recurse == 2 else self.hard_boards_dict
+        board_hash = self.board.current_hash + str(int(self.board.whitetomove))
+        
+        if board_hash in boards_dict:
+            value, board_recurse = boards_dict[board_hash]
+            if board_recurse >= recurse:
+                return value
+        return None
 
 ##########################################
 class Backend:
-    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4, oracle = False, oracle_file = 'oracle_file'):
-        self.AI = AI(watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value, center_encouragement_value,oracle ,oracle_file)
+    def __init__(self, watering_holes_value = [0,20,80,1000000],future_watering_hole_value = [0,5,20,400], adjacent_watering_holes_value = 5, scared_pieces_value = 5,teammate_value =3,   center_encouragement_value = .4):
+        self.AI = AI(watering_holes_value,future_watering_hole_value , adjacent_watering_holes_value, scared_pieces_value, teammate_value, center_encouragement_value)
 
-    def receive_data(self, whitetomove, pieces, previous_moves = {}, temp_recurse = 2 ):
-    	self.AI.receive_data(whitetomove,pieces, previous_moves, temp_recurse)
+    def receive_data(self, whitetomove, pieces, previous_moves = {}, recurse = 3):
+        return self.AI.receive_data(whitetomove,pieces, previous_moves, recurse)
+
+
 
     def send_updated_data(self):
-    	self.AI.send_updated_data()
-         
+        updated_data = self.AI.send_updated_data()
+        return updated_data
     
 
 
         
+        
 
 
+def printboard(board):
+    rows=10
+    cols=10
+    for col in range(0,10):
+        for i in range(0,4):
+            print()
+            for row in range(0,10):
+                if(board[col][row]==None):
+                    if (row, col) in {(int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),(int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))}:
+                        print(' **   ', end='')
+                    elif (col+row)%2==0:
+                        print('------', end='')
+                    else:
+                        print('      ', end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+
+
+  
+  
+  
+
+
+
+ 
+
+
+def match(eval_vector=[20, 100, 5, 5, 0], eval_vector2=[20, 100, 5, 5, 0], printboards=False):
+    #how much better vector 1 is than vector 2 when playing white
+    a=game(eval_vector, eval_vector2, printboards)
+    #how much better vector 2 is than vector 1 when playing white
+    b=game(eval_vector2, eval_vector, printboards) 
+    #return how much better 1 is than 2 overall
+    return a-b
+
+def oracle_match(eval_vector=[20, 100, 5, 5, 0], printboards=False):
+    global oracle
+    global eval_vect
+    #how much better vector 1 is than the oracle
+    a=game(eval_vector, eval_vect, printboards, oracle, 2)
+    #how much better is the oracle than vector 1
+    b=game(eval_vect, eval_vector, printboards, oracle, 1) 
+    #print("Position base score size " +str(getsizeof(oracle.AI.board_position_base_score)/1000000) +" Megabytes")
+    print("Board Positions Dict " +str(getsizeof(oracle.AI.board_position_dict)/1000000) +" Megabytes")
+
+    return (a-b) 
+
+#How much better is Vector 1 than Vector2?
+def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 15, 25, 400, 5, 5, 5, 5], printboards=False, backendarg=None, player=0):
+    vector1score=0
+    vector2score=0
+    moves1=0
+    moves2=0
+    boardvalue1=0
+    boardvalue2=0
+
+
+
+    if (player!=1):
+        backend = Backend([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+    else:
+        backend=backendarg
+    backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
+     ["BLACK","ELEPHANT",9,4,True,False],
+     ["BLACK","ELEPHANT",9,5,False,False],
+     ["BLACK","MOUSE",8,4,False,False],
+     ["BLACK","MOUSE",8,5,False,False],
+     ["BLACK","LION",8,6,False,False],
+     ["BLACK","LION",8,3,False,False],
+     ["WHITE","LION",1,6,False,False],
+     ["WHITE","MOUSE",1,5,False,False],
+     ["WHITE","LION",1,3,False,False],
+     ["WHITE","ELEPHANT",0,4,False,False],
+     ["WHITE","ELEPHANT",0,5,False,False]])
+    """
+                         ,
+     [[9,3],[9,4]])
+     """
+    if(player==2):
+        backend1=backendarg
+    else:
+        backend1 = Backend([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+
+    while(True):
+        temp=backend.send_updated_data()
+        backend1.receive_data(temp[0], temp[1],temp[2], 2) 
+        moves1+=1
+
+        if(printboards):
+            #boardvalue1+=backend.AI.board.board_evaluation(backend.AI.board.positions)
+            #boardvalue1+=backend1.AI.board.board_evaluation(backend.AI.board.positions)
+            printboard(backend.AI.board.board_coord)
+            print("\n\n")
+            print("Winning (agent1) would be worth " + str(100/(moves1+moves2)))
+            print("Average Board Eval (agent1): " + str(boardvalue1/moves1))
+
+
+        if backend1.AI.board.victory():
+            vector1score+=1000/(moves1+moves2)
+            print("VICTORY")
+            break
+        elif backend1.AI.board.draw():
+            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
+            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
+            break
+        elif moves1>=50:
+            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
+            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
+            break
+        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+        
+        temp=backend1.send_updated_data()
+        backend.receive_data(temp[0], temp[1], temp[2],2) #temp2
+        moves2+=1
+
+
+        if(printboards):
+            printboard(backend1.AI.board.board_coord)
+            print("\n\n")
+            print("Winning (agent2) would be worth " + str(100/(moves1+moves2)))
+            print("Average Board Eval (agent2): " + str(boardvalue2/moves2))
+            print("Drawing (agent1) would be worth: " + str((boardvalue1/moves1-boardvalue2/moves2)/20))
+
+        if  backend.AI.board.victory():
+            vector2score+=1000/(moves1+moves2)
+            print("VICTORY")
+            break
+        elif backend.AI.board.draw():
+            vector1score+=(boardvalue1/moves1)/50
+            vector2score+=(boardvalue2/moves2)/50
+            break
+        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+
+    print("\n\n" + str(eval_vector) + "\nVS\n"+ str(eval_vector2))
+    print(vector1score - vector2score)
+    return vector1score - vector2score
+
+def partial_derivative(func, dimension, delta, point, standard=None):
+    #Func take an n-dimensional vector as arugument, 0<=dimension<n, delta is a number, and point is an n-dimensional vector
+    point2=copy.deepcopy(point)
+    point2[dimension]+=delta
+    if (standard==None):
+        return func(point2, point)*10/(point2[dimension]-point[dimension])
+    else:
+        return (func(point2)-standard)*10/(point2[dimension]-point[dimension])
+
+def gradient(func, delta, point, oracle=False):
+    standard= func(point) if oracle else None
+
+    grad=[]
+    for i in range(0,len(point)):
+        grad.append(partial_derivative(func, i, delta, point, standard))
+    return grad
+
+def descent(func, delta, rate, point, oracle=False):
+    global performance_dict
+    global eval_vect
+    for j in range (0, 100):
+        print("******************NEW POINT**********************")
+        print("             "+str(point))
+        if(not oracle):
+            improvement=match(point, [20, 100, 5, 25, 400, 5, 5, 5, 5])
+            performance_dict[improvement]=point
+            print("Improvement: "+str(improvement)) 
+            print()
+        eval_vect=point
+
+        point1=[]
+        grad=gradient(func, delta, point, oracle)
+        #print("Function value: "+ str(func(point)))
+        for i in range(0, len(point)):
+            point1.append(point[i]+rate*grad[i])
+        point=list(point1)
+        
+
+    print("\n\n")
+    print(point)
+    return point
+
+
+if __name__ == "__main__":
+    game([52, 27, -134, -65, 400.0, 49, 55, 53, 113], [52, 27, -134, -65, 400.0, 49, 55, 53, 113])
+
+
+"""
+if __name__ == "__main__":
+    eval_vect=[52, 27, -134, -65, 400.0, 49, 55, 53, 113]
+    oracle = Backend([0,20,80,1000000], [0,5,20,400], 5,5,3,.4, True)
+
+    try:
+        descent(oracle_match, 10, 1, eval_vect, True)
+        while True:
+            pass
+        pass
+    except KeyboardInterrupt:
+        pass
+        file = open('oracle_board_positions', 'w')
+        file.write(str(oracle.AI.board_position_dict))
+
+                        oracle.AI.board_position_black_recurse, \
+                        oracle.AI.board_position_black_score, \
+                        oracle.AI.board_position_black_move,\
+
+                        oracle.AI.board_position_white_recurse,\
+                        oracle.AI.board_position_white_score, \
+                        oracle.AI.board_position_white_move \
+       
+
+
+
+        file.close()
+        """
+
+
+"""
+    eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5]
+    eval_vector2=[16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
+    eval_vector3=[16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
+    #game(eval_vector2, eval_vector, True)
+    #vector2=[14, 100, 17, 25, 30]
+    #print(match(vector2, eval_vector))
+    descent(match, 10, 1, eval_vector)
+    #print(match([25.77, 83.3, -14.38, 6.722962444615047, 7.9, 5.0], eval_vector))
+    #print(match([-13.692807416877077, 105.71418566079505, -37.39105918772004, 3.548704820537315, 87.20862346673107, 30.719564924218883], eval_vector))
+    #print(match(eval_vector, eval_vector))
+    input()
+
+    pass
+"""
+
+
+"""
+  [16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
+
+             [52.145259577025996, 27.160780092497596, -134.02611076547686, -65.4558052051027, 400.0, 49.82338803188459, 55.57225476879648, 53.28150353957831, 113.64946999383056]
+"""
