@@ -132,10 +132,10 @@ function placeInitImage(){
 }
 
 function placeWateringHoles() {
-	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_0"/>';
-	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_1"/>';
-	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_2"/>';
-	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well.gif" id = "wateringhole_3"/>';
+	document.getElementById('tile_3,3').innerHTML += '<img src = "./images/well6.gif" id = "wateringhole_0"/>';
+	document.getElementById('tile_3,6').innerHTML += '<img src = "./images/well6.gif" id = "wateringhole_1"/>';
+	document.getElementById('tile_6,3').innerHTML += '<img src = "./images/well6.gif" id = "wateringhole_2"/>';
+	document.getElementById('tile_6,6').innerHTML += '<img src = "./images/well6.gif" id = "wateringhole_3"/>';
 
 	wateringHoleCounter = 4;
 }
@@ -172,6 +172,7 @@ function addCurrentBoardPosition(){
 
 	if(draw_move_cache[string] >= 3){
 		draw = true;
+		document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
 	}
 }
 
@@ -192,6 +193,7 @@ function undoBoardPosition(){
 		draw_move_cache[string]--;
 		if(draw_move_cache[string] < 3){
 			draw = false;
+			document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
 		}
 	}
 }
@@ -201,22 +203,22 @@ function placeImageForWateringHolesIfEmpty(){
 //'<img src = \''+"./images/"+findImgName(side,type)+'\'/>';
 	if(!(document.getElementById('tile_3,3').innerHTML)){
 		var id = "wateringhole_" + wateringHoleCounter;
-		document.getElementById('tile_3,3').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		document.getElementById('tile_3,3').innerHTML += '<img src = \''+"./images/well6.gif"+'\' id = \''+id+'\'/>';
 		wateringHoleCounter++;
 	}
 	if(!(document.getElementById('tile_3,6').innerHTML)){
 		var id = "wateringhole_" + wateringHoleCounter;
-		document.getElementById('tile_3,6').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		document.getElementById('tile_3,6').innerHTML += '<img src = \''+"./images/well6.gif"+'\' id = \''+id+'\'/>';
 		wateringHoleCounter++;
 	}
 	if(!(document.getElementById('tile_6,3').innerHTML)){
 		var id = "wateringhole_" + wateringHoleCounter;
-		document.getElementById('tile_6,3').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		document.getElementById('tile_6,3').innerHTML += '<img src = \''+"./images/well6.gif"+'\' id = \''+id+'\'/>';
 		wateringHoleCounter++;
 	}
 	if(!(document.getElementById('tile_6,6').innerHTML)){
 		var id = "wateringhole_" + wateringHoleCounter;
-		document.getElementById('tile_6,6').innerHTML += '<img src = \''+"./images/well.gif"+'\' id = \''+id+'\'/>';
+		document.getElementById('tile_6,6').innerHTML += '<img src = \''+"./images/well6.gif"+'\' id = \''+id+'\'/>';
 		wateringHoleCounter++;
 	}
 }
