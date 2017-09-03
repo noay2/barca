@@ -1306,12 +1306,13 @@ function clickMade(row,col,id,val){
 	}
 
 	// console.log("AIsmove: " + AIsmove);
-	enableValidMovesButton();
 
 	if(AIsmove){
 		document.getElementById("message").innerHTML = "<b>Invalid move... It is AI's turn to move. Please wait until it is done making its move...</b>";
 		return;
 	}
+
+	enableValidMovesButton();
 
 	if(victory){
 		document.getElementById("message").innerHTML = "<b>Game is over..." + who_won + " won! Click on start game to start another game or reset to reset game back to its original state!</b>";
