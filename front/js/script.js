@@ -1306,6 +1306,7 @@ function clickMade(row,col,id,val){
 	}
 
 	// console.log("AIsmove: " + AIsmove);
+	enableValidMovesButton();
 
 	if(AIsmove){
 		document.getElementById("message").innerHTML = "<b>Invalid move... It is AI's turn to move. Please wait until it is done making its move...</b>";
