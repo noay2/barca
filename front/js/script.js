@@ -970,6 +970,8 @@ function recomputePositions(pieces,piece_info,src,dest){
 
 /*Fix bugs with this function for TOMORROW*/
 function resetBoardScaredAndTrappedPieces(data){
+	// console.log(data["pieces"]);
+	// console.log(piece_locations);
 	var pieces = data["pieces"];
 // 	var length = data["draw_moves"].length;
 	var src = [null,null];
@@ -982,12 +984,16 @@ function resetBoardScaredAndTrappedPieces(data){
 		set_locations.add(dest_location);
 	});
 
+	// console.log(set_locations);
+
 	for(var key in piece_locations){
 		location_pieces.add(piece_locations[key]);
 	}
 
+	// console.log(location_pieces);
+
 	set_locations.forEach(function(value){
-		if(value in location_pieces){
+		if(location_pieces.has(value)){
 		}
 		else{
 			dest[0] = Math.floor(value/10);
@@ -996,14 +1002,17 @@ function resetBoardScaredAndTrappedPieces(data){
 	});
 
 	for(var key in piece_locations){
-			if(piece_locations[key] in set_locations){
+			if(set_locations.has(piece_locations[key])){
 			}
 			else{
 				src[0] = Math.floor(piece_locations[key]/10);
-				src[1] = piece_locations%10;
+				src[1] = piece_locations[key]%10;
 				break;
 			}
 	}
+
+	console.log(src);
+	console.log(dest);
 
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById(getDiv(piece_info)).innerHTML = "";
