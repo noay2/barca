@@ -50,11 +50,14 @@ class Piece:
         self.piece_type.append(self)
         self.team_pieces = pieces[Piece.piece_color_val[self.color] ]
         self.scared_of_pieces = pieces[  (Piece.piece_color_val[self.color] +1)%2][(Piece.piece_type_val[self.type] +1) %3]
-        
-        
-
     def __repr__(self):
         return "*" +self.color[0] +self.type[0]+"*"
+
+    
+    def send_updated_data(self):
+
+        return ([self.color, self.type, self.row, self.col, self.infear, self.trapped])       
+
 
     def adjacent_to(self, row, col):
         return (abs(row- self.row) <=1) and (abs(col - self.col) <=1)
@@ -143,11 +146,8 @@ class Piece:
         self.board_coord[source[0]][source[1]] = None
         self.board_coord[dest[0]][dest[1]]     = self
         
-    def send_updated_data(self):
-
-        return ([self.color, self.type, self.row, self.col, self.infear, self.trapped])
         
-#)#########################################              
+##########################################              
 class Board:
     colors = ["BLACK", "WHITE"]
     types  = ["ELEPHANT", "MOUSE", "LION"]
@@ -219,7 +219,29 @@ class Board:
             for piece_type in piece_color: 
                 for piece in piece_type:
                     yield piece
+
+    def victory(self):
+        white_counter = 0
+        black_counter = 0
+        for watering_hole_row, watering_hole_col in Board.watering_holes:
+            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
+                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
+                    black_counter +=1
+                else:
+                    white_counter +=1
+        if black_counter >= 3:
+            return "BLACK"
+        elif white_counter >=3:
+            return "WHITE"
+        else:
+            return False
+
+    def draw(self):
+        return self.previous_moves[self.current_hash] >=3
     
+    def switch_turn(self): 
+        self.whitetomove = not self.whitetomove
+        
     def board_evaluation(self,watering_holes_value, future_watering_hole_value, adjacent_watering_holes_value,\
                                scared_pieces_value, teammate_value, center_encouragement_value):
         score=0
@@ -297,28 +319,6 @@ class Board:
                 piece.modify_fear()
 
                 
-                
-    def victory(self):
-        white_counter = 0
-        black_counter = 0
-        for watering_hole_row, watering_hole_col in Board.watering_holes:
-            if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]!= None):
-                if (self.board_coord[int(watering_hole_row)][int(watering_hole_col)]).color == "BLACK":
-                    black_counter +=1
-                else:
-                    white_counter +=1
-        if black_counter >= 3:
-            return "BLACK"
-        elif white_counter >=3:
-            return "WHITE"
-        else:
-            return False
-
-    def draw(self):
-        return self.previous_moves[self.current_hash] >=3
-    
-    def switch_turn(self): 
-        self.whitetomove = not self.whitetomove
     
 
                 
@@ -404,7 +404,7 @@ class AI:
         temp=0
         for chance, move in zip(chances, moves):
             temp+=chance
-            if rand<temp:
+            if (rand<temp if self.board.whitetomove else rand> temp):
                 return move
 
             
@@ -522,299 +522,3 @@ class Backend:
         updated_data = self.AI.send_updated_data()
         return updated_data
     
-
-
-        
-        
-
-
-def printboard(board):
-    rows=10
-    cols=10
-    for col in range(0,10):
-        for i in range(0,4):
-            print()
-            for row in range(0,10):
-                if(board[col][row]==None):
-                    if (row, col) in {(int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),(int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))}:
-                        print(' **   ', end='')
-                    elif (col+row)%2==0:
-                        print('------', end='')
-                    else:
-                        print('      ', end='')
-                elif (board[col][row].color=="WHITE" and board[col][row].type=="ELEPHANT"):
-                    if(i==0):
-                        print("/()()\\", end='')
-                    elif(i==1):
-                        print("/ || \\", end='')
-                    elif(i==2):
-                        print("  ||  ", end='')
-                    elif(i==3):
-                        print("WHITE ", end='')
-                elif (board[col][row].color=="BLACK" and board[col][row].type=="ELEPHANT"):
-                    if(i==0):
-                        print("/()()\\", end='')
-                    elif(i==1):
-                        print("/ || \\", end='')
-                    elif(i==2):
-                        print("  ||  ", end='')
-                    elif(i==3):
-                        print("BLACK ", end='')
-                elif (board[col][row].color=="BLACK" and board[col][row].type=="MOUSE"):
-                    if(i==0):
-                        print("      ", end='')
-                    elif(i==1):
-                        print(" ^.^  ", end='')
-                    elif(i==2):
-                        print("      ", end='')
-                    elif(i==3):
-                        print("BLACK ", end='')
-                elif (board[col][row].color=="WHITE" and board[col][row].type=="MOUSE"):
-                    if(i==0):
-                        print("      ", end='')
-                    elif(i==1):
-                        print(" ^.^  ", end='')
-                    elif(i==2):
-                        print("      ", end='')
-                    elif(i==3):
-                        print("WHITE ", end='')
-                elif (board[col][row].color=="BLACK" and board[col][row].type=="LION"):
-                    if(i==0):
-                        print("<^^^^>", end='')
-                    elif(i==1):
-                        print("<O  O>", end='')
-                    elif(i==2):
-                        print(" <--> ", end='')
-                    elif(i==3):
-                        print("BLACK ", end='')
-                elif (board[col][row].color=="WHITE" and board[col][row].type=="LION"):
-                    if(i==0):
-                        print("<^^^^>", end='')
-                    elif(i==1):
-                        print("<O  O>", end='')
-                    elif(i==2):
-                        print(" <--> ", end='')
-                    elif(i==3):
-                        print("WHITE ", end='')
-
-
-  
-  
-  
-
-
-
- 
-
-
-def match(eval_vector=[20, 100, 5, 5, 0], eval_vector2=[20, 100, 5, 5, 0], printboards=False):
-    #how much better vector 1 is than vector 2 when playing white
-    a=game(eval_vector, eval_vector2, printboards)
-    #how much better vector 2 is than vector 1 when playing white
-    b=game(eval_vector2, eval_vector, printboards) 
-    #return how much better 1 is than 2 overall
-    return a-b
-
-def oracle_match(eval_vector=[20, 100, 5, 5, 0], printboards=False):
-    global oracle
-    global eval_vect
-    #how much better vector 1 is than the oracle
-    a=game(eval_vector, eval_vect, printboards, oracle, 2)
-    #how much better is the oracle than vector 1
-    b=game(eval_vect, eval_vector, printboards, oracle, 1) 
-    #print("Position base score size " +str(getsizeof(oracle.AI.board_position_base_score)/1000000) +" Megabytes")
-    print("Board Positions Dict " +str(getsizeof(oracle.AI.board_position_dict)/1000000) +" Megabytes")
-
-    return (a-b) 
-
-#How much better is Vector 1 than Vector2?
-def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 15, 25, 400, 5, 5, 5, 5], printboards=False, backendarg=None, player=0):
-    vector1score=0
-    vector2score=0
-    moves1=0
-    moves2=0
-    boardvalue1=0
-    boardvalue2=0
-
-
-
-    if (player!=1):
-        backend = Backend([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
-    else:
-        backend=backendarg
-    backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
-     ["BLACK","ELEPHANT",9,4,True,False],
-     ["BLACK","ELEPHANT",9,5,False,False],
-     ["BLACK","MOUSE",8,4,False,False],
-     ["BLACK","MOUSE",8,5,False,False],
-     ["BLACK","LION",8,6,False,False],
-     ["BLACK","LION",8,3,False,False],
-     ["WHITE","LION",1,6,False,False],
-     ["WHITE","MOUSE",1,5,False,False],
-     ["WHITE","LION",1,3,False,False],
-     ["WHITE","ELEPHANT",0,4,False,False],
-     ["WHITE","ELEPHANT",0,5,False,False]])
-    """
-                         ,
-     [[9,3],[9,4]])
-     """
-    if(player==2):
-        backend1=backendarg
-    else:
-        backend1 = Backend([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
-
-    while(True):
-        temp=backend.send_updated_data()
-        backend1.receive_data(temp[0], temp[1],temp[2], 2) 
-        moves1+=1
-
-        if(printboards):
-            #boardvalue1+=backend.AI.board.board_evaluation(backend.AI.board.positions)
-            #boardvalue1+=backend1.AI.board.board_evaluation(backend.AI.board.positions)
-            printboard(backend.AI.board.board_coord)
-            print("\n\n")
-            print("Winning (agent1) would be worth " + str(100/(moves1+moves2)))
-            print("Average Board Eval (agent1): " + str(boardvalue1/moves1))
-
-
-        if backend1.AI.board.victory():
-            vector1score+=1000/(moves1+moves2)
-            print("VICTORY")
-            break
-        elif backend1.AI.board.draw():
-            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
-            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
-            break
-        elif moves1>=50:
-            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
-            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
-            break
-        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
-        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
-        
-        temp=backend1.send_updated_data()
-        backend.receive_data(temp[0], temp[1], temp[2],2) #temp2
-        moves2+=1
-
-
-        if(printboards):
-            printboard(backend1.AI.board.board_coord)
-            print("\n\n")
-            print("Winning (agent2) would be worth " + str(100/(moves1+moves2)))
-            print("Average Board Eval (agent2): " + str(boardvalue2/moves2))
-            print("Drawing (agent1) would be worth: " + str((boardvalue1/moves1-boardvalue2/moves2)/20))
-
-        if  backend.AI.board.victory():
-            vector2score+=1000/(moves1+moves2)
-            print("VICTORY")
-            break
-        elif backend.AI.board.draw():
-            vector1score+=(boardvalue1/moves1)/50
-            vector2score+=(boardvalue2/moves2)/50
-            break
-        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
-        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
-
-    print("\n\n" + str(eval_vector) + "\nVS\n"+ str(eval_vector2))
-    print(vector1score - vector2score)
-    return vector1score - vector2score
-
-def partial_derivative(func, dimension, delta, point, standard=None):
-    #Func take an n-dimensional vector as arugument, 0<=dimension<n, delta is a number, and point is an n-dimensional vector
-    point2=copy.deepcopy(point)
-    point2[dimension]+=delta
-    if (standard==None):
-        return func(point2, point)*10/(point2[dimension]-point[dimension])
-    else:
-        return (func(point2)-standard)*10/(point2[dimension]-point[dimension])
-
-def gradient(func, delta, point, oracle=False):
-    standard= func(point) if oracle else None
-
-    grad=[]
-    for i in range(0,len(point)):
-        grad.append(partial_derivative(func, i, delta, point, standard))
-    return grad
-
-def descent(func, delta, rate, point, oracle=False):
-    global performance_dict
-    global eval_vect
-    for j in range (0, 100):
-        print("******************NEW POINT**********************")
-        print("             "+str(point))
-        if(not oracle):
-            improvement=match(point, [20, 100, 5, 25, 400, 5, 5, 5, 5])
-            performance_dict[improvement]=point
-            print("Improvement: "+str(improvement)) 
-            print()
-        eval_vect=point
-
-        point1=[]
-        grad=gradient(func, delta, point, oracle)
-        #print("Function value: "+ str(func(point)))
-        for i in range(0, len(point)):
-            point1.append(point[i]+rate*grad[i])
-        point=list(point1)
-        
-
-    print("\n\n")
-    print(point)
-    return point
-
-
-if __name__ == "__main__":
-    game([52, 27, -134, -65, 400.0, 49, 55, 53, 113], [52, 27, -134, -65, 400.0, 49, 55, 53, 113])
-
-
-"""
-if __name__ == "__main__":
-    eval_vect=[52, 27, -134, -65, 400.0, 49, 55, 53, 113]
-    oracle = Backend([0,20,80,1000000], [0,5,20,400], 5,5,3,.4, True)
-
-    try:
-        descent(oracle_match, 10, 1, eval_vect, True)
-        while True:
-            pass
-        pass
-    except KeyboardInterrupt:
-        pass
-        file = open('oracle_board_positions', 'w')
-        file.write(str(oracle.AI.board_position_dict))
-
-                        oracle.AI.board_position_black_recurse, \
-                        oracle.AI.board_position_black_score, \
-                        oracle.AI.board_position_black_move,\
-
-                        oracle.AI.board_position_white_recurse,\
-                        oracle.AI.board_position_white_score, \
-                        oracle.AI.board_position_white_move \
-       
-
-
-
-        file.close()
-        """
-
-
-"""
-    eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5]
-    eval_vector2=[16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
-    eval_vector3=[16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
-    #game(eval_vector2, eval_vector, True)
-    #vector2=[14, 100, 17, 25, 30]
-    #print(match(vector2, eval_vector))
-    descent(match, 10, 1, eval_vector)
-    #print(match([25.77, 83.3, -14.38, 6.722962444615047, 7.9, 5.0], eval_vector))
-    #print(match([-13.692807416877077, 105.71418566079505, -37.39105918772004, 3.548704820537315, 87.20862346673107, 30.719564924218883], eval_vector))
-    #print(match(eval_vector, eval_vector))
-    input()
-
-    pass
-"""
-
-
-"""
-  [16.52173913043478, 100.0, -84.47141546989154, -50.71428571428572, 400.0, -67.57767105594674, 1.4602086167800459, -62.38828722600152, -61.315789473684205]
-
-             [52.145259577025996, 27.160780092497596, -134.02611076547686, -65.4558052051027, 400.0, 49.82338803188459, 55.57225476879648, 53.28150353957831, 113.64946999383056]
-"""
