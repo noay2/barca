@@ -414,13 +414,10 @@ class AI:
         
         rand = randint(0, int(counter))
         temp=0
-        counter = 0
         for chance, move in zip(chances, moves):
             temp+=chance
             if (rand<temp):
                 return move
-            counter +=1
-
 
             
         return moves[-1]
