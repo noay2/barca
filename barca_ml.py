@@ -534,6 +534,9 @@ class Backend:
         updated_data = self.AI.send_updated_data()
         return updated_data
 #########################################
+        
+
+
 def printboard(board):
     rows=10
     cols=10
@@ -602,32 +605,40 @@ def printboard(board):
                         print(" <--> ", end='')
                     elif(i==3):
                         print("WHITE ", end='')
-##########################################
+
+
+  
+  
+  
+
+
+
+ 
+
+
 def match(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 15, 25, 400, 5, 5, 5, 5], printboards=False):
-    print(eval_vector)
-    print(eval_vector2)
     #how much better vector 1 is than vector 2 when playing white
     a=game(eval_vector, eval_vector2, printboards)
     #how much better vector 2 is than vector 1 when playing white
     b=game(eval_vector2, eval_vector, printboards) 
     #return how much better 1 is than 2 overall
     return a-b
-
-
+ 
 
 #How much better is Vector 1 than Vector2?
-def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 15, 25, 400, 5, 5, 5, 5], printboards=False, backendarg=None, player=0):
+def game(eval_vector, eval_vector2, printboards=False, backendarg=None, player=0):
     vector1score=0
     vector2score=0
     moves1=0
     moves2=0
     boardvalue1=0
     boardvalue2=0
+
     recur=2
 
 
     if (player!=1):
-        backend = Backend([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+        backend = Backend([-5]+eval_vector[0:2]+[1000000], [-5]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
     else:
         backend=backendarg
     backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
@@ -649,7 +660,7 @@ def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 1
     if(player==2):
         backend1=backendarg
     else:
-        backend1 = Backend([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+        backend1 = Backend([-5]+eval_vector2[0:2]+[1000000], [-5]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
 
     while(True):
         temp=backend.send_updated_data()
@@ -692,11 +703,11 @@ def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 1
             print("Average Board Eval (agent2): " + str(boardvalue2/moves2))
             print("Drawing (agent1) would be worth: " + str((boardvalue1/moves1-boardvalue2/moves2)/20))
 
-        if backend1.AI.board.victory():
+        if backend.AI.board.victory():
             vector2score+=1000/(moves1+moves2)
             print("VICTORY")
             break
-        elif backend1.AI.board.draw():
+        elif backend.AI.board.draw():
             vector1score+=(boardvalue1/moves1)/50
             vector2score+=(boardvalue2/moves2)/50
             break
@@ -710,36 +721,38 @@ def game(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 1
 def partial_derivative(func, dimension, delta, point, standard=None):
     #Func take an n-dimensional vector as arugument, 0<=dimension<n, delta is a number, and point is an n-dimensional vector
     point2=copy.deepcopy(point)
-    point2[dimension]+=delta
+    point2[dimension]*=delta
     if (standard==None):
         return func(point2, point)*10/(point2[dimension]-point[dimension])
     else:
         return (func(point2)-standard)*10/(point2[dimension]-point[dimension])
 
-def gradient(func, delta, point):
-    standard= func(point) 
+def gradient(func, delta, point, oracle=False):
+    standard= func(point) if oracle else None
 
     grad=[]
     for i in range(0,len(point)):
         grad.append(partial_derivative(func, i, delta, point, standard))
     return grad
 
-def descent(func, delta, rate, point):
+def descent(func, delta, rate, point, oracle=False):
     global eval_vect
     for j in range (0, 100):
-        print(point)
         print("******************NEW POINT**********************")
         print("             "+str(point))
-        improvement=match(point, [20, 100, 5, 25, 400, 5, 5, 5, 5])
+        improvement=match(point, [20, 100, 15, 50, 400, 20, 20, 20, 20])
         print("Improvement: "+str(improvement)) 
         print()
         eval_vect=point
 
         point1=[]
-        grad=gradient(func, delta, point)
-        print("Function value: "+ str(func(point)))
+        grad=gradient(func, delta, point, oracle)
+        #print("Function value: "+ str(func(point)))
         for i in range(0, len(point)):
-            point1.append(point[i]+rate*grad[i])
+            if (point[i]+rate*grad[i] > 0):
+                point1.append(point[i]+rate*grad[i])
+            else:
+                point1.append(5)
         point=list(point1)
         
 
@@ -749,10 +762,10 @@ def descent(func, delta, rate, point):
 
 
 if __name__ == "__main__":
-    try:
-        eval_vector= [20, 100, 5, 8, 400, 5, 5, 5, 5]
-        descent(match, 15, 1, eval_vector)
-        
-    except KeyboardInterrupt:
-        pass
+        eval_vector= [52, 27, -134, -65, 400.0, 49, 55, 53, 113]
+        #The descent function should change the value of the vector
+        descent(match, 1.2, 1, eval_vector)
+
+
+
 
