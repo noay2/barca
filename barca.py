@@ -215,7 +215,7 @@ class Board:
     def all_pieces(self):
         for piece_color in self.pieces:
             for piece_type in piece_color: 
-                for piece in piece_type:
+                for piece in sorted(piece_type,key = lambda piece: str(piece.row) + str(piece.col )):
                     yield piece
 
     def victory(self):
@@ -532,3 +532,6 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+
+#########################################
+
