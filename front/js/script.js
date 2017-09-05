@@ -72,6 +72,7 @@ var valid_move_dict = {};
 var invalid_move_dict = {};
 var current_value_chosen = null;
 var displayValidMovesChosen = false;
+var ML_value = false;
 
 var piece_type = "animals";
 
@@ -1240,6 +1241,7 @@ function getAIMove(move){
 	// API_request["human_move"] = [[0,0],[0,5]];
 	API_request["pieces"] = pieces;
 	API_request["difficulty"] = difficulty;
+	API_request["ML"] = ML_value;
 
 	// if(move.length !== 0){
 	// 	var piece = barca_array[move[2]][move[3]];
@@ -1257,7 +1259,7 @@ function getAIMove(move){
 	// console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
-			url: "https://serene-everglades-79780.herokuapp.com/version5",
+			url: "https://serene-everglades-79780.herokuapp.com/version6",
 			data: JSON.stringify(API_request),
 			dataType: "json",
 			contentType: 'application/json',
@@ -1550,6 +1552,8 @@ function initialize(reset){
 		mode = $("#gametype").val();
 		var str = $("#hardness").val();
 		difficulty = parseInt(str);
+		var ml_str = $("#ML").val();
+		ML_value = (ml_str === "Yes") ? true : false;
 		first_to_move = player_TURN;
 		resetState["player_TURN"] = player_TURN;
 		resetState["mode"] = mode;
