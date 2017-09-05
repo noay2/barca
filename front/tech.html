@@ -193,10 +193,9 @@ In order to speed up the reversal of searches, we cached the feared characterist
 
     <p>Additionally, the gradient descent can continue for some time without making any progress-- all of the points it is choosing to evaluate are not performing as well as a point you encountered before. Again, we would simply restart at the highest point reached so far with a different delta or learning rate upon noticing this behavior. </p>
 
-    <p>Lastly, there is the issue that the board evaluation vector that is found to work extremely well with AI’s that perform shallow minimax searches often only has modest performance gains when used in AI’s that perform deeper searches. This is an issue because the AI’s that perform deeper searches take far too long to make a move, so gradient descent cannot be accomplished in a reasonable amount of time with them. Perhaps one would need to use a supercomputer to seek performance gains on the human-competitive AI’s using gradient descent.</p>
-    
+    <p>There is the issue that the board evaluation vector that is found to work extremely well with AI’s that perform shallow minimax searches often only has modest performance gains when used in AI’s that perform deeper searches. This is an issue because the AI’s that perform deeper searches take far too long to make a move, so gradient descent cannot be accomplished in a reasonable amount of time with them. Perhaps one would need to use a supercomputer to seek performance gains on the human-competitive AI’s using gradient descent.</p>
 
-
+    <p>Lastly, there are some strange issues that arise from our self-play scoring in gradient descent, such as board evaluation vectors that actually penalize having watering holes. By doing this, they are rewarded for not having watering holes while their opponent gets penalized for having them. Thus, in the case of draws, the board evaluation tallies make it appear as though these agents did significantly better than their opponents when their opponent was actually outperforming them the entire time. Future research on this project will find ways to keep this odd “changing the goalposts” situation from happening. </p>
 
 
 
