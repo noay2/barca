@@ -141,17 +141,58 @@ function placeWateringHoles() {
 	wateringHoleCounter = 4;
 }
 
+function convertStr(pieceLocation){
+	var string = "";
+	var row = Math.floor(pieceLocation/10);
+	var col = pieceLocation%10;
+	string += row;
+	string += col;
+	return string;
+}
+
 function addCurrentBoardPosition(){
 	var string = "";
-	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
 
-	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
-		if(piece_locations[keysSorted[keyLen]] < 10){
-			string += '0' + piece_locations[keysSorted[keyLen]];
-		}
-		else{
-			string += piece_locations[keysSorted[keyLen]];
-		}
+	if(piece_locations["BR1"] < piece_locations["BR2"]){
+		string += convertStr(piece_locations["BR1"]) + convertStr(piece_locations["BR2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BR2"]) + convertStr(piece_locations["BR1"]);
+	}
+
+	if(piece_locations["BL1"] < piece_locations["BL2"]){
+		string += convertStr(piece_locations["BL1"]) + convertStr(piece_locations["BL2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BL2"]) + convertStr(piece_locations["BL1"]);
+	}
+
+	if(piece_locations["BE1"] < piece_locations["BE2"]){
+		string += convertStr(piece_locations["BE1"]) + convertStr(piece_locations["BE2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BE2"]) + convertStr(piece_locations["BE1"]);
+	}
+
+	if(piece_locations["WR1"] < piece_locations["WR2"]){
+		string += convertStr(piece_locations["WR1"]) + convertStr(piece_locations["WR2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WR2"]) + convertStr(piece_locations["WR1"]);
+	}
+
+	if(piece_locations["WL1"] < piece_locations["WL2"]){
+		string += convertStr(piece_locations["WL1"]) + convertStr(piece_locations["WL2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WL2"]) + convertStr(piece_locations["WL1"]);
+	}
+
+	if(piece_locations["WE1"] < piece_locations["WE2"]){
+		string += convertStr(piece_locations["WE1"]) + convertStr(piece_locations["WE2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WE2"]) + convertStr(piece_locations["WE1"]);
 	}
 
 	// fifo_for_draw_moves.push(string);
@@ -179,15 +220,47 @@ function addCurrentBoardPosition(){
 
 function undoBoardPosition(){
 	var string = "";
-	var keysSorted = Object.keys(piece_locations).sort(function(a,b){return piece_locations[a]-piece_locations[b]})
 
-	for(var keyLen = 0; keyLen < keysSorted.length; keyLen++){
-		if(piece_locations[keysSorted[keyLen]] < 10){
-			string += '0' + piece_locations[keysSorted[keyLen]];
-		}
-		else{
-			string += piece_locations[keysSorted[keyLen]];
-		}
+	if(piece_locations["BR1"] < piece_locations["BR2"]){
+		string += convertStr(piece_locations["BR1"]) + convertStr(piece_locations["BR2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BR2"]) + convertStr(piece_locations["BR1"]);
+	}
+
+	if(piece_locations["BL1"] < piece_locations["BL2"]){
+		string += convertStr(piece_locations["BL1"]) + convertStr(piece_locations["BL2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BL2"]) + convertStr(piece_locations["BL1"]);
+	}
+
+	if(piece_locations["BE1"] < piece_locations["BE2"]){
+		string += convertStr(piece_locations["BE1"]) + convertStr(piece_locations["BE2"]);
+	}
+	else{
+		string += convertStr(piece_locations["BE2"]) + convertStr(piece_locations["BE1"]);
+	}
+
+	if(piece_locations["WR1"] < piece_locations["WR2"]){
+		string += convertStr(piece_locations["WR1"]) + convertStr(piece_locations["WR2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WR2"]) + convertStr(piece_locations["WR1"]);
+	}
+
+	if(piece_locations["WL1"] < piece_locations["WL2"]){
+		string += convertStr(piece_locations["WL1"]) + convertStr(piece_locations["WL2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WL2"]) + convertStr(piece_locations["WL1"]);
+	}
+
+	if(piece_locations["WE1"] < piece_locations["WE2"]){
+		string += convertStr(piece_locations["WE1"]) + convertStr(piece_locations["WE2"]);
+	}
+	else{
+		string += convertStr(piece_locations["WE2"]) + convertStr(piece_locations["WE1"]);
 	}
 
 	if(string in draw_move_cache){
@@ -1241,6 +1314,7 @@ function getAIMove(move){
 	API_request["pieces"] = pieces;
 	API_request["difficulty"] = difficulty;
 	API_request["ML"] = ML_value;
+	console.log(draw_move_cache);
 
 	// if(move.length !== 0){
 	// 	var piece = barca_array[move[2]][move[3]];
@@ -1258,7 +1332,7 @@ function getAIMove(move){
 	// console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
-			url: "https://serene-everglades-79780.herokuapp.com/version6",
+			url: "https://serene-everglades-79780.herokuapp.com/version7",
 			data: JSON.stringify(API_request),
 			dataType: "json",
 			contentType: 'application/json',
