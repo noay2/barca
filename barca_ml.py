@@ -532,3 +532,238 @@ class Backend:
     def send_updated_data(self):
         updated_data = self.AI.send_updated_data()
         return updated_data
+
+#########################################
+        
+
+
+def printboard(board):
+    rows=10
+    cols=10
+    for col in range(0,10):
+        for i in range(0,4):
+            print()
+            for row in range(0,10):
+                if(board[col][row]==None):
+                    if (row, col) in {(int(rows/2 -2),int( cols/2 -2)),(int(rows/2 -2),int( cols/2 +1)),(int(rows/2 +1),int( cols/2 -2)),(int(rows/2 +1),int( cols/2 +1))}:
+                        print(' **   ', end='')
+                    elif (col+row)%2==0:
+                        print('------', end='')
+                    else:
+                        print('      ', end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="ELEPHANT"):
+                    if(i==0):
+                        print("/()()\\", end='')
+                    elif(i==1):
+                        print("/ || \\", end='')
+                    elif(i==2):
+                        print("  ||  ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="MOUSE"):
+                    if(i==0):
+                        print("      ", end='')
+                    elif(i==1):
+                        print(" ^.^  ", end='')
+                    elif(i==2):
+                        print("      ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+                elif (board[col][row].color=="BLACK" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("BLACK ", end='')
+                elif (board[col][row].color=="WHITE" and board[col][row].type=="LION"):
+                    if(i==0):
+                        print("<^^^^>", end='')
+                    elif(i==1):
+                        print("<O  O>", end='')
+                    elif(i==2):
+                        print(" <--> ", end='')
+                    elif(i==3):
+                        print("WHITE ", end='')
+
+
+  
+  
+  
+
+
+
+ 
+
+
+def match(eval_vector=[20, 100, 5, 25, 400, 5, 5, 5, 5], eval_vector2=[20, 100, 15, 25, 400, 5, 5, 5, 5], printboards=False):
+    #how much better vector 1 is than vector 2 when playing white
+    a=game(eval_vector, eval_vector2, printboards)
+    #how much better vector 2 is than vector 1 when playing white
+    b=game(eval_vector2, eval_vector, printboards) 
+    #return how much better 1 is than 2 overall
+    return a-b
+ 
+
+#How much better is Vector 1 than Vector2?
+def game(eval_vector, eval_vector2, printboards=False, backendarg=None, player=0):
+    vector1score=0
+    vector2score=0
+    moves1=0
+    moves2=0
+    boardvalue1=0
+    boardvalue2=0
+
+    recur=2
+
+
+    if (player!=1):
+        backend = Backend([-5]+eval_vector[0:2]+[1000000], [-5]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+    else:
+        backend=backendarg
+    backend.receive_data(True,[["WHITE","MOUSE",1,4,False,False],
+     ["BLACK","ELEPHANT",9,4,True,False],
+     ["BLACK","ELEPHANT",9,5,False,False],
+     ["BLACK","MOUSE",8,4,False,False],
+     ["BLACK","MOUSE",8,5,False,False],
+     ["BLACK","LION",8,6,False,False],
+     ["BLACK","LION",8,3,False,False],
+     ["WHITE","LION",1,6,False,False],
+     ["WHITE","MOUSE",1,5,False,False],
+     ["WHITE","LION",1,3,False,False],
+     ["WHITE","ELEPHANT",0,4,False,False],
+     ["WHITE","ELEPHANT",0,5,False,False]])
+    """
+                         ,
+     [[9,3],[9,4]])
+     """
+    if(player==2):
+        backend1=backendarg
+    else:
+        backend1 = Backend([-5]+eval_vector2[0:2]+[1000000], [-5]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+
+    while(True):
+        temp=backend.send_updated_data()
+        backend1.receive_data(temp[0], temp[1],temp[2], 4 if player==2 else recur) 
+        moves1+=1
+
+        if(printboards):
+            #boardvalue1+=backend.AI.board.board_evaluation(backend.AI.board.positions)
+            #boardvalue1+=backend1.AI.board.board_evaluation(backend.AI.board.positions)
+            printboard(backend.AI.board.board_coord)
+            print("\n\n")
+            print("Winning (agent1) would be worth " + str(100/(moves1+moves2)))
+            print("Average Board Eval (agent1): " + str(boardvalue1/moves1))
+
+
+        if backend1.AI.board.victory():
+            vector1score+=1000/(moves1+moves2)
+            print("VICTORY")
+            break
+        elif backend1.AI.board.draw():
+            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
+            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
+            break
+        elif moves1>=50:
+            vector1score+=(boardvalue1/moves1-boardvalue2/moves2)/50
+            vector2score+=(boardvalue2/moves2-boardvalue1/moves1)/50
+            break
+        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+        boardvalue1+=backend.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+        
+        temp=backend1.send_updated_data()
+        backend.receive_data(temp[0], temp[1], temp[2], 4 if player==1 else recur) #temp2
+        moves2+=1
+
+
+        if(printboards):
+            printboard(backend1.AI.board.board_coord)
+            print("\n\n")
+            print("Winning (agent2) would be worth " + str(100/(moves1+moves2)))
+            print("Average Board Eval (agent2): " + str(boardvalue2/moves2))
+            print("Drawing (agent1) would be worth: " + str((boardvalue1/moves1-boardvalue2/moves2)/20))
+
+        if backend.AI.board.victory():
+            vector2score+=1000/(moves1+moves2)
+            print("VICTORY")
+            break
+        elif backend.AI.board.draw():
+            vector1score+=(boardvalue1/moves1)/50
+            vector2score+=(boardvalue2/moves2)/50
+            break
+        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector[0:2]+[1000000], [0]+eval_vector[2:5], eval_vector[5], eval_vector[6], eval_vector[7], eval_vector[8])
+        boardvalue2-=backend1.AI.board.board_evaluation([0]+eval_vector2[0:2]+[1000000], [0]+eval_vector2[2:5], eval_vector2[5], eval_vector2[6], eval_vector2[7], eval_vector2[8])
+
+    print("\n\n" + str(eval_vector) + "\nVS\n"+ str(eval_vector2))
+    print(vector1score - vector2score)
+    return vector1score - vector2score
+
+def partial_derivative(func, dimension, delta, point, standard=None):
+    #Func take an n-dimensional vector as arugument, 0<=dimension<n, delta is a number, and point is an n-dimensional vector
+    point2=copy.deepcopy(point)
+    point2[dimension]*=delta
+    if (standard==None):
+        return func(point2, point)*10/(point2[dimension]-point[dimension])
+    else:
+        return (func(point2)-standard)*10/(point2[dimension]-point[dimension])
+
+def gradient(func, delta, point, oracle=False):
+    standard= func(point) if oracle else None
+
+    grad=[]
+    for i in range(0,len(point)):
+        grad.append(partial_derivative(func, i, delta, point, standard))
+    return grad
+
+def descent(func, delta, rate, point, oracle=False):
+    global eval_vect
+    for j in range (0, 100):
+        print("******************NEW POINT**********************")
+        print("             "+str(point))
+        improvement=match(point, [20, 100, 15, 50, 400, 20, 20, 20, 20])
+        print("Improvement: "+str(improvement)) 
+        print()
+        eval_vect=point
+
+        point1=[]
+        grad=gradient(func, delta, point, oracle)
+        #print("Function value: "+ str(func(point)))
+        for i in range(0, len(point)):
+            if (point[i]+rate*grad[i] > 0):
+                point1.append(point[i]+rate*grad[i])
+            else:
+                point1.append(5)
+        point=list(point1)
+        
+
+    print("\n\n")
+    print(point)
+    return point
+
+
+if __name__ == "__main__":
+        eval_vector= [52, 27, -134, -65, 400.0, 49, 55, 53, 113]
+        #The descent function should change the value of the vector
+        descent(match, 1.2, 1, eval_vector)
+
+
