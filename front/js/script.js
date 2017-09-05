@@ -1314,7 +1314,7 @@ function getAIMove(move){
 	API_request["pieces"] = pieces;
 	API_request["difficulty"] = difficulty;
 	API_request["ML"] = ML_value;
-	console.log(draw_move_cache);
+	// console.log(draw_move_cache);
 
 	// if(move.length !== 0){
 	// 	var piece = barca_array[move[2]][move[3]];
