@@ -69,14 +69,103 @@
 <p>Although the decision search mechanism was extremely simple, it still makes a decent opponent, beating novice human players about half of the time.</p>
 
 
+<h2>Web-Hosted Application</h2>
+
+    <p>We thought of several ways to implement this application on the web. One of the thoughts we initially stuck on was the C++ offline application where everything is stored on the frontend itself with no need for a server that makes the AI moves. However, we realized from professor’s input that it is not a good idea to do it that way since it is never good to have too much load on the frontend. Finally we reached the decision to separate both the frontend and the backend.</p>
+
+
+<h3>Frontend</h3>
+
+    <p>When it comes to frontend, there were many languages we could have used to design it such as react.js but we have used plain HTML/CSS/Javascript as we thought that fancy languages might prevent us from implementing certain features. We had all the images stored in a folder and just used CSS and javascript elements to implement features like valid moves, different game modes like human v. human and AI v. human. Bhuvnesh has hosted the frontend of the application on his personal website domain. Some of the features of the frontend application include: </p>
+
+
+
+
+
+<h3>Valid Moves Feature</h3>
+
+<p>When a piece is clicked, there is valid moves button at the top. Once it is clicked, it displays valid moves if the piece chosen has valid moves to make a move. Green dots indicate that the chosen piece can be moved to one of those spots. Red dots indicate that the piece cannot be moved there i.e. it is scared. When show valid moves is clicked, valid moves feature is turned on and text on button changes to “Hide Valid Moves”. In this picture below, there is a red dot because mouse is scared of lion and it can't move there. However, it can move to any one of the green dots on the board. </p>
+					<img src="images/valid_moves.png" style="width: 700px" alt="" />
+
+
+<h3>Undo/Redo/Play From Here</h3>
+
+<p>Go back button is used to undo a move. Go forward is used to go forward a move that you just undoed. Play From Here is the button that needs to be clicked on to play from a certain position. However, you do not have to click play from here if you are back to the original board state after undoing and redoing moves.</p>
+
+<h3>Modes and Start Game</h3>
+
+<p>The modes of the game are Human vs. Human and AI vs. Human. Black or white move first but in AI mode, white player always moves first. Also, user can choose the difficulty level he wants to play the AI on namely Easy, Medium and Hard. The game will only start once the user clicks the start game button. If one game is being played and user wants to play a different game in different mode or as a different player, then he can click on the same button to restart another game. </p>
+
+
+<h3>BEV Heuristics</h3>
+
+<p>Another thing that we added to the frontend is the option for the user to choose to play with heuristics that have been obtained from gradient descent or non-gradient descent heuristics i.e. the original board heuristics we have. By default, the game starts with Non-ML board heuristics but if user wants to experiment how the AI plays differently with gradient descent heuristics, he may do so.</p>
+
+<h3>Backend</h3>
+
+   <p>We have used heroku architecture for sending moves and receiving moves from the AI. For building the server itself, we have used python flask. To backup several AIs, we have different files for each AI version that we worked on and created endpoints for each of those so that the application that wants to use the other AI versions or is using AI versions does not encounter any problems if we decided to switch to use some other AI on the front end at any point of time. With this architecture, the only thing that needs to be changed is how we are sending the request on frontend to the backend and what endpoint URL we are sending the request to. The requests are sent back and forth in JSON format. The front end issues a POST request, i.e. posts some data to the backend and then the backend sends the move back to the frontend in the same JSON format.</p>
+
+
 
 					<h2>Board evaluation</h2>
-					
+		<h3>Overview</h3>
+			
 					<p>The AI agent checks several facets of the board and assigns them different values to determine how favorable a certain board position is.</p>
 
 					<p>The parameters of board evaluation are treated as a vector of integers. The first element of this “Board evaluation vector” may be the value given to the condition of owning one watering hole, the second element may be the value given to being able to scare an opponent’s piece next turn, etc. So the board is evaluated by taking a vector that contains boolean information about board conditions and taking its cross product with this board evaluation vector:</p>
 					
 					<img src="images/board_eval.png" style="width: 700px" alt="" />
+
+<h3>Heuristics</h3>
+
+<p>The backend uses multiple types of heuristics in order to best evaluate potential upcoming board positions. The list of heuristics includes:</p>
+
+<li> How many watering holes you have?</li>
+
+<p>This heuristic consists of an array of size four that contains all of the numeric values for having zero, one, two, and three watering holes. Through experimentation with gradient descent, we believe that it is best if having zero or one watering holes is equated a negative value, having two watering holes is equated with a positive value, and having three watering holes is equated with  an extremely large positive value. The rationale as to why having zero or one watering holes is equated with a negative value is as a way of acting as a reinforcer for more watering holes. Having three watering holes is associated with a very high positive value as a way of indicating that a winning state exists.</p>
+
+<li> How many watering holes can you get the next turn?</li>
+
+<p>Similar to heuristic one, this heuristic consists of an array of size four that contains all of the numeric values for being able to have one, two, and three watering holes by the next turn. This heuristic works best when given similar values to those of heuristic one. This heuristic acts as a relatively inexpensive, yet effective, way of assessing the current board position by doing a partial lookahead of which watering holes can be acquired the next turn. This is done by starting at each of the remaining unoccupied watering holes (at most four) and traversing in all 8 possible directions until either a piece is found or out of bounds is reached. If a piece is found, then a check is done if the piece can travel in the required direction and that it is not deterred from the watering hole. The agent is then rewarded by the number assigned to the total amount of watering holes it could have next turn, multiplied by the amount of ways there are to capture a watering hole next turn. </p>
+
+<li> Adjacency to a watering hole:</li>
+
+<p>Each agent is rewarded for each of its pieces that are adjacent to each watering hole, as they serve to deter enemy pieces from the watering holes, and also deter enemy pieces from scaring its own pieces away from the watering holes.</p>
+
+<li> Fear Heuristic:</li>
+
+<p>This heuristic punishes an agent for having pieces that are in fear, because, being forced to move the pieces that are afraid, the agent has fewer move options and thus less control of the board. In order to eliminate having to check every piece with every other piece or checking all adjacent squares, every piece contains a reference to the two pieces that could possibly cause it fear.</p>
+
+<li> Center Proximity:</li>
+
+<p>Similar to heuristic three, this heuristic is a value that encourages the agent to posture its pieces closer to the center (where they generally tend to be more dominant and useful).</p>
+
+<li> Adjacency to complementary teammates:</li>
+
+<p>This heuristic encourages an agent to group different types of its own pieces together. The rationale is that each piece will deter the opponent’s pieces from scaring the other, so it is a stronger and more defensive position. </p>
+ 
+
+
+<h2>Finding the Best Move</h2>
+<h3>Minimax and Alpha Beta Pruning</h3>
+
+<p>The backend uses Minimax in combination with Alpha Beta Pruning in order to best compare different board positions. Minmax essentially simulates one player who is choosing the boards with the greatest evaluation while the other player is choosing the boards with the lowest evaluation. While Minmax is being performed, alpha and beta cutoffs determine whether or not there is any benefit in traversing a particular board position. This eliminates any unnecessary board traversals.</p>
+<p>
+In order to speed up the reversal of searches, we cached the feared characteristics of all the board positions. Calculating the feared characteristics of a board position is relatively expensive. So every time a board traversal is about to be made, we save the current feared characteristics of the old board. This eliminates having to re-calculate the feared characteristics when recovering to an older board position.</p>
+
+<p>One of the things we experimented with was using iterative deepening in order to search board positions we predicted were the best early on in order to quickly get good alpha and beta cutoffs. Having good and tight alpha beta cutoffs early on better eliminates unnecessary board position traversals later. We realized that iterative deepening didn’t help the speed of the search, instead prolonging it because of additional board evaluations required for iterative deepening. In addition we believe that it is hard to predict the state of a board in Barca because the game can change very dramatically in a few turns.</p>
+
+<h3>Move Randomization</h3>
+    
+<p>Every minimax search returns the best five moves available for that board. It then gives each of them a probability proportional to how favourable of a move each one is and chooses one at random. Thus, the agent will still make its best moves most of the time, but will occasionally chose to make different moves so as to be less predictable. </p>
+
+<p>The first thing that is done during deciding which move to make among the five possibilities is making them all positive and sorting them in ascending order (giving additional incentives are given to the best moves among them). Then, the probability of each move is incremented by the board evaluation of the board resulting from that move. </p>
+
+
+
+
+
+
 <h2>Self-Play </h2>
 
 <h3>Match Scoring</h3>
@@ -161,17 +250,29 @@
 <p>Thus, we gave the AI agent a memory of the game’s history, and if the board being considered has occurred three times before, then it is given a board evaluation of zero. Thus it will not move into a draw if it has any move that will bring it an advantage, but will move into a draw when all other moves are disadvantageous. </p>
 
 
+<h2>Using a Database</h2>
+<p>At the moment, any minimax searches that search deeper than 3 moves ahead take too long to be practical. Thus, the only way to make moves using more foresight in an acceptable amount of time is to have already calculated which move to make and to have stored it in a database.</p> 
+
+<p>This database would essentially be a hierarchy of FIFO queues. The bottom FIFO queue would consist of moves that have only occurred once, and if a move occurs that is already in this queue, it is taken out of the queue and put into a higher queue, which contains all the moves that have occurred twice, and so on. Each of these queues stores several thousand board positions and the optimal response for each board position therein, and if the queue overflows, it discards the least recent move. Using this technique, we have the greatest chance of recognizing the most common moves and tracking how frequently they occur. </p>
+
+<p>For the moves that occur more frequently, we will invest more time and do a deeper search on them so that most of the computation time is spent on the most important board positions. So for example, moves that have only occurred once or twice would have a 3-ply minimax search performed, just as normal moves would. However, moves that have occurred three or four times before would have a 4-ply search performed, moves that have occurred 5-15 times would have a 5-ply search performed on them, and the most frequent moves will have a very deep search performed on them.</p>
+
+<p>The end result is that, when the AI is prompted to make a move, it can query this database in O(1) time, and if the board position is recognized, it will make a great move instantaneously. If the board position is not recognized, it will perform its usual technique. </p>
+
+
+
+
 				</div>
 			</section>
 
 			<!-- Footer -->
 			<footer id="footer">
 				<div class="container">
-					<ul class="icons">
+					<!-- <ul class="icons">
 						<li><a href="#" class="icon fa-facebook"></a></li>
 						<li><a href="#" class="icon fa-twitter"></a></li>
 						<li><a href="#" class="icon fa-instagram"></a></li>
-					</ul>
+					</ul> -->
 					<ul class="copyright">
 						<li>&copy; Astros</li>
 						<li><a href="http://uci.edu">University of California, Irvine </a></li>
