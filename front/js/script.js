@@ -194,7 +194,6 @@ function undoBoardPosition(){
 		draw_move_cache[string]--;
 		if(draw_move_cache[string] < 3){
 			draw = false;
-			document.getElementById("message").innerHTML = "<b>Threefold repitition has been detected... Game is a draw </b>";
 		}
 	}
 }
