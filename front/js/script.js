@@ -876,7 +876,7 @@ function removeCrowns(){
 	else{
 		for(var i = crown_counter; i > 0; i--){
 			if(document.getElementById("crown_"+i)){
-				console.log("IN REMOVE");
+				// console.log("IN REMOVE");
 				var element = document.getElementById("crown_"+i);
 				element.parentNode.removeChild(element);
 			}
@@ -1012,8 +1012,8 @@ function resetBoardScaredAndTrappedPieces(data){
 			}
 	}
 
-	console.log(src);
-	console.log(dest);
+	// console.log(src);
+	// console.log(dest);
 
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById(getDiv(piece_info)).innerHTML = "";
