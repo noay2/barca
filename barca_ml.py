@@ -203,19 +203,19 @@ class Board:
         
     def current_pieces(self):
           for piece_type in self.pieces[self.whitetomove]: 
-              for piece in piece_type:
+              for piece in sorted(piece_type,key = lambda piece: str(piece.row) + str(piece.col )):
                     yield piece
               
 
     def other_pieces(self):
           for piece_type in self.pieces[(self.whitetomove +1) %2 ]: 
-              for piece in piece_type:
+              for piece in sorted(piece_type,key = lambda piece: str(piece.row) + str(piece.col )):
                     yield piece
                 
     def all_pieces(self):
         for piece_color in self.pieces:
             for piece_type in piece_color: 
-                for piece in piece_type:
+                for piece in sorted(piece_type,key = lambda piece: str(piece.row) + str(piece.col )):
                     yield piece
 
     def victory(self):
@@ -418,7 +418,6 @@ class AI:
             temp+=chance
             if (rand<temp):
                 return move
-
 
             
         return moves[-1]
