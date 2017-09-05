@@ -1043,50 +1043,12 @@ function recomputePositions(pieces,piece_info,src,dest){
 
 /*Fix bugs with this function for TOMORROW*/
 function resetBoardScaredAndTrappedPieces(data){
-	// console.log(data["pieces"]);
-	// console.log(piece_locations);
 	var pieces = data["pieces"];
-// 	var length = data["draw_moves"].length;
-	var src = [null,null];
-	var dest = [null,null];
-	var set_locations = new Set();
-	var location_pieces = new Set();
+	var length = data["draw_moves"].length;
+	var ai_move = data["draw_moves"][length-1];
 
-	pieces.forEach(function(value){
-		var dest_location = value[2] * 10 + value[3];
-		set_locations.add(dest_location);
-	});
-
-	// console.log(set_locations);
-
-	for(var key in piece_locations){
-		location_pieces.add(piece_locations[key]);
-	}
-
-	// console.log(location_pieces);
-
-	set_locations.forEach(function(value){
-		if(location_pieces.has(value)){
-		}
-		else{
-			dest[0] = Math.floor(value/10);
-			dest[1] = value%10;
-		}
-	});
-
-	for(var key in piece_locations){
-			if(set_locations.has(piece_locations[key])){
-			}
-			else{
-				src[0] = Math.floor(piece_locations[key]/10);
-				src[1] = piece_locations[key]%10;
-				break;
-			}
-	}
-
-	// console.log(src);
-	// console.log(dest);
-
+	var src = [ai_move[2],ai_move[3]];
+	var dest = [ai_move[4],ai_move[5]];
 	var piece_info = barca_array[src[0]][src[1]];
 	document.getElementById(getDiv(piece_info)).innerHTML = "";
 	recomputePositions(pieces,piece_info,src,dest);
@@ -1297,7 +1259,7 @@ function getAIMove(move){
 		return;
 	}
 	API_request["whitetomove"] = (player_TURN === "WHITE") ? false : true;
-	API_request["draw_moves"] = draw_move_cache;
+	API_request["draw_moves"] = all_previous_moves;
 	pieces = [];
 
 	for(var piece in piece_locations){
@@ -1332,7 +1294,7 @@ function getAIMove(move){
 	// console.log("GOT TO REQUEST");
 	$.ajax({
 			type: "POST",
-			url: "https://serene-everglades-79780.herokuapp.com/version7",
+			url: "https://serene-everglades-79780.herokuapp.com/version8",
 			data: JSON.stringify(API_request),
 			dataType: "json",
 			contentType: 'application/json',
